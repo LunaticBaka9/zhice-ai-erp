@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.common.Result;
 import com.example.demo.entity.SignRecord;
+import com.example.demo.entity.User;
 import com.example.demo.service.SignService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -116,42 +117,10 @@ public class SignController {
         return Result.success(signRecord);
     }
 
-    @GetMapping("/export")
-    public void export(@RequestParam(required = false) Long uid, HttpServletResponse response) throws IOException {
-        SignRecord filter = new SignRecord();
-        if (uid != null) {
-            filter.setUid(uid);
-        }
-        List<SignRecord> list = signService.selectAllSign(filter);
-
-        response.setContentType("text/csv;charset=UTF-8");
-        String filename = URLEncoder.encode("sign_records.csv", "UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename*=UTF-8''" + filename);
-
-        PrintWriter writer = response.getWriter();
-        writer.println("sid,uid,username,signDate,signInTime,signOutTime,signInStatus,signOutStatus,status,remark,createTime");
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (SignRecord r : list) {
-            String sid = r.getSid() == null ? "" : String.valueOf(r.getSid());
-            String suid = r.getUid() == null ? "" : String.valueOf(r.getUid());
-            String username = safe(r.getUsername());
-            String signDate = r.getSignDate() == null ? "" : df.format(r.getSignDate());
-            String signIn = r.getSignInTime() == null ? "" : dt.format(r.getSignInTime());
-            String signOut = r.getSignOutTime() == null ? "" : dt.format(r.getSignOutTime());
-            String signInStatus = safe(r.getSignInStatus());
-            String signOutStatus = safe(r.getSignOutStatus());
-            String remark = safe(r.getRemark());
-            String createTime = r.getCreateTime() == null ? "" : dt.format(r.getCreateTime());
-
-            String line = String.join(",", sid, suid, username, signDate, signIn, signOut, signInStatus, signOutStatus, remark, createTime);
-            writer.println(line);
-        }
-        writer.flush();
+    @PostMapping("/delete")
+    public Result deleteById(@RequestBody SignRecord signRecord){
+        signService.deleteById(signRecord);
+        return Result.success();
     }
 
-    private String safe(String s) {
-        if (s == null) return "";
-        return s.replaceAll(",", " ").replaceAll("\r|\n", " ");
-    }
 }

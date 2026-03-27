@@ -17,4 +17,6 @@ public interface SignMapper {
     int updateSignOut(SignRecord signRecord);
 
     void updateById(SignRecord signRecord);
+
+    void deleteById(SignRecord signRecord);
 }

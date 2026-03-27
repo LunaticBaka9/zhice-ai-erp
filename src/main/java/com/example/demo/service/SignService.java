@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.SignRecord;
+import com.example.demo.entity.User;
+import com.example.demo.exception.CustomerException;
 import com.example.demo.mapper.SignMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -40,7 +42,11 @@ public class SignService {
         return signMapper.updateSignOut(signRecord);
     }
 
-    public java.util.List<SignRecord> selectAllSign(SignRecord signRecord) {
+    public List<SignRecord> selectAllSign(SignRecord signRecord) {
         return signMapper.selectAllSign(signRecord);
+    }
+
+    public void deleteById(SignRecord signRecord){
+        signMapper.deleteById(signRecord);
     }
 }

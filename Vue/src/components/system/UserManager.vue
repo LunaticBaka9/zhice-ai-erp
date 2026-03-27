@@ -57,10 +57,14 @@
       </el-form>
     </el-card>
 
+
     <div class="card" style="margin-bottom: 10px">
       <el-button type="primary" @click="handleAdd">
         <el-icon><Plus /></el-icon>
         新增用户
+      </el-button>
+      <el-button type="primary" @click="exportData">
+        导出表格
       </el-button>
     </div>
 
@@ -382,6 +386,7 @@ import {
   Plus, Search, Refresh, View, Edit, Delete, Key
 } from '@element-plus/icons-vue'
 import request from "../../utils/request"
+import axios from 'axios'
 import AsideVue from "../menu/AsideVue.vue";
 import HeaderVue from "../menu/HeaderVue.vue";
 
@@ -792,6 +797,10 @@ const submitResetPassword = async () => {
 // 关闭对话框
 const handleDialogClose = () => {
   userFormRef.value?.clearValidate()
+}
+
+const exportData = async () => {
+  window.open('http://localhost:8080/user/exportData')
 }
 
 // 页面加载时获取数据

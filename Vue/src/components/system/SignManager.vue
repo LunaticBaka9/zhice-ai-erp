@@ -1,12 +1,8 @@
 <template>
   <div class="user-management">
-    <!-- 页面标题 -->
-    <!--    <div class="page-header">-->
-    <!--      <h2 class="page-title">用户管理</h2>-->
-    <!--    </div>-->
-
     <!-- 搜索栏 -->
     <el-card class="search-card" shadow="never" style="margin-bottom: 5px;">
+      <el-form :inline="true">
         <el-form-item label="用户名">
           <el-input
               v-model="data.username"
@@ -25,7 +21,6 @@
               @keyup.enter="load"
           />
         </el-form-item>
-
         <el-form-item label="签到状态">
           <el-select
               v-model="data.signInStatus"
@@ -37,7 +32,6 @@
             <el-option label="迟到" value="迟到" />
           </el-select>
         </el-form-item>
-
         <el-form-item label="签退状态">
           <el-select
               v-model="data.signOutStatus"
@@ -60,7 +54,14 @@
             重置
           </el-button>
         </el-form-item>
+      </el-form>
     </el-card>
+
+    <div class="card" style="margin-bottom: 10px">
+      <el-button type="primary" @click="exprotData">
+        导出表格
+      </el-button>
+    </div>
 
     <!-- 签到信息表格 -->
     <el-card class="table-card" shadow="never">
@@ -75,9 +76,9 @@
         <el-table-column prop="uid" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="signInTime" label="签到时间" width="200" />
-        <el-table-column prop="signOutTime" label="签退时间" width="200" />
+        <el-table-column prop="signInTime" label="签到时间" width="200" sortable />
         <el-table-column prop="signInStatus" label="签到状态" width="90"></el-table-column>
+        <el-table-column prop="signOutTime" label="签退时间" width="200" sortable />
         <el-table-column prop="signOutStatus" label="签退状态" width="90"></el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
@@ -150,7 +151,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Plus, Search, Refresh, View, Edit, Delete, Key
 } from '@element-plus/icons-vue'
-import request from "../../utils/request"
+import request from '../../utils/request.js'
 
 const data = reactive({
   username:null,
@@ -206,11 +207,30 @@ const handleSelectionChange = (row) => {
   data.rows = rows;
 }
 
+const handleDelete = (row) => {
+  ElMessageBox.confirm("确认删除此列数据", "删除确认", { type: "warning" })
+      .then((res) => {
+        request.post("/sign/delete", row).then((res) => {
+          if (res.code === "200") {
+            ElMessage.success("删除成功");
+            load();
+          } else {
+            ElMessage.error(res.msg);
+          }
+        });
+      })
+      .catch((err) => {});
+}
+
+const exprotData = () => {
+
+}
+
 // // 修改状态
 const update = (row) => {
   formRef.value.validate((valid) => {
     if (valid) {
-      requset.post("/sign/update", data.form).then((res)=>{
+      request.post("/sign/update", data.form).then((res)=>{
         if(res.code === "200"){
           data.formVisible = false;
           ElMessage.success("修改成功");
@@ -222,6 +242,7 @@ const update = (row) => {
     }
   });
 }
+
 </script>
 
 <style scoped>
