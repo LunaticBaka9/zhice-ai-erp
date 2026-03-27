@@ -1,0 +1,4 @@
+.el-container {
+    height: calc(100vh - 1rem);
+    font-family: Arial, sans-serif;
+}

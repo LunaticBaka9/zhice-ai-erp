@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SignMapper">
+    <select id="selectAllSign">
+            select 
+                sr.sid as sid,
+                sr.uid as uid,
+                sr.sign_date as signDate,
+                sr.sign_in_time as signInTime,
+                sr.sign_out_time as signOutTime,
+                sr.sign_in_status as signInStatus,
+                sr.sign_out_status as signOutStatus,
+                sr.remark as remark,
+                sr.create_time as createTime,
+                u.username as username,
+                u.name as name
+            from sign_record sr
+            left join `user` u on sr.uid = u.uid
+        <where>
+            <if test="uid != null and uid != 0">sr.uid = #{uid}</if>
+            <if test="username != null">username like concat('%', #{username}, '%')</if>
+            <if test="name != null">and name like concat('%', #{name}, '%')</if>
+            <if test="signInStatus != null">and sign_in_status like concat('%', #{signInStatus}, '%')</if>
+            <if test="signOutStatus != null">sign_out_status = #{signOutStatus},</if>
+        </where>
+        order by create_time desc
+    </select>
+    <select id="selectLatestOpenSign" resultType="com.example.demo.entity.SignRecord">
+        select 
+            sr.sid as sid,
+            sr.uid as uid,
+            sr.sign_date as signDate,
+            sr.sign_in_time as signInTime,
+            sr.sign_out_time as signOutTime,
+            sr.sign_in_status as signInStatus,
+            sr.sign_out_status as signOutStatus,
+            sr.remark as remark,
+            sr.create_time as createTime,
+            u.username as username
+        from sign_record sr
+        left join `user` u on sr.uid = u.uid
+        where sr.uid = #{uid} and sr.sign_out_time is null
+        order by sr.create_time desc
+        limit 1
+    </select>
+
+    <update id="updateSignOut" parameterType="com.example.demo.entity.SignRecord">
+        update sign_record
+        <set>
+            <if test="signOutTime != null">sign_out_time = #{signOutTime},</if>
+            <if test="signOutStatus != null">sign_out_status = #{signOutStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </set>
+        where sid = #{sid}
+    </update>
+    
+    <insert id="insertSign" parameterType="com.example.demo.entity.SignRecord" useGeneratedKeys="true" keyProperty="sid">
+        insert into sign_record(uid, sign_date, sign_in_time, sign_out_time, sign_in_status, sign_out_status, remark, create_time)
+        values(#{uid}, #{signDate}, #{signInTime}, #{signOutTime}, #{signInStatus}, #{signOutStatus}, #{remark}, #{createTime})
+    </insert>
+</mapper>
