@@ -42,8 +42,8 @@ public class SignService {
         return signMapper.updateSignOut(signRecord);
     }
 
-    public List<SignRecord> selectAllSign(SignRecord signRecord) {
-        return signMapper.selectAllSign(signRecord);
+    public List<SignRecord> selectAllSign() {
+        return signMapper.selectAllSign(null);
     }
 
     public void deleteById(SignRecord signRecord){

@@ -15,6 +15,7 @@
           <!-- 用户信息卡片 -->
           <el-card class="profile-card" shadow="hover">
             <div class="user-info">
+
               <h3 class="user-name">{{ data.userInfo.name }}</h3>
               <p class="user-role">{{ data.userInfo.role }}</p>
               <p class="user-department">{{ data.userInfo.department }}</p>

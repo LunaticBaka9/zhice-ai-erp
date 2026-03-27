@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.example.demo.common.Result;
@@ -11,11 +10,13 @@ import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -86,17 +87,29 @@ public class UserController {
             @RequestParam(required = false) String name,
             HttpServletResponse response) throws IOException{
         ExcelWriter writer = ExcelUtil.getWriter(username, name);
-        List<User> list = new ArrayList<>();
-        if ( StrUtil.isBlank(username) && StrUtil.isBlank(name) ){
-            list = userService.selectAllUsers();
-        }
+        //全局
+        CellStyle cellStyle = writer.getCellStyle();
+        //创建标题字体
+        Font font = writer.createFont();
+        //大小
+        font.setFontHeightInPoints((short) 10);
+        font.setFontName("宋体");
+        cellStyle.setFont(font);
+        //全局  宽15
+        writer.setColumnWidth(-1,15);
+        writer.setColumnWidth(0,20);
+        //全局  高25
+        writer.setRowHeight(-1,25);
+
+        List<User> list = userService.selectAllUsers();
         writer.write(list,true);
         //response为HttpServletResponse对象
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
         //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-        response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode("用户信息表","UTF-8") +".xls");
+        response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode("用户信息表", StandardCharsets.UTF_8) +".xls");
         ServletOutputStream out = response.getOutputStream();
         writer.flush(out,true);
         writer.close();
     }
+
 }

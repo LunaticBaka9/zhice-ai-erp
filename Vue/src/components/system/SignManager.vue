@@ -223,7 +223,7 @@ const handleDelete = (row) => {
 }
 
 const exprotData = () => {
-
+  window.open('http://localhost:8080/sign/exportData')
 }
 
 // // 修改状态
