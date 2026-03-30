@@ -1,23 +1,32 @@
 package com.example.demo.controller;
 
-
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
-import com.example.demo.common.Result;
-import com.example.demo.entity.User;
-import com.example.demo.service.UserService;
-import com.github.pagehelper.PageInfo;
-import jakarta.annotation.Resource;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.demo.common.Result;
+import com.example.demo.entity.User;
+import com.example.demo.service.UserService;
+import com.github.pagehelper.PageInfo;
+
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
+import jakarta.annotation.Resource;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/user")
@@ -112,4 +121,21 @@ public class UserController {
         writer.close();
     }
 
+    @PostMapping("/importData")
+    public Result importData(MultipartFile file) throws IOException{
+        ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+        List<User> userList = reader.readAll(User.class);
+        try {
+            userService.insertBatch(userList);
+        } catch (Exception e) {
+            return Result.error("数据批量导入错误");
+        }
+        return Result.success();
+    }
+
+    @PostMapping("/insertBatch")
+    public Result insertBatch(@RequestBody List<User> userList){
+        userService.insertBatch(userList);
+        return Result.success();
+    }
 }

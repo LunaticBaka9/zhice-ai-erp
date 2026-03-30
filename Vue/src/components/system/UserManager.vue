@@ -66,6 +66,10 @@
       <el-button type="primary" @click="exportData">
         导出表格
       </el-button>
+      <el-upload action="/api/user/importData" :on-success="handleImport"
+          style="display: inline-block; margin-left: 10px" :show-file-list="false">
+        <el-button type="primary">导入表格</el-button>
+      </el-upload>
     </div>
 
     <!-- 用户表格 -->
@@ -79,7 +83,7 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="uid" label="ID" width="80" />
+        <el-table-column prop="uid" label="ID" width="80"/>
         <el-table-column prop="avatar" label="头像" width="80">
           <template #default="{ row }">
             <el-avatar :src="row.avatar || defaultAvatar" :size="40" />
@@ -87,7 +91,7 @@
         </el-table-column>
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="role" label="角色" width="120">
+        <el-table-column prop="role" label="角色" width="120" >
           <template #default="{ row }">
             <el-tag :type="getRoleType(row.role)" size="small">
               {{ row.role }}
@@ -97,7 +101,7 @@
         <el-table-column prop="department" label="部门" width="150" />
         <el-table-column prop="phone" label="手机号" width="130" />
         <el-table-column prop="email" label="邮箱" width="200" show-overflow-tooltip />
-        <el-table-column prop="joinDate" label="入职时间" width="120" />
+        <el-table-column prop="joinDate" label="入职时间" width="120" sortable />
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <el-switch
@@ -792,6 +796,15 @@ const submitResetPassword = async () => {
       }
     }
   })
+}
+
+const handleImport = (res,file,filelist) =>{
+  if(res.code === "200"){
+    ElMessage.success("数据导入成功");
+  } else {
+    ElMessage.error(res.msg);
+  }
+  getUserList();
 }
 
 // 关闭对话框

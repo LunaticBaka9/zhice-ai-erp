@@ -20,6 +20,8 @@ public interface UserMapper {
 
     void updatePasswordById(User user);
 
+    void updateAvatarById(Long uid, String path);
+
     List<User> selectAllUsers(User user);
 
     void deleteById(User user);

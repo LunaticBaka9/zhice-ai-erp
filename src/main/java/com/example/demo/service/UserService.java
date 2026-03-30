@@ -6,6 +6,7 @@ import com.example.demo.mapper.UserMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -71,6 +72,10 @@ public class UserService {
         userMapper.updatePasswordById(user);
     }
 
+    public void updateAvatar(Long uid, String path){
+        userMapper.updateAvatarById(uid, path);
+    }
+
     public void deleteById(User user){
         User dbUser = userMapper.selectByUsername(user.getUsername());
         if(dbUser == null){
@@ -82,6 +87,30 @@ public class UserService {
     public void deleteBatch(List<User> list){
         for(User user: list){
             this.deleteById(user);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void insertBatch(List<User> list){
+        if(list == null || list.isEmpty()){
+            return;
+        }
+        for(User user: list){
+            if(user == null){
+                throw new CustomerException("导入数据包含空记录");
+            }
+            String username = user.getUsername();
+            if(username == null || username.trim().isEmpty()){
+                throw new CustomerException("用户名不能为空");
+            }
+            User dbUser = userMapper.selectByUsername(username);
+            if(dbUser != null){
+                throw new CustomerException("账号重复: " + username);
+            }
+            if(user.getName() == null || user.getName().trim().isEmpty()){
+                user.setName(username);
+            }
+            userMapper.insertUser(user);
         }
     }
 }
