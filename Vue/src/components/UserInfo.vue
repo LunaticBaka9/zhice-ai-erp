@@ -15,9 +15,12 @@
           <!-- 用户信息卡片 -->
           <el-card class="profile-card" shadow="hover">
             <div class="user-info">
-
-              <h3 class="user-name">{{ data.userInfo.name }}</h3>
-              <p class="user-role">{{ data.userInfo.role }}</p>
+              <el-avatar
+                :src="data.userInfo.avatar || defaultAvatar"
+                :size="100"
+              />
+              <h1 class="user-name">{{ data.userInfo.name }}</h1>
+              <h3 class="user-role">{{ data.userInfo.role }}</h3>
               <p class="user-department">{{ data.userInfo.department }}</p>
               <div class="user-contact">
                 <el-icon><Message /></el-icon>
@@ -64,7 +67,11 @@
             <el-tabs v-model="activeTab">
               <!-- 最近活动 -->
               <el-tab-pane label="最近活动" name="activity">
-                <div v-for="item in activities" :key="item.id" class="activity-item">
+                <div
+                  v-for="item in activities"
+                  :key="item.id"
+                  class="activity-item"
+                >
                   <el-tag :type="item.type" size="small" class="activity-tag">
                     {{ item.tag }}
                   </el-tag>
@@ -82,25 +89,35 @@
                     <h4>账户密码</h4>
                     <p>当前密码强度：强</p>
                   </div>
-                  <el-button link type="primary" @click="openPasswordDialog">修改</el-button>
+                  <el-button link type="primary" @click="openPasswordDialog"
+                    >修改</el-button
+                  >
                 </div>
                 <el-divider />
                 <div class="security-item">
                   <div class="security-info">
                     <h4>绑定手机</h4>
-                    <p v-if="data.userInfo.phone" class="table-text-center">已绑定：{{ data.userInfo.phone }}</p>
+                    <p v-if="data.userInfo.phone" class="table-text-center">
+                      已绑定：{{ data.userInfo.phone }}
+                    </p>
                     <p v-else class="table-text-center">未绑定</p>
                   </div>
-                  <el-button link type="primary" @click="openPhoneDialog">修改</el-button>
+                  <el-button link type="primary" @click="openPhoneDialog"
+                    >修改</el-button
+                  >
                 </div>
                 <el-divider />
                 <div class="security-item">
                   <div class="security-info">
                     <h4>绑定邮箱</h4>
-                    <p v-if="data.userInfo.email" class="table-text-center">已绑定：{{ data.userInfo.email }}</p>
+                    <p v-if="data.userInfo.email" class="table-text-center">
+                      已绑定：{{ data.userInfo.email }}
+                    </p>
                     <p v-else class="table-text-center">未绑定</p>
                   </div>
-                  <el-button link type="primary" @click="openEmailDialog">修改</el-button>
+                  <el-button link type="primary" @click="openEmailDialog"
+                    >修改</el-button
+                  >
                 </div>
                 <el-divider />
                 <div class="security-item">
@@ -108,18 +125,22 @@
                     <h4>两步验证</h4>
                     <p>未开启两步验证</p>
                   </div>
-                  <el-button link type="primary" @click="handleEnable2FA">开启</el-button>
+                  <el-button link type="primary" @click="handleEnable2FA"
+                    >开启</el-button
+                  >
                 </div>
               </el-tab-pane>
 
               <!-- 个人资料 -->
               <el-tab-pane label="个人资料" name="profile">
                 <el-descriptions :column="1" border>
-                  <el-descriptions-item label="姓名">{{ data.userInfo.name }}</el-descriptions-item>
-                  <el-descriptions-item label="角色">{{ data.userInfo.role }}</el-descriptions-item>
-                  <el-descriptions-item label="部门">{{ data.userInfo.department }}</el-descriptions-item>
-                  <el-descriptions-item label="入职时间">{{ data.userInfo.joinDate }}</el-descriptions-item>
-                  <el-descriptions-item label="个人简介">{{ data.userInfo.bio }}</el-descriptions-item>
+                  <el-descriptions-item label="姓名">{{data.userInfo.name }}</el-descriptions-item>
+                  <el-descriptions-item label="角色">{{data.userInfo.role }}</el-descriptions-item>
+                  <el-descriptions-item label="部门">{{data.userInfo.department }}</el-descriptions-item>
+                  <el-descriptions-item label="入职时间">{{data.userInfo.joinDate }}</el-descriptions-item>
+                  <el-descriptions-item label="个人简介">{{
+                    data.userInfo.bio
+                  }}</el-descriptions-item>
                 </el-descriptions>
               </el-tab-pane>
             </el-tabs>
@@ -131,46 +152,50 @@
 
   <!-- 修改密码对话框 -->
   <el-dialog
-      v-model="passwordDialog.visible"
-      title="修改密码"
-      width="400px"
-      :close-on-click-modal="false"
+    v-model="passwordDialog.visible"
+    title="修改密码"
+    width="400px"
+    :close-on-click-modal="false"
   >
     <el-form
-        ref="passwordFormRef"
-        :model="passwordDialog.form"
-        :rules="passwordDialog.rules"
-        label-width="100px"
+      ref="passwordFormRef"
+      :model="passwordDialog.form"
+      :rules="passwordDialog.rules"
+      label-width="100px"
     >
       <el-form-item label="当前密码" prop="oldPassword">
         <el-input
-            v-model="passwordDialog.form.oldPassword"
-            type="password"
-            placeholder="请输入当前密码"
-            show-password
+          v-model="passwordDialog.form.oldPassword"
+          type="password"
+          placeholder="请输入当前密码"
+          show-password
         />
       </el-form-item>
       <el-form-item label="新密码" prop="newPassword">
         <el-input
-            v-model="passwordDialog.form.newPassword"
-            type="password"
-            placeholder="请输入新密码"
-            show-password
+          v-model="passwordDialog.form.newPassword"
+          type="password"
+          placeholder="请输入新密码"
+          show-password
         />
       </el-form-item>
       <el-form-item label="确认密码" prop="confirmPassword">
         <el-input
-            v-model="passwordDialog.form.confirmPassword"
-            type="password"
-            placeholder="请再次输入新密码"
-            show-password
+          v-model="passwordDialog.form.confirmPassword"
+          type="password"
+          placeholder="请再次输入新密码"
+          show-password
         />
       </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="passwordDialog.visible = false">取消</el-button>
-        <el-button type="primary" @click="submitPassword" :loading="passwordDialog.loading">
+        <el-button
+          type="primary"
+          @click="submitPassword"
+          :loading="passwordDialog.loading"
+        >
           确认修改
         </el-button>
       </span>
@@ -179,40 +204,47 @@
 
   <!-- 修改手机对话框 -->
   <el-dialog
-      v-model="phoneDialog.visible"
-      title="修改手机"
-      width="400px"
-      :close-on-click-modal="false"
+    v-model="phoneDialog.visible"
+    title="修改手机"
+    width="400px"
+    :close-on-click-modal="false"
   >
     <el-form
-        ref="phoneFormRef"
-        :model="phoneDialog.form"
-        :rules="phoneDialog.rules"
-        label-width="100px"
+      ref="phoneFormRef"
+      :model="phoneDialog.form"
+      :rules="phoneDialog.rules"
+      label-width="100px"
     >
       <el-form-item label="当前手机" prop="oldPhone">
         <el-input
-            v-model="phoneDialog.form.oldPhone"
-            placeholder="请输入当前手机号"
-            :disabled="true"
-            :value="data.userInfo.phone"
+          v-model="phoneDialog.form.oldPhone"
+          placeholder="请输入当前手机号"
+          :disabled="true"
+          :value="data.userInfo.phone"
         />
       </el-form-item>
       <el-form-item label="新手机号" prop="newPhone">
         <el-input
-            v-model="phoneDialog.form.newPhone"
-            placeholder="请输入新手机号"
+          v-model="phoneDialog.form.newPhone"
+          placeholder="请输入新手机号"
         />
       </el-form-item>
       <el-form-item label="验证码" prop="code">
         <div class="code-input-wrapper">
-          <el-input v-model="phoneDialog.form.code" placeholder="请输入验证码" />
+          <el-input
+            v-model="phoneDialog.form.code"
+            placeholder="请输入验证码"
+          />
           <el-button
-              type="primary"
-              :disabled="phoneDialog.codeSending || phoneDialog.countdown > 0"
-              @click="sendPhoneCode"
+            type="primary"
+            :disabled="phoneDialog.codeSending || phoneDialog.countdown > 0"
+            @click="sendPhoneCode"
           >
-            {{ phoneDialog.countdown > 0 ? `${phoneDialog.countdown}秒后重试` : '获取验证码' }}
+            {{
+              phoneDialog.countdown > 0
+                ? `${phoneDialog.countdown}秒后重试`
+                : "获取验证码"
+            }}
           </el-button>
         </div>
       </el-form-item>
@@ -220,7 +252,11 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="phoneDialog.visible = false">取消</el-button>
-        <el-button type="primary" @click="submitPhone" :loading="phoneDialog.loading">
+        <el-button
+          type="primary"
+          @click="submitPhone"
+          :loading="phoneDialog.loading"
+        >
           确认修改
         </el-button>
       </span>
@@ -229,40 +265,47 @@
 
   <!-- 修改邮箱对话框 -->
   <el-dialog
-      v-model="emailDialog.visible"
-      title="修改邮箱"
-      width="400px"
-      :close-on-click-modal="false"
+    v-model="emailDialog.visible"
+    title="修改邮箱"
+    width="400px"
+    :close-on-click-modal="false"
   >
     <el-form
-        ref="emailFormRef"
-        :model="emailDialog.form"
-        :rules="emailDialog.rules"
-        label-width="100px"
+      ref="emailFormRef"
+      :model="emailDialog.form"
+      :rules="emailDialog.rules"
+      label-width="100px"
     >
       <el-form-item label="当前邮箱" prop="oldEmail">
         <el-input
-            v-model="emailDialog.form.oldEmail"
-            placeholder="请输入当前邮箱"
-            :disabled="true"
-            :value="data.userInfo.email"
+          v-model="emailDialog.form.oldEmail"
+          placeholder="请输入当前邮箱"
+          :disabled="true"
+          :value="data.userInfo.email"
         />
       </el-form-item>
       <el-form-item label="新邮箱" prop="newEmail">
         <el-input
-            v-model="emailDialog.form.newEmail"
-            placeholder="请输入新邮箱"
+          v-model="emailDialog.form.newEmail"
+          placeholder="请输入新邮箱"
         />
       </el-form-item>
       <el-form-item label="验证码" prop="code">
         <div class="code-input-wrapper">
-          <el-input v-model="emailDialog.form.code" placeholder="请输入验证码" />
+          <el-input
+            v-model="emailDialog.form.code"
+            placeholder="请输入验证码"
+          />
           <el-button
-              type="primary"
-              :disabled="emailDialog.codeSending || emailDialog.countdown > 0"
-              @click="sendEmailCode"
+            type="primary"
+            :disabled="emailDialog.codeSending || emailDialog.countdown > 0"
+            @click="sendEmailCode"
           >
-            {{ emailDialog.countdown > 0 ? `${emailDialog.countdown}秒后重试` : '获取验证码' }}
+            {{
+              emailDialog.countdown > 0
+                ? `${emailDialog.countdown}秒后重试`
+                : "获取验证码"
+            }}
           </el-button>
         </div>
       </el-form-item>
@@ -270,7 +313,11 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="emailDialog.visible = false">取消</el-button>
-        <el-button type="primary" @click="submitEmail" :loading="emailDialog.loading">
+        <el-button
+          type="primary"
+          @click="submitEmail"
+          :loading="emailDialog.loading"
+        >
           确认修改
         </el-button>
       </span>
@@ -279,48 +326,92 @@
 
   <!-- 编辑资料对话框 -->
   <el-dialog
-      v-model="profileDialog.visible"
-      title="编辑个人资料"
-      width="500px"
-      :close-on-click-modal="false"
-      @close="handleProfileDialogClose"
+    v-model="profileDialog.visible"
+    title="编辑个人资料"
+    width="500px"
+    :close-on-click-modal="false"
+    @close="handleProfileDialogClose"
   >
     <el-form
-        ref="profileFormRef"
-        :model="profileDialog.form"
-        :rules="profileDialog.rules"
-        label-width="100px"
-        status-icon
+      ref="profileFormRef"
+      :model="profileDialog.form"
+      :rules="profileDialog.rules"
+      label-width="100px"
+      status-icon
     >
-      <!--      <el-form-item label="头像" prop="avatar">-->
-      <!--        <div class="avatar-uploader" @click="triggerAvatarUpload">-->
-      <!--          <img v-if="profileDialog.form.avatar" :src="profileDialog.form.avatar" class="avatar" />-->
-      <!--          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>-->
-      <!--        </div>-->
-      <!--        <input-->
-      <!--            ref="avatarInputRef"-->
-      <!--            type="file"-->
-      <!--            accept="image/*"-->
-      <!--            style="display: none"-->
-      <!--            @change="handleAvatarChange"-->
-      <!--        />-->
-      <!--        <div class="avatar-tip">点击上传头像，支持jpg、png格式</div>-->
-      <!--      </el-form-item>-->
+      <el-form-item label="头像" prop="avatar">
+        <el-upload
+          class="avatar-uploader"
+          :show-file-list="false"
+          :before-upload="beforeAvatarUpload"
+        >
+          <img
+            v-if="profileDialog.form.avatar"
+            :src="profileDialog.form.avatar"
+            class="avatar"
+          />
+          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+        </el-upload>
+        <div class="avatar-tip">点击上传并编辑头像，支持jpg、png格式</div>
+      </el-form-item>
+
+      <!-- 头像编辑对话框 -->
+      <el-dialog v-model="avatarDialog.visible" title="编辑头像" width="560px">
+        <div class="avatar-edit-container">
+          <div class="avatar-edit-canvas-wrapper">
+            <canvas
+              ref="avatarCanvas"
+              class="avatar-canvas"
+              width="300"
+              height="300"
+              @mousedown="onCanvasMouseDown"
+              @mousemove="onCanvasMouseMove"
+              @mouseup="onCanvasMouseUp"
+              @mouseleave="onCanvasMouseUp"
+            ></canvas>
+          </div>
+          <div class="avatar-edit-controls">
+            <input type="file" accept="image/*" @change="onAvatarFileChange" />
+            <el-slider
+              v-model="avatarDialog.scale"
+              :min="0.2"
+              :max="2"
+              :step="0.01"
+              show-tooltip="false"
+              @input="drawAvatarToCanvas"
+            />
+            <div style="margin-top: 8px">
+              拖动画布可移动裁剪区域，滑动调整缩放
+            </div>
+          </div>
+        </div>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="avatarDialog.visible = false">取消</el-button>
+            <el-button
+              type="primary"
+              @click="confirmAvatar"
+              :loading="avatarDialog.loading"
+              >确定</el-button
+            >
+          </span>
+        </template>
+      </el-dialog>
 
       <el-form-item label="姓名" prop="name">
         <el-input
-            v-model="profileDialog.form.name"
-            placeholder="请输入姓名"
-            maxlength="20"
-            show-word-limit
+          v-model="profileDialog.form.name"
+          placeholder="请输入姓名"
+          maxlength="20"
+          show-word-limit
         />
       </el-form-item>
 
       <el-form-item label="角色" prop="role">
         <el-select
-            v-model="profileDialog.form.role"
-            placeholder="请选择角色"
-            style="width: 100%"
+          v-model="profileDialog.form.role"
+          placeholder="请选择角色"
+          style="width: 100%"
         >
           <el-option label="超级管理员" value="超级管理员" />
           <el-option label="高级管理员" value="高级管理员" />
@@ -333,39 +424,39 @@
 
       <el-form-item label="部门" prop="department">
         <el-cascader
-            v-model="profileDialog.form.department"
-            :options="departmentOptions"
-            :props="{
+          v-model="profileDialog.form.department"
+          :options="departmentOptions"
+          :props="{
             value: 'id',
             label: 'name',
             children: 'children',
-            checkStrictly: true
+            checkStrictly: true,
           }"
-            placeholder="请选择部门"
-            style="width: 100%"
-            clearable
+          placeholder="请选择部门"
+          style="width: 100%"
+          clearable
         />
       </el-form-item>
 
       <el-form-item label="入职时间" prop="joinDate">
         <el-date-picker
-            v-model="profileDialog.form.joinDate"
-            type="date"
-            placeholder="选择入职时间"
-            style="width: 100%"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
+          v-model="profileDialog.form.joinDate"
+          type="date"
+          placeholder="选择入职时间"
+          style="width: 100%"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
         />
       </el-form-item>
 
       <el-form-item label="个人简介" prop="bio">
         <el-input
-            v-model="profileDialog.form.bio"
-            type="textarea"
-            placeholder="请输入个人简介"
-            :rows="4"
-            maxlength="200"
-            show-word-limit
+          v-model="profileDialog.form.bio"
+          type="textarea"
+          placeholder="请输入个人简介"
+          :rows="4"
+          maxlength="200"
+          show-word-limit
         />
       </el-form-item>
     </el-form>
@@ -373,7 +464,11 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="profileDialog.visible = false">取消</el-button>
-        <el-button type="primary" @click="submitProfile" :loading="profileDialog.loading">
+        <el-button
+          type="primary"
+          @click="submitProfile"
+          :loading="profileDialog.loading"
+        >
           保存修改
         </el-button>
       </span>
@@ -382,13 +477,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeMount } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Grid, Setting, User, Lock, Menu, Monitor, UserFilled, Document,
-  Avatar, Fold, Expand, Bell, ArrowDown, SwitchButton, Message, Phone
-} from '@element-plus/icons-vue'
-import request from '../utils/request'
+import { ref, reactive, onBeforeMount, nextTick } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Message, Phone, Plus } from "@element-plus/icons-vue";
+import request from "../utils/request";
+import axios from "axios";
+
+const defaultAvatar =
+  "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
 
 onBeforeMount(() => {
   const userStr = localStorage.getItem("local_user");
@@ -404,19 +500,19 @@ onBeforeMount(() => {
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem("local_user")),
-  userInfo:[]
-})
-console.log(data.user)
+  userInfo: [],
+});
+console.log(data.user);
 
-const load = () =>{
-  request.get("user/selectById/" + data.user.uid).then((res)=>{
-    if(res.code == "200"){
+const load = () => {
+  request.get("user/selectById/" + data.user.uid).then((res) => {
+    if (res.code == "200") {
       data.userInfo = res.data;
-    } else{
+    } else {
       ElMessage.error(res.msg);
     }
-  })
-}
+  });
+};
 load();
 
 const logout = () => {
@@ -429,92 +525,92 @@ const stats = reactive({
   projects: 12,
   tasks: 38,
   team: 8,
-  activities: 156
-})
+  activities: 156,
+});
 
 // 当前激活的标签页
-const activeTab = ref('security')
+const activeTab = ref("security");
 
 // 最近活动数据
 const activities = ref([
   {
     id: 1,
-    title: '完成了项目Alpha的代码审查',
-    time: '10分钟前',
-    tag: '更新',
-    type: 'success'
+    title: "完成了项目Alpha的代码审查",
+    time: "10分钟前",
+    tag: "更新",
+    type: "success",
   },
   {
     id: 2,
-    title: '提交了用户管理模块的PR',
-    time: '2小时前',
-    tag: '提交',
-    type: 'info'
+    title: "提交了用户管理模块的PR",
+    time: "2小时前",
+    tag: "提交",
+    type: "info",
   },
   {
     id: 3,
-    title: '参加了产品需求评审会议',
-    time: '昨天',
-    tag: '会议',
-    type: 'warning'
+    title: "参加了产品需求评审会议",
+    time: "昨天",
+    tag: "会议",
+    type: "warning",
   },
   {
     id: 4,
-    title: '修复了登录页面的样式问题',
-    time: '昨天',
-    tag: '修复',
-    type: 'danger'
-  }
-])
+    title: "修复了登录页面的样式问题",
+    time: "昨天",
+    tag: "修复",
+    type: "danger",
+  },
+]);
 
 // 表单引用
-const passwordFormRef = ref()
-const phoneFormRef = ref()
-const emailFormRef = ref()
+const passwordFormRef = ref();
+const phoneFormRef = ref();
+const emailFormRef = ref();
 
 // 密码修改对话框
 const passwordDialog = reactive({
   visible: false,
   loading: false,
   form: {
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   },
   rules: {
     oldPassword: [
-      { required: true, message: '请输入当前密码', trigger: 'blur' },
-      { min: 6, max: 20, message: '密码长度在6-20个字符', trigger: 'blur' }
+      { required: true, message: "请输入当前密码", trigger: "blur" },
+      { min: 6, max: 20, message: "密码长度在6-20个字符", trigger: "blur" },
     ],
     newPassword: [
-      { required: true, message: '请输入新密码', trigger: 'blur' },
-      { min: 6, max: 20, message: '密码长度在6-20个字符', trigger: 'blur' },
+      { required: true, message: "请输入新密码", trigger: "blur" },
+      { min: 6, max: 20, message: "密码长度在6-20个字符", trigger: "blur" },
       {
         validator: (rule, value, callback) => {
           if (value === passwordDialog.form.oldPassword) {
-            callback(new Error('新密码不能与当前密码相同'))
+            callback(new Error("新密码不能与当前密码相同"));
           } else {
-            callback()
+            callback();
           }
         },
-        trigger: 'blur'
-      }
+        trigger: "blur",
+      },
     ],
     confirmPassword: [
-      { required: true, message: '请确认新密码', trigger: 'blur' },
+      { required: true, message: "请确认新密码", trigger: "blur" },
       {
         validator: (rule, value, callback) => {
           if (value !== passwordDialog.form.newPassword) {
-            callback(new Error('两次输入的密码不一致'))
+            callback(new Error("两次输入的密码不一致"));
           } else {
-            callback()
+            callback();
           }
         },
-        trigger: 'blur'
-      }
-    ]
-  }
-})
+        trigger: "blur",
+      },
+    ],
+  },
+});
 
 // 手机修改对话框
 const phoneDialog = reactive({
@@ -523,21 +619,25 @@ const phoneDialog = reactive({
   codeSending: false,
   countdown: 0,
   form: {
-    oldPhone: '',
-    newPhone: '',
-    code: ''
+    oldPhone: "",
+    newPhone: "",
+    code: "",
   },
   rules: {
     newPhone: [
-      { required: true, message: '请输入新手机号', trigger: 'blur' },
-      { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+      { required: true, message: "请输入新手机号", trigger: "blur" },
+      {
+        pattern: /^1[3-9]\d{9}$/,
+        message: "请输入正确的手机号",
+        trigger: "blur",
+      },
     ],
     code: [
-      { required: true, message: '请输入验证码', trigger: 'blur' },
-      { len: 6, message: '验证码长度为6位', trigger: 'blur' }
-    ]
-  }
-})
+      { required: true, message: "请输入验证码", trigger: "blur" },
+      { len: 6, message: "验证码长度为6位", trigger: "blur" },
+    ],
+  },
+});
 
 // 邮箱修改对话框
 const emailDialog = reactive({
@@ -546,456 +646,521 @@ const emailDialog = reactive({
   codeSending: false,
   countdown: 0,
   form: {
-    oldEmail: '',
-    newEmail: '',
-    code: ''
+    oldEmail: "",
+    newEmail: "",
+    code: "",
   },
   rules: {
     newEmail: [
-      { required: true, message: '请输入新邮箱', trigger: 'blur' },
-      { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+      { required: true, message: "请输入新邮箱", trigger: "blur" },
+      { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" },
     ],
     code: [
-      { required: true, message: '请输入验证码', trigger: 'blur' },
-      { len: 6, message: '验证码长度为6位', trigger: 'blur' }
-    ]
-  }
-})
-
-// 切换侧边栏折叠
-const toggleCollapse = () => {
-  isCollapse.value = !isCollapse.value
-}
-
-// 处理下拉菜单命令
-const handleCommand = (command) => {
-  switch (command) {
-    case 'profile':
-      ElMessage.success('跳转到个人中心')
-      break
-    case 'settings':
-      ElMessage.success('跳转到系统设置')
-      break
-    case 'logout':
-      handleLogout()
-      break
-  }
-}
+      { required: true, message: "请输入验证码", trigger: "blur" },
+      { len: 6, message: "验证码长度为6位", trigger: "blur" },
+    ],
+  },
+});
 
 // 退出登录
 const handleLogout = () => {
-  ElMessageBox.confirm('确认退出登录吗？', '提示', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    logout()
-  }).catch(() => {})
-}
+  ElMessageBox.confirm("确认退出登录吗？", "提示", {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      logout();
+    })
+    .catch(() => {});
+};
 
 // 打开修改密码对话框
 const openPasswordDialog = () => {
   passwordDialog.form = {
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  }
-  passwordDialog.visible = true
-}
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  };
+  passwordDialog.visible = true;
+};
 
 // 打开修改手机对话框
 const openPhoneDialog = () => {
   phoneDialog.form = {
     oldPhone: data.userInfo.phone,
-    newPhone: '',
-    code: ''
-  }
-  phoneDialog.visible = true
-}
+    newPhone: "",
+    code: "",
+  };
+  phoneDialog.visible = true;
+};
 
 // 打开修改邮箱对话框
 const openEmailDialog = () => {
   emailDialog.form = {
     oldEmail: data.userInfo.email,
-    newEmail: '',
-    code: ''
-  }
-  emailDialog.visible = true
-}
+    newEmail: "",
+    code: "",
+  };
+  emailDialog.visible = true;
+};
 
 // 发送手机验证码
 const sendPhoneCode = async () => {
   if (!phoneDialog.form.newPhone) {
-    ElMessage.warning('请先输入新手机号')
-    return
+    ElMessage.warning("请先输入新手机号");
+    return;
   }
 
   if (!/^1[3-9]\d{9}$/.test(phoneDialog.form.newPhone)) {
-    ElMessage.warning('请输入正确的手机号')
-    return
+    ElMessage.warning("请输入正确的手机号");
+    return;
   }
 
-  phoneDialog.codeSending = true
+  phoneDialog.codeSending = true;
   try {
     // 这里调用发送验证码的API
-    await request.post('/api/send-phone-code', {
+    await request.post("/api/send-phone-code", {
       phone: phoneDialog.form.newPhone,
-      type: 'change_phone'
-    })
-    ElMessage.success('验证码已发送')
+      type: "change_phone",
+    });
+    ElMessage.success("验证码已发送");
 
     // 开始倒计时
-    phoneDialog.countdown = 60
+    phoneDialog.countdown = 60;
     const timer = setInterval(() => {
       if (phoneDialog.countdown > 0) {
-        phoneDialog.countdown--
+        phoneDialog.countdown--;
       } else {
-        clearInterval(timer)
+        clearInterval(timer);
       }
-    }, 1000)
+    }, 1000);
   } catch (error) {
-    ElMessage.error('验证码发送失败')
+    ElMessage.error("验证码发送失败");
   } finally {
-    phoneDialog.codeSending = false
+    phoneDialog.codeSending = false;
   }
-}
+};
 
 // 发送邮箱验证码
 const sendEmailCode = async () => {
   if (!emailDialog.form.newEmail) {
-    ElMessage.warning('请先输入新邮箱')
-    return
+    ElMessage.warning("请先输入新邮箱");
+    return;
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(emailDialog.form.newEmail)) {
-    ElMessage.warning('请输入正确的邮箱地址')
-    return
+    ElMessage.warning("请输入正确的邮箱地址");
+    return;
   }
 
-  emailDialog.codeSending = true
+  emailDialog.codeSending = true;
   try {
     // 这里调用发送验证码的API
-    await request.post('/user/send-email-code', {
+    await request.post("/user/send-email-code", {
       email: emailDialog.form.newEmail,
-      type: 'change_email'
-    })
-    ElMessage.success('验证码已发送，验证码为 12345')
+      type: "change_email",
+    });
+    ElMessage.success("验证码已发送，验证码为 12345");
 
     // 开始倒计时
-    emailDialog.countdown = 60
+    emailDialog.countdown = 60;
     const timer = setInterval(() => {
       if (emailDialog.countdown > 0) {
-        emailDialog.countdown--
+        emailDialog.countdown--;
       } else {
-        clearInterval(timer)
+        clearInterval(timer);
       }
-    }, 1000)
+    }, 1000);
   } catch (error) {
-    ElMessage.error('验证码发送失败')
+    ElMessage.error("验证码发送失败");
   } finally {
-    emailDialog.codeSending = false
+    emailDialog.codeSending = false;
   }
-}
+};
 
 // 提交修改密码
 const submitPassword = async () => {
-  if (!passwordFormRef.value) return
+  if (!passwordFormRef.value) return;
 
   await passwordFormRef.value.validate(async (valid) => {
     if (valid) {
-      passwordDialog.loading = true
+      passwordDialog.loading = true;
       try {
         // 这里调用修改密码的API
-        await request.post('/user/updatePassword', {
+        await request.post("/user/updatePassword", {
           userId: data.user.uid,
           oldPassword: passwordDialog.form.oldPassword,
-          newPassword: passwordDialog.form.newPassword
-        })
-        ElMessage.success('密码修改成功')
-        passwordDialog.visible = false
+          newPassword: passwordDialog.form.newPassword,
+        });
+        ElMessage.success("密码修改成功");
+        passwordDialog.visible = false;
       } catch (error) {
-        ElMessage.error('密码修改失败')
+        ElMessage.error("密码修改失败");
       } finally {
-        passwordDialog.loading = false
+        passwordDialog.loading = false;
       }
     }
-  })
-}
+  });
+};
 
 // 提交修改手机
 const submitPhone = async () => {
-  if (!phoneFormRef.value) return
+  if (!phoneFormRef.value) return;
 
   await phoneFormRef.value.validate(async (valid) => {
     if (valid) {
-      phoneDialog.loading = true
+      phoneDialog.loading = true;
       try {
         // 这里调用修改手机的API
-        await request.post('/api/change-phone', {
+        await request.post("/api/change-phone", {
           userId: data.user.uid,
           newPhone: phoneDialog.form.newPhone,
-          code: phoneDialog.form.code
-        })
+          code: phoneDialog.form.code,
+        });
 
         // 更新本地用户信息
-        data.userInfo.phone = phoneDialog.form.newPhone
-        ElMessage.success('手机号修改成功')
-        phoneDialog.visible = false
+        data.userInfo.phone = phoneDialog.form.newPhone;
+        ElMessage.success("手机号修改成功");
+        phoneDialog.visible = false;
       } catch (error) {
-        ElMessage.error('手机号修改失败')
+        ElMessage.error("手机号修改失败");
       } finally {
-        phoneDialog.loading = false
+        phoneDialog.loading = false;
       }
     }
-  })
-}
+  });
+};
 
 // 提交修改邮箱
 const submitEmail = async () => {
-  if (!emailFormRef.value) return
+  if (!emailFormRef.value) return;
 
   await emailFormRef.value.validate(async (valid) => {
     if (valid) {
-      emailDialog.loading = true
+      emailDialog.loading = true;
       try {
         // 这里调用修改邮箱的API
-        await request.post('/user/changeEmail', {
+        await request.post("/user/changeEmail", {
           userId: data.user.uid,
           newEmail: emailDialog.form.newEmail,
-          code: emailDialog.form.code
-        })
+          code: emailDialog.form.code,
+        });
 
         // 更新本地用户信息
-        data.userInfo.email = emailDialog.form.newEmail
-        ElMessage.success('邮箱修改成功')
-        emailDialog.visible = false
+        data.userInfo.email = emailDialog.form.newEmail;
+        ElMessage.success("邮箱修改成功");
+        emailDialog.visible = false;
       } catch (error) {
-        ElMessage.error('邮箱修改失败')
+        ElMessage.error("邮箱修改失败");
       } finally {
-        emailDialog.loading = false
+        emailDialog.loading = false;
       }
     }
-  })
-}
+  });
+};
 
 // 在 data 对象后面添加部门选项数据
 const departmentOptions = ref([
   {
-    id: '技术部',
-    name: '技术部',
+    id: "技术部",
+    name: "技术部",
     children: [
-      { id: '研发组', name: '研发组' },
-      { id: '测试组', name: '测试组' },
-      { id: '运维组', name: '运维组' }
-    ]
+      { id: "研发组", name: "研发组" },
+      { id: "测试组", name: "测试组" },
+      { id: "运维组", name: "运维组" },
+    ],
   },
   {
-    id: '产品部t',
-    name: '产品部',
+    id: "产品部t",
+    name: "产品部",
     children: [
-      { id: '产品组', name: '产品组' },
-      { id: '设计组', name: '设计组' },
-      { id: '交互组', name: '交互组' }
-    ]
+      { id: "产品组", name: "产品组" },
+      { id: "设计组", name: "设计组" },
+      { id: "交互组", name: "交互组" },
+    ],
   },
   {
-    id: '市场部',
-    name: '市场部',
+    id: "市场部",
+    name: "市场部",
     children: [
-      { id: '运营组', name: '运营组' },
-      { id: '销售组', name: '销售组' },
-      { id: '公关组', name: '公关组' }
-    ]
+      { id: "运营组", name: "运营组" },
+      { id: "销售组", name: "销售组" },
+      { id: "公关组", name: "公关组" },
+    ],
   },
   {
-    id: '行政部',
-    name: '行政部',
+    id: "行政部",
+    name: "行政部",
     children: [
-      { id: '人力资源', name: '人力资源' },
-      { id: '财务组', name: '财务组' },
-      { id: '办公室', name: '办公室' }
-    ]
-  }
-])
+      { id: "人力资源", name: "人力资源" },
+      { id: "财务组", name: "财务组" },
+      { id: "办公室", name: "办公室" },
+    ],
+  },
+]);
 
 // 编辑资料对话框
 const profileDialog = reactive({
   visible: false,
   loading: false,
   form: {
-    avatar: '',
-    name: '',
-    role: '',
+    avatar: "",
+    name: "",
+    role: "",
     department: [],
-    email: '',
-    phone: '',
-    joinDate: '',
-    bio: ''
+    email: "",
+    phone: "",
+    joinDate: "",
+    bio: "",
   },
   rules: {
     name: [
-      { required: true, message: '请输入姓名', trigger: 'blur' },
-      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+      { required: true, message: "请输入姓名", trigger: "blur" },
+      { min: 2, max: 20, message: "长度在 2 到 20 个字符", trigger: "blur" },
     ],
-    role: [
-      { required: true, message: '请选择角色', trigger: 'change' }
-    ],
-    department: [
-      { required: true, message: '请选择部门', trigger: 'change' }
-    ],
+    role: [{ required: true, message: "请选择角色", trigger: "change" }],
+    department: [{ required: true, message: "请选择部门", trigger: "change" }],
     email: [
-      { required: true, message: '请输入邮箱', trigger: 'blur' },
-      { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+      { required: true, message: "请输入邮箱", trigger: "blur" },
+      { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" },
     ],
     phone: [
-      { required: true, message: '请输入手机号', trigger: 'blur' },
-      { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+      { required: true, message: "请输入手机号", trigger: "blur" },
+      {
+        pattern: /^1[3-9]\d{9}$/,
+        message: "请输入正确的手机号",
+        trigger: "blur",
+      },
     ],
     joinDate: [
-      { required: true, message: '请选择入职时间', trigger: 'change' }
+      { required: true, message: "请选择入职时间", trigger: "change" },
     ],
-    bio: [
-      { max: 200, message: '个人简介不能超过200个字符', trigger: 'blur' }
-    ]
-  }
-})
+    bio: [{ max: 200, message: "个人简介不能超过200个字符", trigger: "blur" }],
+  },
+});
+console.log(data.form)
 
 // 表单引用
-const profileFormRef = ref()
-const avatarInputRef = ref()
+const profileFormRef = ref();
 
 // 打开编辑资料对话框
 const handleEdit = () => {
   // 将当前用户信息填充到表单
   profileDialog.form = {
     // avatar: data.userInfo.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-    name: data.userInfo.name || '',
-    role: data.userInfo.role || '',
+    name: data.userInfo.name || "",
+    role: data.userInfo.role || "",
     department: data.userInfo.department ? [data.userInfo.department] : [],
-    email: data.userInfo.email || '',
-    phone: data.userInfo.phone || '',
-    joinDate: data.userInfo.joinDate || '',
-    bio: data.userInfo.bio || ''
-  }
-  profileDialog.visible = true
-}
+    email: data.userInfo.email || "",
+    phone: data.userInfo.phone || "",
+    joinDate: data.userInfo.joinDate || "",
+    bio: data.userInfo.bio || "",
+  };
+  profileDialog.visible = true;
+};
 
 // 关闭对话框时的处理
 const handleProfileDialogClose = () => {
-  profileFormRef.value?.clearValidate()
-}
+  profileFormRef.value?.clearValidate();
+};
 
-// 触发头像上传
-const triggerAvatarUpload = () => {
-  avatarInputRef.value?.click()
-}
+// 头像编辑相关
+const avatarCanvas = ref(null);
+const avatarDialog = reactive({
+  visible: false,
+  image: "",
+  scale: 1,
+  offsetX: 0,
+  offsetY: 0,
+  dragging: false,
+  startX: 0,
+  startY: 0,
+  imgWidth: 0,
+  imgHeight: 0,
+  loading: false,
+});
 
-// 处理头像变更
-const handleAvatarChange = (event) => {
-  const file = event.target.files[0]
-  if (!file) return
+const beforeAvatarUpload = (file) => {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    avatarDialog.image = e.target.result;
+    avatarDialog.scale = 1;
+    avatarDialog.offsetX = 0;
+    avatarDialog.offsetY = 0;
+    avatarDialog.visible = true;
+    nextTick(() => {
+      drawAvatarToCanvas();
+    });
+  };
+  reader.readAsDataURL(file);
+  return false; // 阻止 el-upload 自动上传
+};
 
-  // 验证文件类型
-  const isImage = file.type.startsWith('image/')
-  const isLt2M = file.size / 1024 / 1024 < 2
+const onAvatarFileChange = (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    avatarDialog.image = ev.target.result;
+    avatarDialog.scale = 1;
+    avatarDialog.offsetX = 0;
+    avatarDialog.offsetY = 0;
+    nextTick(() => drawAvatarToCanvas());
+  };
+  reader.readAsDataURL(file);
+};
 
-  if (!isImage) {
-    ElMessage.error('只能上传图片文件！')
-    return
+const drawAvatarToCanvas = () => {
+  const canvas = avatarCanvas.value;
+  if (!canvas || !avatarDialog.image) return;
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+  img.onload = () => {
+    const cw = canvas.width;
+    const ch = canvas.height;
+    avatarDialog.imgWidth = img.width;
+    avatarDialog.imgHeight = img.height;
+    ctx.clearRect(0, 0, cw, ch);
+    const scale = avatarDialog.scale;
+    const dw = img.width * scale;
+    const dh = img.height * scale;
+    const dx = (cw - dw) / 2 + avatarDialog.offsetX;
+    const dy = (ch - dh) / 2 + avatarDialog.offsetY;
+    ctx.drawImage(img, dx, dy, dw, dh);
+  };
+  img.src = avatarDialog.image;
+};
+
+const onCanvasMouseDown = (e) => {
+  avatarDialog.dragging = true;
+  avatarDialog.startX = e.clientX;
+  avatarDialog.startY = e.clientY;
+};
+
+const onCanvasMouseMove = (e) => {
+  if (!avatarDialog.dragging) return;
+  const dx = e.clientX - avatarDialog.startX;
+  const dy = e.clientY - avatarDialog.startY;
+  avatarDialog.startX = e.clientX;
+  avatarDialog.startY = e.clientY;
+  avatarDialog.offsetX += dx;
+  avatarDialog.offsetY += dy;
+  drawAvatarToCanvas();
+};
+
+const onCanvasMouseUp = () => {
+  avatarDialog.dragging = false;
+};
+
+const dataURLToBlob = (dataurl) => {
+  const arr = dataurl.split(",");
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
   }
-  if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB！')
-    return
-  }
+  return new Blob([u8arr], { type: mime });
+};
 
-  // 创建FormData对象
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('userId', data.user.uid)
+const confirmAvatar = async () => {
+  const canvas = avatarCanvas.value;
+  if (!canvas) return;
+  avatarDialog.loading = true;
+  try {
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    const blob = dataURLToBlob(dataUrl);
+    const form = new FormData();
+    const fileName = `avatar_${data.user.uid}.jpg`;
+    form.append("photo", blob, fileName);
+    form.append("uid", data.user.uid);
 
-  // 显示上传中状态
-  const loading = ElMessage.loading('正在上传头像...')
+    const resp = await axios.post("/api/file/uploadAvatar", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
-  // 上传头像到服务器
-  request.post('/api/upload-avatar', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  }).then(res => {
-    if (res.code === '200') {
-      // 更新预览图
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        profileDialog.form.avatar = e.target.result
-      }
-      reader.readAsDataURL(file)
-
-      ElMessage.success('头像上传成功')
+    const result = resp.data;
+    if (result && result.code === "200") {
+      profileDialog.form.avatar = result.data;
+      avatarDialog.visible = false;
+      ElMessage.success("头像上传成功");
     } else {
-      ElMessage.error(res.msg || '头像上传失败')
+      ElMessage.error(result.msg || "头像上传失败");
     }
-  }).catch(error => {
-    ElMessage.error('头像上传失败')
-  }).finally(() => {
-    loading.close()
-    // 清空input，允许重新选择同一文件
-    event.target.value = ''
-  })
-}
+  } catch (err) {
+    console.error(err);
+    ElMessage.error("头像上传失败");
+  } finally {
+    avatarDialog.loading = false;
+  }
+};
 
 // 提交编辑资料
 const submitProfile = async () => {
-  if (!profileFormRef.value) return
+  if (!profileFormRef.value) return;
 
   await profileFormRef.value.validate(async (valid) => {
     if (valid) {
-      profileDialog.loading = true
+      profileDialog.loading = true;
 
       // 准备提交的数据
       const submitData = {
         uid: data.user.uid,
-        // avatar: profileDialog.form.avatar,
+        avatar: profileDialog.form.avatar,
         name: profileDialog.form.name,
         role: profileDialog.form.role,
         department: Array.isArray(profileDialog.form.department)
-            ? profileDialog.form.department[profileDialog.form.department.length - 1]
-            : profileDialog.form.department,
-        email: profileDialog.form.email,
-        phone: profileDialog.form.phone,
+          ? profileDialog.form.department[
+              profileDialog.form.department.length - 1
+            ]
+          : profileDialog.form.department,
         joinDate: profileDialog.form.joinDate,
-        bio: profileDialog.form.bio
-      }
+        bio: profileDialog.form.bio,
+      };
 
       try {
         // 调用更新用户信息的API
-        const res = await request.post('/user/updateInfo', submitData)
-        if (res.code === '200') {
-          ElMessage.success('资料更新成功')
+        const res = await request.post("/user/updateInfo", submitData);
+        if (res.code === "200") {
+          ElMessage.success("资料更新成功");
 
           // 更新本地用户信息
           data.userInfo = {
             ...data.userInfo,
             ...submitData,
-            department: submitData.department
+            department: submitData.department,
+          };
+
+          // 同步 local_user 中的 avatar
+          const localUserStr = localStorage.getItem("local_user");
+          if (localUserStr) {
+            try {
+              const localUser = JSON.parse(localUserStr);
+              localUser.avatar = submitData.avatar;
+              localStorage.setItem("local_user", JSON.stringify(localUser));
+            } catch (e) {}
           }
 
-          profileDialog.visible = false
+          profileDialog.visible = false;
+          load();
         } else {
-          ElMessage.error(res.msg || '更新失败')
+          ElMessage.error(res.msg || "更新失败");
         }
       } catch (error) {
-        ElMessage.error('更新失败，请稍后重试')
+        ElMessage.error("更新失败，请稍后重试");
       } finally {
-        profileDialog.loading = false
+        profileDialog.loading = false;
       }
     }
-  })
-}
+  });
+};
 
 const handleEnable2FA = () => {
-  ElMessage.success('两步验证功能开发中')
-}
+  ElMessage.success("两步验证功能开发中");
+};
 </script>
 
 <style scoped>
@@ -1207,7 +1372,7 @@ const handleEnable2FA = () => {
 
 .user-name {
   margin: 8px 0 4px;
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 500;
   color: #303133;
 }
@@ -1416,6 +1581,7 @@ const handleEnable2FA = () => {
 }
 
 .avatar-tip {
+  margin-left: 10px;
   color: #909399;
   font-size: 12px;
   line-height: 1.5;
@@ -1466,5 +1632,29 @@ const handleEnable2FA = () => {
     line-height: 80px;
     font-size: 24px;
   }
+}
+
+/* 头像编辑对话框样式 */
+.avatar-edit-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.avatar-edit-canvas-wrapper {
+  width: 300px;
+  height: 300px;
+  border: 1px dashed #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.avatar-canvas {
+  cursor: grab;
+  max-width: 100%;
+  max-height: 100%;
+}
+.avatar-edit-controls input[type="file"] {
+  margin-bottom: 8px;
 }
 </style>

@@ -30,7 +30,7 @@
     <update id="updateInfoById" parameterType="com.example.demo.entity.User">
         UPDATE `user`
         SET name = #{name},role = #{role},department = #{department},
-            bio = #{bio},joinDate = #{joinDate},
+            bio = #{bio},joinDate = #{joinDate},avatar = #{avatar},
             status=#{status},updateTime=NOW()
         WHERE uid = #{uid}
     </update>
@@ -42,7 +42,7 @@
     </update>
 
     <update id="updateAvatarById">
-        update `shop` set avatar =#{path}, updateTime=NOW() where uid =#{uid}
+        UPDATE `user` SET avatar = #{path}, updateTime = NOW() WHERE uid = #{uid}
     </update>
 
     <insert id="insertUser">

@@ -27,23 +27,23 @@
       <!-- 其他内容保持不变 -->
       <div class="search-box">
         <el-input
-            v-model="searchKeyword"
-            placeholder="搜索..."
-            :prefix-icon="Search"
-            size="small"
-            clearable
-            @keyup.enter="handleSearch"
-            class="search-input"
+          v-model="searchKeyword"
+          placeholder="搜索..."
+          :prefix-icon="Search"
+          size="small"
+          clearable
+          @keyup.enter="handleSearch"
+          class="search-input"
         />
       </div>
 
       <!-- 消息通知 -->
       <el-popover
-          placement="bottom-end"
-          :width="360"
-          trigger="click"
-          popper-class="message-popover"
-          @show="handleMessagePopoverShow"
+        placement="bottom-end"
+        :width="360"
+        trigger="click"
+        popper-class="message-popover"
+        @show="handleMessagePopoverShow"
       >
         <template #reference>
           <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
@@ -57,11 +57,11 @@
           <div class="message-header">
             <span class="title">消息通知</span>
             <el-button
-                v-if="unreadCount > 0"
-                type="primary"
-                link
-                size="small"
-                @click="markAllAsRead"
+              v-if="unreadCount > 0"
+              type="primary"
+              link
+              size="small"
+              @click="markAllAsRead"
             >
               全部已读
             </el-button>
@@ -70,11 +70,11 @@
           <div class="message-list" v-loading="loading">
             <template v-if="messageList.length > 0">
               <div
-                  v-for="item in messageList"
-                  :key="item.id"
-                  class="message-item"
-                  :class="{ unread: !item.isRead }"
-                  @click="handleMessageClick(item)"
+                v-for="item in messageList"
+                :key="item.id"
+                class="message-item"
+                :class="{ unread: !item.isRead }"
+                @click="handleMessageClick(item)"
               >
                 <div class="message-icon-wrapper">
                   <el-icon :size="20" :color="getMessageIconColor(item.type)">
@@ -84,7 +84,9 @@
                 <div class="message-content">
                   <div class="message-title">{{ item.title }}</div>
                   <div class="message-desc">{{ item.content }}</div>
-                  <div class="message-time">{{ formatTime(item.createTime) }}</div>
+                  <div class="message-time">
+                    {{ formatTime(item.createTime) }}
+                  </div>
                 </div>
                 <div v-if="!item.isRead" class="unread-dot"></div>
               </div>
@@ -92,8 +94,13 @@
             <el-empty v-else description="暂无消息" :image-size="80" />
           </div>
 
-          <div class="message-footer" v-if="messageList.length > 0 && total > messageList.length">
-            <el-button type="primary" link @click="loadMore">查看更多</el-button>
+          <div
+            class="message-footer"
+            v-if="messageList.length > 0 && total > messageList.length"
+          >
+            <el-button type="primary" link @click="loadMore"
+              >查看更多</el-button
+            >
           </div>
         </div>
       </el-popover>
@@ -102,8 +109,7 @@
         <FullScreen v-if="!isFullscreen" />
         <Aim v-else />
       </el-icon>
-
-      <el-dropdown @command="handleCommand" trigger="click">
+      <el-dropdown @command="handleCommand" trigger="click" v-if="data.user">
         <div class="user-dropdown">
           <el-avatar :src="data.userInfo.avatar || defaultAvatar" :size="32" />
           <span class="username">{{ data.userInfo.name }}</span>
@@ -126,19 +132,33 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <el-button v-else @click="login">登录</el-button>
     </div>
   </el-header>
 </template>
 
 <script setup>
-import {ref, computed, onMounted, onUnmounted, reactive} from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import {ElMessage, ElMessageBox, ElNotification} from 'element-plus'
+import { ref, computed, onMounted, onUnmounted, reactive } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
 import {
-  Fold, Expand, Bell, ArrowDown, SwitchButton, Avatar, Setting,
-  Search, FullScreen, Aim, Moon, Sunny, Close, User, Message, Warning,
-  InfoFilled, Tickets, SuccessFilled, ChatDotRound, Document
-} from '@element-plus/icons-vue'
+  Fold,
+  Expand,
+  Bell,
+  ArrowDown,
+  SwitchButton,
+  Avatar,
+  Setting,
+  Search,
+  FullScreen,
+  Aim,
+  Warning,
+  InfoFilled,
+  Tickets,
+  SuccessFilled,
+  ChatDotRound,
+  Document,
+} from "@element-plus/icons-vue";
 import { useMenuStore } from "../../store/menu";
 const menuStore = useMenuStore();
 const isCollapse = menuStore.isCollapse;
@@ -146,135 +166,136 @@ const handleToggle = menuStore.handleToggle;
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem("local_user")),
-  userInfo:[]
-})
+  userInfo: [],
+});
 
 // 定义事件
-const emit = defineEmits(['update:isCollapse', 'search', 'logout'])
+const emit = defineEmits(["update:isCollapse", "search", "logout"]);
 
 // 路由
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
 const breadcrumbMap = {
-  '/signboard': '打卡签到',
-  '/userInfo': '个人中心',
-  '/message': '消息中心',
-  '/system/user': '用户管理',
-  '/system/sign': '打卡管理',
-  '/user/list': '用户列表',
-  '/user/detail': '用户详情',
-  '/order': '订单管理',
-  '/order/list': '订单列表',
-  '/order/detail': '订单详情',
-  '/product': '商品管理',
-  '/product/list': '商品列表',
-  '/product/detail': '商品详情'
-}
+  "/signboard": "打卡签到",
+  "/userInfo": "个人中心",
+  "/message": "消息中心",
+  "/system/user": "用户管理",
+  "/system/sign": "打卡管理",
+  "/user/list": "用户列表",
+  "/user/detail": "用户详情",
+  "/order": "订单管理",
+  "/order/list": "订单列表",
+  "/order/detail": "订单详情",
+  "/product": "商品管理",
+  "/product/list": "商品列表",
+  "/product/detail": "商品详情",
+};
 
 // 生成面包屑数据
 const breadcrumbs = computed(() => {
-  const matched = route.matched.filter(item => item.path !== '')
-  const crumbs = []
+  const matched = route.matched.filter((item) => item.path !== "");
+  const crumbs = [];
 
-  matched.forEach(route => {
+  matched.forEach((route) => {
     // 优先使用路由meta中配置的面包屑名称
-    let name = route.meta?.breadcrumb || route.meta?.title
+    let name = route.meta?.breadcrumb || route.meta?.title;
     if (!name) {
       // 如果meta中没有配置，则从映射表中获取
-      name = breadcrumbMap[route.path]
+      name = breadcrumbMap[route.path];
     }
     if (!name && route.name) {
       // 最后尝试使用路由名称
-      name = route.name
+      name = route.name;
     }
 
     if (name) {
       crumbs.push({
         name,
-        path: route.path
-      })
+        path: route.path,
+      });
     }
-  })
+  });
 
-  return crumbs
-})
+  return crumbs;
+});
 // 导航处理
 const handleNavigate = (path) => {
-  router.push(path)
-}
+  router.push(path);
+};
 
 // 默认头像
-const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+const defaultAvatar =
+  "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
 
 // 搜索关键词
-const searchKeyword = ref('')
+const searchKeyword = ref("");
 
 // 全屏状态
-const isFullscreen = ref(false)
+const isFullscreen = ref(false);
 
 // 主题模式
-const theme = ref(localStorage.getItem('theme') || 'light')
+const theme = ref(localStorage.getItem("theme") || "light");
 
 // 消息相关状态
-const unreadCount = ref(0)
-const messageList = ref([])
-const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(5)
-const total = ref(0)
+const unreadCount = ref(0);
+const messageList = ref([]);
+const loading = ref(false);
+const currentPage = ref(1);
+const pageSize = ref(5);
+const total = ref(0);
 
 // 模拟消息数据
 const mockMessages = [
   {
     id: 1,
-    title: '系统升级通知',
-    content: '系统将于今晚22:00进行升级维护，预计持续2小时',
-    type: 'system',
+    title: "系统升级通知",
+    content: "系统将于今晚22:00进行升级维护，预计持续2小时",
+    type: "system",
     isRead: false,
-    createTime: '2024-01-15 10:30:00'
+    createTime: "2024-01-15 10:30:00",
   },
   {
     id: 2,
-    title: '新任务分配',
-    content: '您有一个新的任务需要处理，请及时查看',
-    type: 'task',
+    title: "新任务分配",
+    content: "您有一个新的任务需要处理，请及时查看",
+    type: "task",
     isRead: false,
-    createTime: '2024-01-15 09:15:00'
+    createTime: "2024-01-15 09:15:00",
   },
   {
     id: 3,
-    title: '审批通过',
-    content: '您提交的请假申请已通过审批',
-    type: 'approve',
+    title: "审批通过",
+    content: "您提交的请假申请已通过审批",
+    type: "approve",
     isRead: true,
-    createTime: '2024-01-14 16:20:00'
+    createTime: "2024-01-14 16:20:00",
   },
   {
     id: 4,
-    title: '新评论',
-    content: '您的项目文档有新的评论',
-    type: 'comment',
+    title: "新评论",
+    content: "您的项目文档有新的评论",
+    type: "comment",
     isRead: false,
-    createTime: '2024-01-14 14:45:00'
+    createTime: "2024-01-14 14:45:00",
   },
   {
     id: 5,
-    title: '会议提醒',
-    content: '下午3点召开项目进度会议，请准时参加',
-    type: 'reminder',
+    title: "会议提醒",
+    content: "下午3点召开项目进度会议，请准时参加",
+    type: "reminder",
     isRead: true,
-    createTime: '2024-01-14 10:00:00'
+    createTime: "2024-01-14 10:00:00",
   },
   {
     id: 6,
-    title: '文件更新',
-    content: '项目需求文档已更新，请查看最新版本',
-    type: 'file',
+    title: "文件更新",
+    content: "项目需求文档已更新，请查看最新版本",
+    type: "file",
     isRead: false,
-    createTime: '2024-01-13 17:30:00'
-  }
-]
+    createTime: "2024-01-13 17:30:00",
+  },
+];
 
 // 获取消息图标
 const getMessageIcon = (type) => {
@@ -285,207 +306,213 @@ const getMessageIcon = (type) => {
     comment: ChatDotRound,
     reminder: Bell,
     file: Document,
-    warning: Warning
-  }
-  return iconMap[type] || InfoFilled
-}
+    warning: Warning,
+  };
+  return iconMap[type] || InfoFilled;
+};
 
 // 获取消息图标颜色
 const getMessageIconColor = (type) => {
   const colorMap = {
-    system: '#409EFF',
-    task: '#E6A23C',
-    approve: '#67C23A',
-    comment: '#909399',
-    reminder: '#F56C6C',
-    file: '#909399'
-  }
-  return colorMap[type] || '#909399'
-}
+    system: "#409EFF",
+    task: "#E6A23C",
+    approve: "#67C23A",
+    comment: "#909399",
+    reminder: "#F56C6C",
+    file: "#909399",
+  };
+  return colorMap[type] || "#909399";
+};
 
 // 格式化时间
 const formatTime = (time) => {
-  const date = new Date(time)
-  const now = new Date()
-  const diff = now - date
+  const date = new Date(time);
+  const now = new Date();
+  const diff = now - date;
 
   if (diff < 3600000) {
-    return `${Math.floor(diff / 60000)}分钟前`
+    return `${Math.floor(diff / 60000)}分钟前`;
   } else if (diff < 86400000) {
-    return `${Math.floor(diff / 3600000)}小时前`
+    return `${Math.floor(diff / 3600000)}小时前`;
   } else if (diff < 604800000) {
-    return `${Math.floor(diff / 86400000)}天前`
+    return `${Math.floor(diff / 86400000)}天前`;
   }
-  return time.slice(0, 16)
-}
+  return time.slice(0, 16);
+};
 
 // 获取消息列表
 const fetchMessages = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const start = (currentPage.value - 1) * pageSize.value
-    const end = start + pageSize.value
-    const list = mockMessages.slice(start, end)
-    const totalMessages = mockMessages.length
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    const list = mockMessages.slice(start, end);
+    const totalMessages = mockMessages.length;
 
-    messageList.value = list
-    total.value = totalMessages
+    messageList.value = list;
+    total.value = totalMessages;
 
     // 计算未读数量（实际项目中应从接口获取）
-    updateUnreadCount()
+    updateUnreadCount();
   } catch (error) {
-    ElMessage.error('获取消息失败')
+    ElMessage.error("获取消息失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 更新未读数量
 const updateUnreadCount = () => {
-  const unread = mockMessages.filter(item => !item.isRead).length
-  unreadCount.value = unread
-}
+  const unread = mockMessages.filter((item) => !item.isRead).length;
+  unreadCount.value = unread;
+};
 
 // 处理消息点击
 const handleMessageClick = (item) => {
   if (!item.isRead) {
-    item.isRead = true
-    updateUnreadCount()
+    item.isRead = true;
+    updateUnreadCount();
     // 可以在这里调用标记已读的接口
     ElNotification({
       title: item.title,
       message: item.content,
-      type: 'info',
-      duration: 3000
-    })
+      type: "info",
+      duration: 3000,
+    });
   } else {
     ElNotification({
       title: item.title,
       message: item.content,
-      type: 'info',
-      duration: 3000
-    })
+      type: "info",
+      duration: 3000,
+    });
   }
-}
+};
 
 // 全部标记为已读
 const markAllAsRead = () => {
-  mockMessages.forEach(item => {
-    item.isRead = true
-  })
-  messageList.value.forEach(item => {
-    item.isRead = true
-  })
-  updateUnreadCount()
-  ElMessage.success('已全部标记为已读')
-}
+  mockMessages.forEach((item) => {
+    item.isRead = true;
+  });
+  messageList.value.forEach((item) => {
+    item.isRead = true;
+  });
+  updateUnreadCount();
+  ElMessage.success("已全部标记为已读");
+};
 
 // 模拟实时消息推送
 const simulateRealTimeMessage = () => {
   setTimeout(() => {
     const newMessage = {
       id: Date.now(),
-      title: '实时消息',
-      content: '您有一条新的实时消息',
-      type: 'system',
+      title: "实时消息",
+      content: "您有一条新的实时消息",
+      type: "system",
       isRead: false,
-      createTime: new Date().toLocaleString()
-    }
-    mockMessages.unshift(newMessage)
-    updateUnreadCount()
+      createTime: new Date().toLocaleString(),
+    };
+    mockMessages.unshift(newMessage);
+    updateUnreadCount();
 
     // 如果消息弹窗未打开，显示通知
     ElNotification({
-      title: '新消息',
+      title: "新消息",
       message: newMessage.title,
-      type: 'info',
-      duration: 5000
-    })
-  }, 10000)
-}
+      type: "info",
+      duration: 5000,
+    });
+  }, 10000);
+};
 
 onMounted(() => {
-  updateUnreadCount()
+  updateUnreadCount();
   // 模拟实时消息
-  simulateRealTimeMessage()
-})
+  simulateRealTimeMessage();
+});
 
 // 加载更多
 const loadMore = () => {
-  currentPage.value++
-  fetchMessages()
-}
+  currentPage.value++;
+  fetchMessages();
+};
 
 // 消息弹窗显示时的处理
 const handleMessagePopoverShow = () => {
   if (currentPage.value === 1 && messageList.value.length === 0) {
-    fetchMessages()
+    fetchMessages();
   }
-}
+};
 
 // 处理搜索
 const handleSearch = () => {
   if (searchKeyword.value.trim()) {
-    emit('search', searchKeyword.value)
+    emit("search", searchKeyword.value);
   }
-}
+};
 
 // 全屏切换
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen()
-    isFullscreen.value = true
+    document.documentElement.requestFullscreen();
+    isFullscreen.value = true;
   } else {
-    document.exitFullscreen()
-    isFullscreen.value = false
+    document.exitFullscreen();
+    isFullscreen.value = false;
   }
-}
+};
 
 // 处理下拉菜单命令
 const handleCommand = (command) => {
   switch (command) {
-    case 'profile':
-      router.push('/profile')
-      break
-    case 'settings':
-      router.push('/settings')
-      break
-    case 'logout':
-      handleLogout()
-      break
+    case "profile":
+      router.push("/profile");
+      break;
+    case "settings":
+      router.push("/settings");
+      break;
+    case "logout":
+      handleLogout();
+      break;
   }
-}
+};
 
 // 切换侧边栏 - 直接使用 store 的方法
 
 const handleLogout = () => {
-  ElMessageBox.confirm('确认退出登录吗？', '提示', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    logout();
-  }).catch(() => {})
-}
+  ElMessageBox.confirm("确认退出登录吗？", "提示", {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      logout();
+    })
+    .catch(() => {});
+};
 
-const logout = () =>{
-  localStorage.removeItem('local_user')
-  router.push('/login')
-}
+const login = () => {
+  router.push("/login");
+};
+
+const logout = () => {
+  localStorage.removeItem("local_user");
+  router.push("/login");
+};
 
 onMounted(() => {
-  document.addEventListener('fullscreenchange', () => {
-    isFullscreen.value = !!document.fullscreenElement
-  })
-  document.documentElement.setAttribute('data-theme', theme.value)
-})
+  document.addEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
+  document.documentElement.setAttribute("data-theme", theme.value);
+});
 
 onUnmounted(() => {
-  document.removeEventListener('fullscreenchange', () => {})
-})
+  document.removeEventListener("fullscreenchange", () => {});
+});
 </script>
 
 <style scoped>

@@ -31,4 +31,6 @@ public class User {
     private String createTime;
     @Alias("更新时间")
     private String updateTime;
+    
+    private String avatar;
 }

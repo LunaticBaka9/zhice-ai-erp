@@ -54,58 +54,86 @@ const register = () => {
     }
   });
 };
-
 </script>
 
 <template>
   <el-main class="login-card">
-    <div style="width: 350px; height: auto; background-color: #ffff; border-radius: 5px; padding: 20px">
-      <el-form ref="formRef" :model="data.form" :rules="data.rules" style="padding: 20px 30px 10px 0">
-        <div style="margin: 20px 0; text-align: center; font-weight: bold; font-size: 24px">注 册</div>
+    <div
+      style="
+        width: 350px;
+        height: auto;
+        background-color: #ffff;
+        border-radius: 5px;
+        padding: 20px;
+      "
+    >
+      <el-form
+        ref="formRef"
+        :model="data.form"
+        :rules="data.rules"
+        style="padding: 20px 30px 10px 0"
+      >
+        <div
+          style="
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 24px;
+          "
+        >
+          注 册
+        </div>
         <el-form-item prop="username">
           <el-input
-              v-model="data.form.username"
-              autocomplete="off"
-              size="large"
-              prefix-icon="User"
-              placeholder="请输入账号"
+            v-model="data.form.username"
+            autocomplete="off"
+            size="large"
+            prefix-icon="User"
+            placeholder="请输入账号"
           />
         </el-form-item>
         <el-form-item prop="password">
           <el-input
-              v-model="data.form.password"
-              autocomplete="off"
-              show-password="true"
-              size="large"
-              prefix-icon="Lock"
-              placeholder="请输入密码"
+            v-model="data.form.password"
+            autocomplete="off"
+            show-password="true"
+            size="large"
+            prefix-icon="Lock"
+            placeholder="请输入密码"
           />
         </el-form-item>
         <el-form-item prop="confirmPassword">
           <el-input
-              v-model="data.form.confirmPassword"
-              autocomplete="off"
-              show-password="true"
-              size="large"
-              prefix-icon="Lock"
-              placeholder="请确认输入密码"
+            v-model="data.form.confirmPassword"
+            autocomplete="off"
+            show-password="true"
+            size="large"
+            prefix-icon="Lock"
+            placeholder="请确认输入密码"
           />
         </el-form-item>
         <el-form-item prop="email">
           <el-input
-              v-model="data.form.email"
-              autocomplete="off"
-              size="large"
-              prefix-icon="Message"
-              placeholder="请确认输入邮箱"
+            v-model="data.form.email"
+            autocomplete="off"
+            size="large"
+            prefix-icon="Message"
+            placeholder="请确认输入邮箱"
           />
         </el-form-item>
         <div>
-          <el-button size="large" type="primary" style="width: 100%; margin: 20px 0" @click="register">
+          <el-button
+            size="large"
+            type="primary"
+            style="width: 100%; margin: 20px 0"
+            @click="register"
+          >
             注 册
           </el-button>
         </div>
-        <div style="text-align: right">已经有账号？请<a style="color: #274afa" href="/login">登录</a></div>
+        <div style="text-align: right">
+          已经有账号？请<a style="color: #274afa" href="/login">登录</a>
+        </div>
       </el-form>
     </div>
   </el-main>

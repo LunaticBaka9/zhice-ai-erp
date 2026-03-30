@@ -1,47 +1,47 @@
 <template>
   <div class="user-management">
     <!-- 页面标题 -->
-<!--    <div class="page-header">-->
-<!--      <h2 class="page-title">用户管理</h2>-->
-<!--    </div>-->
+    <!--    <div class="page-header">-->
+    <!--      <h2 class="page-title">用户管理</h2>-->
+    <!--    </div>-->
 
     <!-- 搜索栏 -->
     <el-card class="search-card" shadow="never">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="用户名">
           <el-input
-              v-model="searchForm.username"
-              placeholder="请输入用户名"
-              clearable
-              @clear="handleSearch"
-              @keyup.enter="handleSearch"
+            v-model="searchForm.username"
+            placeholder="请输入用户名"
+            clearable
+            @clear="handleSearch"
+            @keyup.enter="handleSearch"
           />
         </el-form-item>
         <el-form-item label="姓名">
           <el-input
-              v-model="searchForm.name"
-              placeholder="请输入姓名"
-              clearable
-              @clear="handleSearch"
-              @keyup.enter="handleSearch"
+            v-model="searchForm.name"
+            placeholder="请输入姓名"
+            clearable
+            @clear="handleSearch"
+            @keyup.enter="handleSearch"
           />
         </el-form-item>
         <el-form-item label="手机号">
           <el-input
-              v-model="searchForm.phone"
-              placeholder="请输入手机号"
-              clearable
-              @clear="handleSearch"
-              @keyup.enter="handleSearch"
+            v-model="searchForm.phone"
+            placeholder="请输入手机号"
+            clearable
+            @clear="handleSearch"
+            @keyup.enter="handleSearch"
           />
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input
-              v-model="searchForm.email"
-              placeholder="请输入邮箱"
-              clearable
-              @clear="handleSearch"
-              @keyup.enter="handleSearch"
+            v-model="searchForm.email"
+            placeholder="请输入邮箱"
+            clearable
+            @clear="handleSearch"
+            @keyup.enter="handleSearch"
           />
         </el-form-item>
         <el-form-item>
@@ -57,17 +57,18 @@
       </el-form>
     </el-card>
 
-
     <div class="card" style="margin-bottom: 10px">
       <el-button type="primary" @click="handleAdd">
         <el-icon><Plus /></el-icon>
         新增用户
       </el-button>
-      <el-button type="primary" @click="exportData">
-        导出表格
-      </el-button>
-      <el-upload action="/api/user/importData" :on-success="handleImport"
-          style="display: inline-block; margin-left: 10px" :show-file-list="false">
+      <el-button type="primary" @click="exportData"> 导出表格 </el-button>
+      <el-upload
+        action="/api/user/importData"
+        :on-success="handleImport"
+        style="display: inline-block; margin-left: 10px"
+        :show-file-list="false"
+      >
         <el-button type="primary">导入表格</el-button>
       </el-upload>
     </div>
@@ -75,15 +76,15 @@
     <!-- 用户表格 -->
     <el-card class="table-card" shadow="never">
       <el-table
-          :data="userList"
-          v-loading="loading"
-          stripe
-          border
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
+        :data="userList"
+        v-loading="loading"
+        stripe
+        border
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="uid" label="ID" width="80"/>
+        <el-table-column prop="uid" label="ID" width="80" />
         <el-table-column prop="avatar" label="头像" width="80">
           <template #default="{ row }">
             <el-avatar :src="row.avatar || defaultAvatar" :size="40" />
@@ -91,7 +92,7 @@
         </el-table-column>
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="role" label="角色" width="120" >
+        <el-table-column prop="role" label="角色" width="120">
           <template #default="{ row }">
             <el-tag :type="getRoleType(row.role)" size="small">
               {{ row.role }}
@@ -100,33 +101,63 @@
         </el-table-column>
         <el-table-column prop="department" label="部门" width="150" />
         <el-table-column prop="phone" label="手机号" width="130" />
-        <el-table-column prop="email" label="邮箱" width="200" show-overflow-tooltip />
-        <el-table-column prop="joinDate" label="入职时间" width="120" sortable />
+        <el-table-column
+          prop="email"
+          label="邮箱"
+          width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="joinDate"
+          label="入职时间"
+          width="120"
+          sortable
+        />
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <el-switch
-                v-model="row.status"
-                active-value="启用"
-                inactive-value="禁用"
-                @change="handleStatusChange(row)"
+              v-model="row.status"
+              active-value="启用"
+              inactive-value="禁用"
+              @change="handleStatusChange(row)"
             />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="handleView(row)">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="handleView(row)"
+            >
               <el-icon><View /></el-icon>
               查看
             </el-button>
-            <el-button link type="primary" size="small" @click="handleEdit(row)">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="handleEdit(row)"
+            >
               <el-icon><Edit /></el-icon>
               编辑
             </el-button>
-            <el-button link type="danger" size="small" @click="handleDelete(row)">
+            <el-button
+              link
+              type="danger"
+              size="small"
+              @click="handleDelete(row)"
+            >
               <el-icon><Delete /></el-icon>
               删除
             </el-button>
-            <el-button link type="primary" size="small" @click="handleResetPassword(row)">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="handleResetPassword(row)"
+            >
               <el-icon><Key /></el-icon>
               修改密码
             </el-button>
@@ -137,48 +168,48 @@
       <!-- 分页 -->
       <div class="pagination-container">
         <el-pagination
-            v-model:current-page="pagination.pageNum"
-            v-model:page-size="pagination.pageSize"
-            :page-sizes="[5,10, 20, 50, 100]"
-            :total="pagination.total"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
+          v-model:current-page="pagination.pageNum"
+          v-model:page-size="pagination.pageSize"
+          :page-sizes="[5, 10, 20, 50, 100]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
 
     <!-- 新增/编辑用户对话框 -->
     <el-dialog
-        v-model="dialog.visible"
-        :title="dialog.title"
-        width="600px"
-        :close-on-click-modal="false"
-        @close="handleDialogClose"
+      v-model="dialog.visible"
+      :title="dialog.title"
+      width="600px"
+      :close-on-click-modal="false"
+      @close="handleDialogClose"
     >
       <el-form
-          ref="userFormRef"
-          :model="dialog.form"
-          :rules="dialog.rules"
-          label-width="100px"
-          status-icon
+        ref="userFormRef"
+        :model="dialog.form"
+        :rules="dialog.rules"
+        label-width="100px"
+        status-icon
       >
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="用户名" prop="username">
               <el-input
-                  v-model="dialog.form.username"
-                  placeholder="请输入用户名"
-                  :disabled="dialog.isView"
+                v-model="dialog.form.username"
+                placeholder="请输入用户名"
+                :disabled="dialog.isView"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="姓名" prop="name">
               <el-input
-                  v-model="dialog.form.name"
-                  placeholder="请输入姓名"
-                  :disabled="dialog.isView"
+                v-model="dialog.form.name"
+                placeholder="请输入姓名"
+                :disabled="dialog.isView"
               />
             </el-form-item>
           </el-col>
@@ -188,20 +219,24 @@
           <el-col :span="12">
             <el-form-item label="密码" prop="password" v-if="dialog.isAdd">
               <el-input
-                  v-model="dialog.form.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  show-password
+                v-model="dialog.form.password"
+                type="password"
+                placeholder="请输入密码"
+                show-password
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="确认密码" prop="confirmPassword" v-if="dialog.isAdd">
+            <el-form-item
+              label="确认密码"
+              prop="confirmPassword"
+              v-if="dialog.isAdd"
+            >
               <el-input
-                  v-model="dialog.form.confirmPassword"
-                  type="password"
-                  placeholder="请确认密码"
-                  show-password
+                v-model="dialog.form.confirmPassword"
+                type="password"
+                placeholder="请确认密码"
+                show-password
               />
             </el-form-item>
           </el-col>
@@ -209,10 +244,10 @@
 
         <el-form-item label="角色" prop="role">
           <el-select
-              v-model="dialog.form.role"
-              placeholder="请选择角色"
-              style="width: 100%"
-              :disabled="dialog.isView"
+            v-model="dialog.form.role"
+            placeholder="请选择角色"
+            style="width: 100%"
+            :disabled="dialog.isView"
           >
             <el-option label="超级管理员" value="超级管理员" />
             <el-option label="高级管理员" value="高级管理员" />
@@ -225,17 +260,17 @@
 
         <el-form-item label="部门" prop="department">
           <el-cascader
-              v-model="dialog.form.department"
-              :options="departmentOptions"
-              :props="{
+            v-model="dialog.form.department"
+            :options="departmentOptions"
+            :props="{
               value: 'id',
               label: 'name',
               children: 'children',
-              checkStrictly: true
+              checkStrictly: true,
             }"
-              placeholder="请选择部门"
-              style="width: 100%"
-              clearable
+            placeholder="请选择部门"
+            style="width: 100%"
+            clearable
           />
         </el-form-item>
 
@@ -243,18 +278,18 @@
           <el-col :span="12">
             <el-form-item label="手机号" prop="phone">
               <el-input
-                  v-model="dialog.form.phone"
-                  placeholder="请输入手机号"
-                  :disabled="dialog.isView"
+                v-model="dialog.form.phone"
+                placeholder="请输入手机号"
+                :disabled="dialog.isView"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="邮箱" prop="email">
               <el-input
-                  v-model="dialog.form.email"
-                  placeholder="请输入邮箱"
-                  :disabled="dialog.isView"
+                v-model="dialog.form.email"
+                placeholder="请输入邮箱"
+                :disabled="dialog.isView"
               />
             </el-form-item>
           </el-col>
@@ -264,23 +299,23 @@
           <el-col :span="12">
             <el-form-item label="入职时间" prop="joinDate">
               <el-date-picker
-                  v-model="dialog.form.joinDate"
-                  type="date"
-                  placeholder="选择入职时间"
-                  style="width: 100%"
-                  format="YYYY-MM-DD"
-                  value-format="YYYY-MM-DD"
-                  :disabled="dialog.isView"
+                v-model="dialog.form.joinDate"
+                type="date"
+                placeholder="选择入职时间"
+                style="width: 100%"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                :disabled="dialog.isView"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="状态" prop="status">
               <el-select
-                  v-model="dialog.form.status"
-                  placeholder="请选择状态"
-                  style="width: 100%"
-                  :disabled="dialog.isView"
+                v-model="dialog.form.status"
+                placeholder="请选择状态"
+                style="width: 100%"
+                :disabled="dialog.isView"
               >
                 <el-option label="启用" value="启用" />
                 <el-option label="禁用" value="禁用" />
@@ -291,13 +326,13 @@
 
         <el-form-item label="个人简介" prop="bio">
           <el-input
-              v-model="dialog.form.bio"
-              type="textarea"
-              placeholder="请输入个人简介"
-              :rows="4"
-              maxlength="200"
-              show-word-limit
-              :disabled="dialog.isView"
+            v-model="dialog.form.bio"
+            type="textarea"
+            placeholder="请输入个人简介"
+            :rows="4"
+            maxlength="200"
+            show-word-limit
+            :disabled="dialog.isView"
           />
         </el-form-item>
       </el-form>
@@ -306,10 +341,10 @@
         <span class="dialog-footer">
           <el-button @click="dialog.visible = false">取消</el-button>
           <el-button
-              v-if="!dialog.isView"
-              type="primary"
-              @click="submitUser"
-              :loading="dialog.loading"
+            v-if="!dialog.isView"
+            type="primary"
+            @click="submitUser"
+            :loading="dialog.loading"
           >
             确认
           </el-button>
@@ -318,63 +353,87 @@
     </el-dialog>
 
     <!-- 查看用户详情对话框 -->
-    <el-dialog
-        v-model="viewDialog.visible"
-        title="用户详情"
-        width="500px"
-    >
+    <el-dialog v-model="viewDialog.visible" title="用户详情" width="500px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="用户名">{{ viewDialog.data.username }}</el-descriptions-item>
-        <el-descriptions-item label="姓名">{{ viewDialog.data.name }}</el-descriptions-item>
-        <el-descriptions-item label="角色">{{ viewDialog.data.role }}</el-descriptions-item>
-        <el-descriptions-item label="部门">{{ viewDialog.data.department }}</el-descriptions-item>
-        <el-descriptions-item label="手机号">{{ viewDialog.data.phone }}</el-descriptions-item>
-        <el-descriptions-item label="邮箱">{{ viewDialog.data.email }}</el-descriptions-item>
-        <el-descriptions-item label="入职时间">{{ viewDialog.data.joinDate }}</el-descriptions-item>
+        <el-descriptions-item label="用户名">{{
+          viewDialog.data.username
+        }}</el-descriptions-item>
+        <el-descriptions-item label="姓名">{{
+          viewDialog.data.name
+        }}</el-descriptions-item>
+        <el-descriptions-item label="角色">{{
+          viewDialog.data.role
+        }}</el-descriptions-item>
+        <el-descriptions-item label="部门">{{
+          viewDialog.data.department
+        }}</el-descriptions-item>
+        <el-descriptions-item label="手机号">{{
+          viewDialog.data.phone
+        }}</el-descriptions-item>
+        <el-descriptions-item label="邮箱">{{
+          viewDialog.data.email
+        }}</el-descriptions-item>
+        <el-descriptions-item label="入职时间">{{
+          viewDialog.data.joinDate
+        }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="viewDialog.data.status === '启用' ? 'success' : 'danger'">
+          <el-tag
+            :type="viewDialog.data.status === '启用' ? 'success' : 'danger'"
+          >
             {{ viewDialog.data.status }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="个人简介">{{ viewDialog.data.bio || '暂无' }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ viewDialog.data.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ viewDialog.data.updateTime }}</el-descriptions-item>
+        <el-descriptions-item label="个人简介">{{
+          viewDialog.data.bio || "暂无"
+        }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{
+          viewDialog.data.createTime
+        }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间">{{
+          viewDialog.data.updateTime
+        }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
 
     <!-- 修改密码对话框 -->
     <el-dialog
-        v-model="resetPasswordDialog.visible"
-        title="修改密码"
-        width="400px"
+      v-model="resetPasswordDialog.visible"
+      title="修改密码"
+      width="400px"
     >
       <el-form
-          ref="resetPasswordFormRef"
-          :model="resetPasswordDialog.form"
-          :rules="resetPasswordDialog.rules"
-          label-width="100px"
+        ref="resetPasswordFormRef"
+        :model="resetPasswordDialog.form"
+        :rules="resetPasswordDialog.rules"
+        label-width="100px"
       >
         <el-form-item label="新密码" prop="newPassword">
           <el-input
-              v-model="resetPasswordDialog.form.newPassword"
-              type="password"
-              placeholder="请输入新密码"
-              show-password
+            v-model="resetPasswordDialog.form.newPassword"
+            type="password"
+            placeholder="请输入新密码"
+            show-password
           />
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
           <el-input
-              v-model="resetPasswordDialog.form.confirmPassword"
-              type="password"
-              placeholder="请确认新密码"
-              show-password
+            v-model="resetPasswordDialog.form.confirmPassword"
+            type="password"
+            placeholder="请确认新密码"
+            show-password
           />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="resetPasswordDialog.visible = false">取消</el-button>
-          <el-button type="primary" @click="submitResetPassword" :loading="resetPasswordDialog.loading">
+          <el-button @click="resetPasswordDialog.visible = false"
+            >取消</el-button
+          >
+          <el-button
+            type="primary"
+            @click="submitResetPassword"
+            :loading="resetPasswordDialog.loading"
+          >
             确认重置
           </el-button>
         </span>
@@ -384,442 +443,451 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, reactive, onMounted, computed } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
-  Plus, Search, Refresh, View, Edit, Delete, Key
-} from '@element-plus/icons-vue'
-import request from "../../utils/request"
-import axios from 'axios'
+  Plus,
+  Search,
+  Refresh,
+  View,
+  Edit,
+  Delete,
+  Key,
+} from "@element-plus/icons-vue";
+import request from "../../utils/request";
+import axios from "axios";
 import AsideVue from "../menu/AsideVue.vue";
 import HeaderVue from "../menu/HeaderVue.vue";
 
 // 默认头像
-const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+const defaultAvatar =
+  "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
 
 // 搜索表单
 const searchForm = reactive({
-  username: '',
-  name: '',
-  phone: '',
-  email: '',
-  role: ''
-})
+  username: "",
+  name: "",
+  phone: "",
+  email: "",
+  role: "",
+});
 
 // 用户列表数据
-const userList = ref([])
-const loading = ref(false)
+const userList = ref([]);
+const loading = ref(false);
 
 // 分页参数
 const pagination = reactive({
   pageNum: 1,
   pageSize: 10,
-  total: 0
-})
+  total: 0,
+});
 
 // 选中的行
-const selectedRows = ref([])
+const selectedRows = ref([]);
 
 // 部门选项
 const departmentOptions = ref([
   {
-    id: '技术部',
-    name: '技术部',
+    id: "技术部",
+    name: "技术部",
     children: [
-      { id: '研发组', name: '研发组' },
-      { id: '测试组', name: '测试组' },
-      { id: '运维组', name: '运维组' }
-    ]
+      { id: "研发组", name: "研发组" },
+      { id: "测试组", name: "测试组" },
+      { id: "运维组", name: "运维组" },
+    ],
   },
   {
-    id: '产品部t',
-    name: '产品部',
+    id: "产品部t",
+    name: "产品部",
     children: [
-      { id: '产品组', name: '产品组' },
-      { id: '设计组', name: '设计组' },
-      { id: '交互组', name: '交互组' }
-    ]
+      { id: "产品组", name: "产品组" },
+      { id: "设计组", name: "设计组" },
+      { id: "交互组", name: "交互组" },
+    ],
   },
   {
-    id: '市场部',
-    name: '市场部',
+    id: "市场部",
+    name: "市场部",
     children: [
-      { id: '运营组', name: '运营组' },
-      { id: '销售组', name: '销售组' },
-      { id: '公关组', name: '公关组' }
-    ]
+      { id: "运营组", name: "运营组" },
+      { id: "销售组", name: "销售组" },
+      { id: "公关组", name: "公关组" },
+    ],
   },
   {
-    id: 'admin',
-    name: '行政部',
+    id: "admin",
+    name: "行政部",
     children: [
-      { id: 'admin-hr', name: '人力资源' },
-      { id: 'admin-finance', name: '财务组' },
-      { id: 'admin-office', name: '办公室' }
-    ]
-  }
-])
+      { id: "admin-hr", name: "人力资源" },
+      { id: "admin-finance", name: "财务组" },
+      { id: "admin-office", name: "办公室" },
+    ],
+  },
+]);
 
 // 新增/编辑对话框
-const userFormRef = ref()
+const userFormRef = ref();
 const dialog = reactive({
   visible: false,
-  title: '',
+  title: "",
   isAdd: false,
   isView: false,
   loading: false,
   form: {
     id: null,
-    username: '',
-    name: '',
-    password: '',
-    confirmPassword: '',
-    role: '',
+    username: "",
+    name: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
     department: [],
-    phone: '',
-    email: '',
-    joinDate: '',
-    status: '启用',
-    bio: ''
+    phone: "",
+    email: "",
+    joinDate: "",
+    status: "启用",
+    bio: "",
   },
   rules: {
     username: [
-      { required: true, message: '请输入用户名', trigger: 'blur' },
-      { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+      { required: true, message: "请输入用户名", trigger: "blur" },
+      { min: 3, max: 20, message: "长度在 3 到 20 个字符", trigger: "blur" },
     ],
     name: [
-      { required: true, message: '请输入姓名', trigger: 'blur' },
-      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+      { required: true, message: "请输入姓名", trigger: "blur" },
+      { min: 2, max: 20, message: "长度在 2 到 20 个字符", trigger: "blur" },
     ],
     password: [
-      { required: true, message: '请输入密码', trigger: 'blur' },
-      { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+      { required: true, message: "请输入密码", trigger: "blur" },
+      { min: 6, max: 20, message: "长度在 6 到 20 个字符", trigger: "blur" },
     ],
     confirmPassword: [
-      { required: true, message: '请确认密码', trigger: 'blur' },
+      { required: true, message: "请确认密码", trigger: "blur" },
       {
         validator: (rule, value, callback) => {
           if (value !== dialog.form.password) {
-            callback(new Error('两次输入的密码不一致'))
+            callback(new Error("两次输入的密码不一致"));
           } else {
-            callback()
+            callback();
           }
         },
-        trigger: 'blur'
-      }
+        trigger: "blur",
+      },
     ],
-    role: [
-      { required: true, message: '请选择角色', trigger: 'change' }
-    ],
-    department: [
-      { required: true, message: '请选择部门', trigger: 'change' }
-    ],
+    role: [{ required: true, message: "请选择角色", trigger: "change" }],
+    department: [{ required: true, message: "请选择部门", trigger: "change" }],
     phone: [
-      { required: true, message: '请输入手机号', trigger: 'blur' },
-      { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+      { required: true, message: "请输入手机号", trigger: "blur" },
+      {
+        pattern: /^1[3-9]\d{9}$/,
+        message: "请输入正确的手机号",
+        trigger: "blur",
+      },
     ],
     email: [
-      { required: true, message: '请输入邮箱', trigger: 'blur' },
-      { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+      { required: true, message: "请输入邮箱", trigger: "blur" },
+      { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" },
     ],
     joinDate: [
-      { required: true, message: '请选择入职时间', trigger: 'change' }
-    ]
-  }
-})
+      { required: true, message: "请选择入职时间", trigger: "change" },
+    ],
+  },
+});
 
 // 查看详情对话框
 const viewDialog = reactive({
   visible: false,
-  data: {}
-})
+  data: {},
+});
 
 // 修改密码对话框
-const resetPasswordFormRef = ref()
+const resetPasswordFormRef = ref();
 const resetPasswordDialog = reactive({
   visible: false,
   loading: false,
   userId: null,
   form: {
-    newPassword: '',
-    confirmPassword: ''
+    newPassword: "",
+    confirmPassword: "",
   },
   rules: {
     newPassword: [
-      { required: true, message: '请输入新密码', trigger: 'blur' },
-      { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+      { required: true, message: "请输入新密码", trigger: "blur" },
+      { min: 6, max: 20, message: "长度在 6 到 20 个字符", trigger: "blur" },
     ],
     confirmPassword: [
-      { required: true, message: '请确认密码', trigger: 'blur' },
+      { required: true, message: "请确认密码", trigger: "blur" },
       {
         validator: (rule, value, callback) => {
           if (value !== resetPasswordDialog.form.newPassword) {
-            callback(new Error('两次输入的密码不一致'))
+            callback(new Error("两次输入的密码不一致"));
           } else {
-            callback()
+            callback();
           }
         },
-        trigger: 'blur'
-      }
-    ]
-  }
-})
+        trigger: "blur",
+      },
+    ],
+  },
+});
 
 // 获取角色标签类型
 const getRoleType = (role) => {
   const typeMap = {
-    '超级管理员': 'danger',
-    '高级管理员': 'warning',
-    '普通管理员': 'info',
-    '开发工程师': 'primary',
-    '测试工程师': 'success',
-    '产品经理': ''
-  }
-  return typeMap[role] || 'info'
-}
+    超级管理员: "danger",
+    高级管理员: "warning",
+    普通管理员: "info",
+    开发工程师: "primary",
+    测试工程师: "success",
+    产品经理: "",
+  };
+  return typeMap[role] || "info";
+};
 
 // 获取用户列表
 const getUserList = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     const params = {
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize,
-      ...searchForm
-    }
-    const res = await request.get('/user/list', { params })
-    if (res.code === '200') {
-      userList.value = res.data.records || res.data.list || []
-      pagination.total = res.data.total || 0
-      console.log(res.data)
+      ...searchForm,
+    };
+    const res = await request.get("/user/list", { params });
+    if (res.code === "200") {
+      userList.value = res.data.records || res.data.list || [];
+      pagination.total = res.data.total || 0;
+      console.log(res.data);
     } else {
-      ElMessage.error(res.msg || '获取用户列表失败')
+      ElMessage.error(res.msg || "获取用户列表失败");
     }
   } catch (error) {
-    ElMessage.error('获取用户列表失败')
+    ElMessage.error("获取用户列表失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 搜索
 const handleSearch = () => {
-  pagination.pageNum = 1
-  getUserList()
-}
+  pagination.pageNum = 1;
+  getUserList();
+};
 
 // 重置搜索
 const resetSearch = () => {
-  Object.keys(searchForm).forEach(key => {
-    searchForm[key] = ''
-  })
-  handleSearch()
-}
+  Object.keys(searchForm).forEach((key) => {
+    searchForm[key] = "";
+  });
+  handleSearch();
+};
 
 // 分页改变
 const handleSizeChange = (val) => {
-  pagination.pageSize = val
-  getUserList()
-}
+  pagination.pageSize = val;
+  getUserList();
+};
 
 const handleCurrentChange = (val) => {
-  pagination.pageNum = val
-  getUserList()
-}
+  pagination.pageNum = val;
+  getUserList();
+};
 
 // 表格选择变化
 const handleSelectionChange = (val) => {
-  selectedRows.value = val
-}
+  selectedRows.value = val;
+};
 
 // 新增用户
 const handleAdd = () => {
-  dialog.title = '新增用户'
-  dialog.isAdd = true
-  dialog.isView = false
+  dialog.title = "新增用户";
+  dialog.isAdd = true;
+  dialog.isView = false;
   dialog.form = {
     id: null,
-    username: '',
-    name: '',
-    password: '',
-    confirmPassword: '',
-    role: '',
-    department: '',
-    phone: '',
-    email: '',
-    joinDate: '',
-    status: '启用',
-    bio: ''
-  }
-  dialog.visible = true
-}
+    username: "",
+    name: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
+    department: "",
+    phone: "",
+    email: "",
+    joinDate: "",
+    status: "启用",
+    bio: "",
+  };
+  dialog.visible = true;
+};
 
 // 编辑用户
 const handleEdit = (row) => {
-  dialog.title = '编辑用户'
-  dialog.isAdd = false
-  dialog.isView = false
-  const formData = { ...row}
-  if(formData.department&&typeof formData.department === 'string') {
-    formData.department = formData.department.split('/')
-  } else if(!formData.department){
-    formData.department = []
+  dialog.title = "编辑用户";
+  dialog.isAdd = false;
+  dialog.isView = false;
+  const formData = { ...row };
+  if (formData.department && typeof formData.department === "string") {
+    formData.department = formData.department.split("/");
+  } else if (!formData.department) {
+    formData.department = [];
   }
 
   dialog.form = {
     ...row,
-    password: '',
-    confirmPassword: ''
-  }
-  dialog.visible = true
-}
+    password: "",
+    confirmPassword: "",
+  };
+  dialog.visible = true;
+};
 
 // 查看用户
 const handleView = (row) => {
-  viewDialog.data = { ...row }
-  viewDialog.visible = true
-}
+  viewDialog.data = { ...row };
+  viewDialog.visible = true;
+};
 
 // 提交用户
 const submitUser = async () => {
-  if (!userFormRef.value) return
+  if (!userFormRef.value) return;
 
   await userFormRef.value.validate(async (valid) => {
     if (valid) {
-      dialog.loading = true
+      dialog.loading = true;
       try {
-        const submitData = { ...dialog.form }
+        const submitData = { ...dialog.form };
 
-        if(submitData.department&&Array.isArray(submitData.department)){
-          submitData.department = submitData.department.join('/')
+        if (submitData.department && Array.isArray(submitData.department)) {
+          submitData.department = submitData.department.join("/");
         }
 
         if (dialog.isAdd) {
-          delete submitData.confirmPassword
-          const res = await request.post('/user/add', submitData)
-          if (res.code === '200') {
-            ElMessage.success('新增用户成功')
-            dialog.visible = false
-            getUserList()
+          delete submitData.confirmPassword;
+          const res = await request.post("/user/add", submitData);
+          if (res.code === "200") {
+            ElMessage.success("新增用户成功");
+            dialog.visible = false;
+            getUserList();
           } else {
-            ElMessage.error(res.msg || '新增用户失败')
+            ElMessage.error(res.msg || "新增用户失败");
           }
         } else {
-          delete submitData.password
-          delete submitData.confirmPassword
-          const res = await request.post('/user/updateInfo', submitData)
-          if (res.code === '200') {
-            ElMessage.success('更新用户成功')
-            dialog.visible = false
-            getUserList()
+          delete submitData.password;
+          delete submitData.confirmPassword;
+          const res = await request.post("/user/updateInfo", submitData);
+          if (res.code === "200") {
+            ElMessage.success("更新用户成功");
+            dialog.visible = false;
+            getUserList();
           } else {
-            ElMessage.error(res.msg || '更新用户失败')
+            ElMessage.error(res.msg || "更新用户失败");
           }
         }
       } catch (error) {
-        ElMessage.error('操作失败')
+        ElMessage.error("操作失败");
       } finally {
-        dialog.loading = false
+        dialog.loading = false;
       }
     }
-  })
-}
+  });
+};
 
 // 删除用户
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除用户"${row.name}"吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    try {
-      const res = await request.post(`/user/delete`, row)
-      if (res.code === '200') {
-        ElMessage.success('删除成功')
-        getUserList()
-      } else {
-        ElMessage.error(res.msg || '删除失败')
+  ElMessageBox.confirm(`确定要删除用户"${row.name}"吗？`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      try {
+        const res = await request.post(`/user/delete`, row);
+        if (res.code === "200") {
+          ElMessage.success("删除成功");
+          getUserList();
+        } else {
+          ElMessage.error(res.msg || "删除失败");
+        }
+      } catch (error) {
+        ElMessage.error("删除失败");
       }
-    } catch (error) {
-      ElMessage.error('删除失败')
-    }
-  }).catch(() => {})
-}
+    })
+    .catch(() => {});
+};
 
 // // 修改状态
 const handleStatusChange = async (row) => {
   try {
-    const res = await request.post(`/user/updateStatus`, row)
-    if (res.code !== '200') {
-      ElMessage.error('状态修改失败')
+    const res = await request.post(`/user/updateStatus`, row);
+    if (res.code !== "200") {
+      ElMessage.error("状态修改失败");
       // 回滚状态
-      row.status = row.status === '启用' ? '禁用' : '启用'
+      row.status = row.status === "启用" ? "禁用" : "启用";
     }
   } catch (error) {
-    ElMessage.error('状态修改失败')
-    row.status = row.status === '启用' ? '禁用' : '启用'
+    ElMessage.error("状态修改失败");
+    row.status = row.status === "启用" ? "禁用" : "启用";
   }
-}
+};
 
 // 修改密码
 const handleResetPassword = (row) => {
-  resetPasswordDialog.userId = row.id
+  resetPasswordDialog.userId = row.id;
   resetPasswordDialog.form = {
-    newPassword: '',
-    confirmPassword: ''
-  }
-  resetPasswordDialog.visible = true
-}
+    newPassword: "",
+    confirmPassword: "",
+  };
+  resetPasswordDialog.visible = true;
+};
 
 // 提交修改密码
 const submitResetPassword = async () => {
-  if (!resetPasswordFormRef.value) return
+  if (!resetPasswordFormRef.value) return;
 
   await resetPasswordFormRef.value.validate(async (valid) => {
     if (valid) {
-      resetPasswordDialog.loading = true
+      resetPasswordDialog.loading = true;
       try {
-        const res = await request.post('/user/updatePassword', {
+        const res = await request.post("/user/updatePassword", {
           uid: resetPasswordDialog.userId,
-          newPassword: resetPasswordDialog.form.newPassword
-        })
-        if (res.code === '200') {
-          ElMessage.success('密码修改成功')
-          resetPasswordDialog.visible = false
+          newPassword: resetPasswordDialog.form.newPassword,
+        });
+        if (res.code === "200") {
+          ElMessage.success("密码修改成功");
+          resetPasswordDialog.visible = false;
         } else {
-          ElMessage.error(res.msg || '密码修改成功')
+          ElMessage.error(res.msg || "密码修改成功");
         }
       } catch (error) {
-        ElMessage.error('密码修改成功')
+        ElMessage.error("密码修改成功");
       } finally {
-        resetPasswordDialog.loading = false
+        resetPasswordDialog.loading = false;
       }
     }
-  })
-}
+  });
+};
 
-const handleImport = (res,file,filelist) =>{
-  if(res.code === "200"){
+const handleImport = (res, file, filelist) => {
+  if (res.code === "200") {
     ElMessage.success("数据导入成功");
   } else {
     ElMessage.error(res.msg);
   }
   getUserList();
-}
+};
 
 // 关闭对话框
 const handleDialogClose = () => {
-  userFormRef.value?.clearValidate()
-}
+  userFormRef.value?.clearValidate();
+};
 
 const exportData = async () => {
-  window.open('http://localhost:8080/user/exportData')
-}
+  window.open("http://localhost:8080/user/exportData");
+};
 
 // 页面加载时获取数据
 onMounted(() => {
-  getUserList()
-})
+  getUserList();
+});
 </script>
 
 <style scoped>

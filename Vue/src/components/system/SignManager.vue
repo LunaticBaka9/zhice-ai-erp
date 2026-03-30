@@ -1,32 +1,32 @@
 <template>
   <div class="user-management">
     <!-- 搜索栏 -->
-    <el-card class="search-card" shadow="never" style="margin-bottom: 5px;">
+    <el-card class="search-card" shadow="never" style="margin-bottom: 5px">
       <el-form :inline="true">
         <el-form-item label="用户名">
           <el-input
-              v-model="data.username"
-              placeholder="请输入用户名"
-              clearable
-              @clear="load"
-              @keyup.enter="load"
+            v-model="data.username"
+            placeholder="请输入用户名"
+            clearable
+            @clear="load"
+            @keyup.enter="load"
           />
         </el-form-item>
         <el-form-item label="姓名">
           <el-input
-              v-model="data.name"
-              placeholder="请输入姓名"
-              clearable
-              @clear="load"
-              @keyup.enter="load"
+            v-model="data.name"
+            placeholder="请输入姓名"
+            clearable
+            @clear="load"
+            @keyup.enter="load"
           />
         </el-form-item>
         <el-form-item label="签到状态">
           <el-select
-              v-model="data.signInStatus"
-              placeholder="选择签到状态"
-              clearable
-              @clear="load"
+            v-model="data.signInStatus"
+            placeholder="选择签到状态"
+            clearable
+            @clear="load"
           >
             <el-option label="准时" value="准时" />
             <el-option label="迟到" value="迟到" />
@@ -34,10 +34,10 @@
         </el-form-item>
         <el-form-item label="签退状态">
           <el-select
-              v-model="data.signOutStatus"
-              placeholder="选择签退状态"
-              clearable
-              @clear="load"
+            v-model="data.signOutStatus"
+            placeholder="选择签退状态"
+            clearable
+            @clear="load"
           >
             <el-option label="准时" value="准时" />
             <el-option label="早退" value="早退" />
@@ -58,35 +58,61 @@
     </el-card>
 
     <div class="card" style="margin-bottom: 10px">
-      <el-button type="primary" @click="exprotData">
-        导出表格
-      </el-button>
+      <el-button type="primary" @click="exprotData"> 导出表格 </el-button>
     </div>
 
     <!-- 签到信息表格 -->
     <el-card class="table-card" shadow="never">
       <el-table
-          :data="data.tableData"
-          stripe
-          border
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
+        :data="data.tableData"
+        stripe
+        border
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
         <el-table-column prop="uid" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="signInTime" label="签到时间" width="200" sortable />
-        <el-table-column prop="signInStatus" label="签到状态" width="90"></el-table-column>
-        <el-table-column prop="signOutTime" label="签退时间" width="200" sortable />
-        <el-table-column prop="signOutStatus" label="签退状态" width="90"></el-table-column>
+        <el-table-column
+          prop="signInTime"
+          label="签到时间"
+          width="200"
+          sortable
+        />
+        <el-table-column
+          prop="signInStatus"
+          label="签到状态"
+          width="90"
+        ></el-table-column>
+        <el-table-column
+          prop="signOutTime"
+          label="签退时间"
+          width="200"
+          sortable
+        />
+        <el-table-column
+          prop="signOutStatus"
+          label="签退状态"
+          width="90"
+        ></el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
-            <el-button link type="primary" size="small" @click="handleEdit(scope.row)">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="handleEdit(scope.row)"
+            >
               <el-icon><Edit /></el-icon>
               编辑
             </el-button>
-            <el-button link type="danger" size="small" @click="handleDelete(scope.row)">
+            <el-button
+              link
+              type="danger"
+              size="small"
+              @click="handleDelete(scope.row)"
+            >
               <el-icon><Delete /></el-icon>
               删除
             </el-button>
@@ -96,44 +122,44 @@
       <!-- 分页 -->
       <div class="pagination-container">
         <el-pagination
-            v-model:current-page="data.pageNum"
-            v-model:page-size="data.pageSize"
-            :page-sizes="[5,10, 20, 50, 100]"
-            :total="data.total"
-            layout="total, sizes, prev, pager, next, jumper"
-            @current-change="load"
-            @size-change="load"
+          v-model:current-page="data.pageNum"
+          v-model:page-size="data.pageSize"
+          :page-sizes="[5, 10, 20, 50, 100]"
+          :total="data.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="load"
+          @size-change="load"
         />
       </div>
     </el-card>
 
-<!--    修改表格 -->
+    <!--    修改表格 -->
     <el-dialog
-        v-model="data.formVisible"
-        title="修改签到"
-        width="600px"
-        :close-on-click-modal="false"
-        @close="handleDialogClose"
+      v-model="data.formVisible"
+      title="修改签到"
+      width="600px"
+      :close-on-click-modal="false"
+      @close="handleDialogClose"
     >
       <el-form ref="formRef" :model="data.form">
-          <el-form-item label="签到时间" prop="sign_in_time" >
-            <el-input v-model="data.form.signInTime" autocomplete="off" />
-          </el-form-item>
-          <el-form-item label="签到状态" prop="sign_in_status">
-            <el-select v-model="data.form.signInStatus" placeholder="签到状态">
-              <el-option label="准时" value="准时" />
-              <el-option label="迟到" value="迟到" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="签退时间" prop="sign_in_time">
-            <el-input v-model="data.form.signOutTime" autocomplete="off" />
-          </el-form-item>
-          <el-form-item label="签退状态" prop="sign_out_status">
-            <el-select v-model="data.form.signOutStatus" placeholder="签退状态">
-              <el-option label="准时" value="准时" />
-              <el-option label="早退" value="早退" />
-            </el-select>
-          </el-form-item>
+        <el-form-item label="签到时间" prop="sign_in_time">
+          <el-input v-model="data.form.signInTime" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="签到状态" prop="sign_in_status">
+          <el-select v-model="data.form.signInStatus" placeholder="签到状态">
+            <el-option label="准时" value="准时" />
+            <el-option label="迟到" value="迟到" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="签退时间" prop="sign_in_time">
+          <el-input v-model="data.form.signOutTime" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="签退状态" prop="sign_out_status">
+          <el-select v-model="data.form.signOutStatus" placeholder="签退状态">
+            <el-option label="准时" value="准时" />
+            <el-option label="早退" value="早退" />
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -146,103 +172,110 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, reactive, onMounted, computed } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
-  Plus, Search, Refresh, View, Edit, Delete, Key
-} from '@element-plus/icons-vue'
-import request from '../../utils/request.js'
+  Plus,
+  Search,
+  Refresh,
+  View,
+  Edit,
+  Delete,
+  Key,
+} from "@element-plus/icons-vue";
+import request from "../../utils/request.js";
 
 const data = reactive({
-  username:null,
-  name:null,
-  signInStatus:null,
-  signOutStatus:null,
-  pageNum:1,
-  pageSize:10,
-  total:6,
+  username: null,
+  name: null,
+  signInStatus: null,
+  signOutStatus: null,
+  pageNum: 1,
+  pageSize: 10,
+  total: 6,
   tableData: [],
   formVisible: false,
   form: {},
   rows: [],
-})
+});
 
 const formRef = ref();
 
-const load = () =>{
-  request.get("/sign/selectPage",{
-    params:{
-      pageNum:data.pageNum,
-      pageSize:data.pageSize,
-      username:data.username,
-      name:data.name,
-    },
-  }).then(res=>{
-    if(res.code === "200"){
-      data.tableData = res.data.list;
-      data.total = res.data.total;
-      console.log(data)
-    } else{
-      ElMessage.error(res.msg)
-    }
-  })
-}
+const load = () => {
+  request
+    .get("/sign/selectPage", {
+      params: {
+        pageNum: data.pageNum,
+        pageSize: data.pageSize,
+        username: data.username,
+        name: data.name,
+      },
+    })
+    .then((res) => {
+      if (res.code === "200") {
+        data.tableData = res.data.list;
+        data.total = res.data.total;
+        console.log(data);
+      } else {
+        ElMessage.error(res.msg);
+      }
+    });
+};
 load();
 
-const resetSearch = () =>{
+const resetSearch = () => {
   data.username = null;
   data.name = null;
   data.signInStatus = null;
   data.signOutStatus = null;
   load();
-}
+};
 
 // 编辑用户
 const handleEdit = (row) => {
   data.form = JSON.parse(JSON.stringify(row));
   data.formVisible = true;
-}
+};
 
 const handleSelectionChange = (row) => {
   data.rows = rows;
-}
+};
 
 const handleDelete = (row) => {
   ElMessageBox.confirm("确认删除此列数据", "删除确认", { type: "warning" })
-      .then((res) => {
-        request.post("/sign/delete", row).then((res) => {
-          if (res.code === "200") {
-            ElMessage.success("删除成功");
-            load();
-          } else {
-            ElMessage.error(res.msg);
-          }
-        });
-      })
-      .catch((err) => {});
-}
+    .then((res) => {
+      request.post("/sign/delete", row).then((res) => {
+        if (res.code === "200") {
+          ElMessage.success("删除成功");
+          load();
+        } else {
+          ElMessage.error(res.msg);
+        }
+      });
+    })
+    .catch((err) => {});
+};
 
 const exprotData = () => {
-  window.open('http://localhost:8080/sign/exportData')
-}
+  window.open("http://localhost:8080/sign/exportData");
+};
 
 // // 修改状态
 const update = (row) => {
   formRef.value.validate((valid) => {
     if (valid) {
-      request.post("/sign/update", data.form).then((res)=>{
-        if(res.code === "200"){
+      request.post("/sign/update", data.form).then((res) => {
+        if (res.code === "200") {
           data.formVisible = false;
           ElMessage.success("修改成功");
           load();
         }
-      })
-    } else{
-      ElMessage.error(res.msg)
+      });
+    } else {
+      ElMessage.error(res.msg);
     }
   });
-}
-
+};
 </script>
 
 <style scoped>
