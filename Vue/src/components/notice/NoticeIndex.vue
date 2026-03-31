@@ -126,7 +126,7 @@
         </div>
         <div class="detail-body" v-html="selectedAnnouncement.content"></div>
         <div class="detail-footer">
-          <span>阅读次数：{{ selectedAnnouncement.views + 1 }}</span>
+          <span>阅读次数：{{ selectedAnnouncement.views }}</span>
         </div>
       </div>
       <template #footer>
@@ -168,7 +168,7 @@ const mapNoticeToAnnouncement = (notice) => {
       : notice.uid
         ? String(notice.uid)
         : "系统管理员",
-    views: 0,
+    views: notice.views ? notice.views : 0,
     isRead: false,
   };
 };

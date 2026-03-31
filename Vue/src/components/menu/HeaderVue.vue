@@ -465,7 +465,7 @@ const toggleFullscreen = () => {
 const handleCommand = (command) => {
     switch (command) {
         case "profile":
-            router.push("/profile");
+            router.push("/userInfo");
             break;
         case "settings":
             router.push("/settings");

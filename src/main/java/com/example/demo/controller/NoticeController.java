@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.common.Result;
 import com.example.demo.entity.Notice;
+import com.example.demo.entity.SignRecord;
 import com.example.demo.service.NoticeService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -41,4 +42,9 @@ public class NoticeController {
         return Result.success();
     }
 
+    @PostMapping("/delete")
+    public Result deleteById(@RequestBody Notice notice){
+        noticeService.deleteByNid(notice);
+        return Result.success();
+    }
 }
