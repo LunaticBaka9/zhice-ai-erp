@@ -157,6 +157,7 @@ const breadcrumbMap = {
     "/signboard": "打卡签到",
     "/userInfo": "个人中心",
     "/message": "消息中心",
+    "/notice/index": "公告详情",
     "/system/user": "用户管理",
     "/system/sign": "打卡管理",
     "/user/list": "用户列表",

@@ -28,6 +28,20 @@
         <span>签到打卡</span>
       </el-menu-item>
 
+      <!-- 系统公告 -->
+      <el-sub-menu>
+        <template #title>
+          <el-icon><Notification /></el-icon>
+          <span>系统公告</span>
+        </template>
+        <el-menu-item index="/notice/index">
+          <span>公告详情</span>
+        </el-menu-item>
+        <el-menu-item index="/notice/post">
+          <span>公告发布</span>
+        </el-menu-item>
+      </el-sub-menu>
+
       <!-- 技术部 -->
       <el-sub-menu v-if="isTech || isAdmin" index="/technology">
         <template #title>

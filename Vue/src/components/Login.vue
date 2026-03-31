@@ -5,10 +5,7 @@ import { ElMessage } from "element-plus";
 
 const formRef = ref();
 const data = reactive({
-    form: {
-        username: "",
-        password: "",
-    },
+    form: {},
     rules: {
         username: [
             { required: true, message: "请填写账号", trigger: "blur" },
@@ -23,7 +20,7 @@ const login = () => {
         if (valid) {
             request.post("/login", data.form).then((res) => {
                 console.log(res);
-                if (res.data.code === "200") {
+                if (res.code === "200") {
                     //存储用户信息
                     localStorage.setItem("local_user", JSON.stringify(res.data || "{}"));
                     const userStr = localStorage.getItem("local_user");
@@ -31,7 +28,7 @@ const login = () => {
                     ElMessage.success("登录成功");
                     location.href = "/index";
                 } else {
-                    ElMessage.error(res.data.msg);
+                    ElMessage.error(res.msg);
                 }
             });
         }

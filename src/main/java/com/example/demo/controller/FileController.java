@@ -32,7 +32,7 @@ public class FileController {
         }
         // 使用 ResourceUtils 获取 classpath 下的 static 目录，避免手动拼接路径导致的非法字符
         File staticDir = ResourceUtils.getFile("classpath:static");
-        File uploadDirFile = new File(staticDir, "upload");
+        File uploadDirFile = new File(staticDir, "upload/avatars");
         if (!uploadDirFile.exists()) {
             uploadDirFile.mkdirs();
         }
@@ -43,7 +43,7 @@ public class FileController {
         Files.copy(photo.getInputStream(), target);
 
         // 返回前端可访问的静态资源路径
-        String publicPath =  "api/static/upload/" + fileName; // 前端访问地址: /static/upload 映射到 /upload/
+        String publicPath =  "api/static/upload/avatars/" + fileName; // 前端访问地址: /static/upload 映射到 /upload/
         userService.updateAvatar(uid, publicPath);
         return Result.success(publicPath);
     }

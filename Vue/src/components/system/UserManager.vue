@@ -87,7 +87,7 @@
         <el-table-column prop="uid" label="ID" width="80" />
         <el-table-column prop="avatar" label="头像" width="80">
           <template #default="{ row }">
-            <el-avatar :src="row.avatar || defaultAvatar" :size="40" />
+            <el-avatar :src="resolveAvatar(row.avatar)" :size="40" />
           </template>
         </el-table-column>
         <el-table-column prop="username" label="用户名" width="120" />
@@ -455,13 +455,23 @@ import {
   Key,
 } from "@element-plus/icons-vue";
 import request from "../../utils/request";
-import axios from "axios";
-import AsideVue from "../menu/AsideVue.vue";
-import HeaderVue from "../menu/HeaderVue.vue";
 
 // 默认头像
 const defaultAvatar =
   "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
+
+// 解析头像 URL，支持空值、完整 URL、以 / 开头的绝对路径和相对路径
+const resolveAvatar = (avatar) => {
+  if (!avatar) return defaultAvatar;
+  if (/^https?:\/\//.test(avatar)) return avatar;
+  if (avatar.startsWith("/")) return avatar;
+  try {
+    // 相对路径，拼接当前站点 origin
+    return new URL(avatar, window.location.origin).toString();
+  } catch (e) {
+    return defaultAvatar;
+  }
+};
 
 // 搜索表单
 const searchForm = reactive({
@@ -536,6 +546,7 @@ const dialog = reactive({
   loading: false,
   form: {
     id: null,
+    avatar: "",
     username: "",
     name: "",
     password: "",
@@ -705,6 +716,7 @@ const handleAdd = () => {
   dialog.isView = false;
   dialog.form = {
     id: null,
+    avatar: "",
     username: "",
     name: "",
     password: "",

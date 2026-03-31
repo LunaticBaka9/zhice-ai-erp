@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import cn.hutool.core.annotation.Alias;
+import cn.hutool.core.annotation.PropIgnore;
 import lombok.Data;
 
 @Data
@@ -27,10 +28,10 @@ public class User {
     private String joinDate;
     @Alias("状态")
     private String status;
-    @Alias("创建时间")
+    @PropIgnore
     private String createTime;
-    @Alias("更新时间")
+    @PropIgnore
     private String updateTime;
-    
+    @PropIgnore
     private String avatar;
 }
