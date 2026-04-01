@@ -1,10 +1,10 @@
 package com.example.demo.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 
 import com.example.demo.entity.SignRecord;
-
-import java.util.List;
 
 @Mapper
 public interface SignMapper {
@@ -13,6 +13,8 @@ public interface SignMapper {
     int insertSign(SignRecord signRecord);
 
     SignRecord selectLatestOpenSign(Long uid);
+
+    SignRecord selectLatestSign(Long uid);
 
     int updateSignOut(SignRecord signRecord);
 

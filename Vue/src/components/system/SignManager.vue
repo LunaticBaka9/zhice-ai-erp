@@ -68,16 +68,16 @@
         stripe
         border
         style="width: 100%"
+        :table-layout="fixed"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="uid" label="ID" width="80" />
+        <el-table-column prop="sid" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="name" label="姓名" width="120" />
         <el-table-column
           prop="signInTime"
           label="签到时间"
-          width="200"
           sortable
         />
         <el-table-column
@@ -88,7 +88,6 @@
         <el-table-column
           prop="signOutTime"
           label="签退时间"
-          width="200"
           sortable
         />
         <el-table-column
@@ -124,7 +123,7 @@
         <el-pagination
           v-model:current-page="data.pageNum"
           v-model:page-size="data.pageSize"
-          :page-sizes="[5, 10, 20, 50, 100]"
+          :page-sizes="[10, 20, 50, 100]"
           :total="data.total"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="load"
@@ -191,7 +190,7 @@ const data = reactive({
   signInStatus: null,
   signOutStatus: null,
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   total: 6,
   tableData: [],
   formVisible: false,
@@ -257,7 +256,7 @@ const handleDelete = (row) => {
 };
 
 const exprotData = () => {
-  window.open("http://localhost:8080/sign/exportData");
+  window.open("http://localhost:8080/notice/exportData");
 };
 
 // // 修改状态
@@ -378,6 +377,22 @@ const update = (row) => {
 
 :deep(.el-table .el-table__row:hover) {
   background-color: #f5f7fa;
+}
+
+/* 设置表格行高 */
+::v-deep .el-table__row {
+  height: 60px;
+}
+
+/* 或者设置单元格内边距 */
+::v-deep .el-table__body td {
+  padding: 15px 0;
+}
+
+/* 或者设置单元格的高度 */
+::v-deep .el-table td,
+::v-deep .el-table th {
+  padding: 12px 0;
 }
 
 /* 头像样式 */

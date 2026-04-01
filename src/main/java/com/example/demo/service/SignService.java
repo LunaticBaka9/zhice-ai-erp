@@ -32,6 +32,10 @@ public class SignService {
         return signMapper.selectLatestOpenSign(uid);
     }
 
+    public SignRecord selectLatestSign(Long uid) {
+        return signMapper.selectLatestSign(uid);
+    }
+
     public void updateById(SignRecord signRecord) {
         signMapper.updateById(signRecord);
     }

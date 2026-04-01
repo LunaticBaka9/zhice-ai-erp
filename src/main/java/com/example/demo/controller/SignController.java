@@ -42,13 +42,9 @@ public class SignController {
         if (signRecord.getCreateTime() == null) {
             signRecord.setCreateTime(now);
         }
-        if (signRecord.getSignDate() == null) {
-            signRecord.setSignDate(now);
-        }
         if (signRecord.getSignInTime() == null) {
             signRecord.setSignInTime(now);
         }
-
         // 判断签到状态（迟到/准时），并设置 signInStatus；兼容性地同步到旧的 status 字段
         try {
             Date signIn = signRecord.getSignInTime();
@@ -155,6 +151,15 @@ public class SignController {
         ServletOutputStream out = response.getOutputStream();
         writer.flush(out,true);
         writer.close();
+    }
+
+    @GetMapping("/latest")
+    public Result latest(@RequestParam Long uid) {
+        if (uid == null) {
+            return Result.error("缺少 uid");
+        }
+        SignRecord r = signService.selectLatestSign(uid);
+        return Result.success(r);
     }
 
 }

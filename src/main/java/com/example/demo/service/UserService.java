@@ -90,27 +90,9 @@ public class UserService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public void insertBatch(List<User> list){
-        if(list == null || list.isEmpty()){
-            return;
-        }
         for(User user: list){
-            if(user == null){
-                throw new CustomerException("导入数据包含空记录");
-            }
-            String username = user.getUsername();
-            if(username == null || username.trim().isEmpty()){
-                throw new CustomerException("用户名不能为空");
-            }
-            User dbUser = userMapper.selectByUsername(username);
-            if(dbUser != null){
-                throw new CustomerException("账号重复: " + username);
-            }
-            if(user.getName() == null || user.getName().trim().isEmpty()){
-                user.setName(username);
-            }
-            userMapper.insertUser(user);
+            this.insert(user);
         }
     }
 }

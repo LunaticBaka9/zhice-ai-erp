@@ -81,6 +81,7 @@
         stripe
         border
         style="width: 100%"
+        :table-layout="fixed"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
@@ -110,7 +111,6 @@
         <el-table-column
           prop="joinDate"
           label="入职时间"
-          width="120"
           sortable
         />
         <el-table-column label="状态" width="100">
@@ -998,6 +998,22 @@ onMounted(() => {
 
 :deep(.el-table .el-table__row:hover) {
   background-color: #f5f7fa;
+}
+
+/* 设置表格行高 */
+::v-deep .el-table__row {
+  height: 60px;
+}
+
+/* 或者设置单元格内边距 */
+::v-deep .el-table__body td {
+  padding: 15px 0;
+}
+
+/* 或者设置单元格的高度 */
+::v-deep .el-table td,
+::v-deep .el-table th {
+  padding: 12px 0;
 }
 
 /* 头像样式 */

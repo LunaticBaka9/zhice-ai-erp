@@ -7,7 +7,6 @@
             select 
                 sr.sid as sid,
                 sr.uid as uid,
-                sr.sign_date as signDate,
                 sr.sign_in_time as signInTime,
                 sr.sign_out_time as signOutTime,
                 sr.sign_in_status as signInStatus,
@@ -31,7 +30,6 @@
         select 
             sr.sid as sid,
             sr.uid as uid,
-            sr.sign_date as signDate,
             sr.sign_in_time as signInTime,
             sr.sign_out_time as signOutTime,
             sr.sign_in_status as signInStatus,
@@ -43,6 +41,24 @@
         left join `user` u on sr.uid = u.uid
         where sr.uid = #{uid} and sr.sign_out_time is null
         order by sr.create_time desc
+        limit 1
+    </select>
+
+    <select id="selectLatestSign" parameterType="long" resultType="com.example.demo.entity.SignRecord">
+        select
+            sr.sid as sid,
+            sr.uid as uid,
+            sr.sign_in_time as signInTime,
+            sr.sign_out_time as signOutTime,
+            sr.sign_in_status as signInStatus,
+            sr.sign_out_status as signOutStatus,
+            sr.remark as remark,
+            sr.create_time as createTime,
+            u.username as username
+        from sign_record sr
+        left join `user` u on sr.uid = u.uid
+        where sr.uid = #{uid}
+        order by sr.sign_in_time desc
         limit 1
     </select>
 
@@ -64,8 +80,8 @@
     </update>
 
     <insert id="insertSign" parameterType="com.example.demo.entity.SignRecord" useGeneratedKeys="true" keyProperty="sid">
-        insert into sign_record(uid, sign_date, sign_in_time, sign_out_time, sign_in_status, sign_out_status, remark, create_time)
-        values(#{uid}, #{signDate}, #{signInTime}, #{signOutTime}, #{signInStatus}, #{signOutStatus}, #{remark}, #{createTime})
+        insert into sign_record(uid, sign_in_time, sign_out_time, sign_in_status, sign_out_status, remark, create_time)
+        values(#{uid},  #{signInTime}, #{signOutTime}, #{signInStatus}, #{signOutStatus}, #{remark}, #{createTime})
     </insert>
 
     <delete id="deleteById" parameterType="com.example.demo.entity.SignRecord">

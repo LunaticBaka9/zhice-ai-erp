@@ -4,16 +4,40 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.NoticeMapper">
     <select id="selectAllNotice" resultType="com.example.demo.entity.Notice">
-        SELECT n.*, u.name AS author
-        FROM `notice` n
-        LEFT JOIN `user` u ON n.uid = u.uid
-        ORDER BY n.publishDate DESC
+        SELECT *
+        FROM `notice`
+        <where>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="type != null and type != ''">and type like concat('%', #{type}, '%')</if>
+            <if test="author != null and author != ''">and author like concat('%', #{author}, '%')</if>
+        </where>
+        ORDER BY publishDate DESC
     </select>
 
     <select id="selectByNid" parameterType="long" resultType="com.example.demo.entity.Notice">
-        SELECT n.*, u.name AS author
+        SELECT *
         FROM `notice` n
-        LEFT JOIN `user` u ON n.uid = u.uid
-        WHERE n.nid = #{nid}
+        WHERE nid = #{nid}
     </select>
+
+    <insert id="insertNotice" parameterType="com.example.demo.entity.Notice">
+        INSERT into notice(title,type,content,publishDate,author)
+        values (#{title},#{type},#{content},#{publishDate},#{author})
+    </insert>
+
+    <update id="updateNotice">
+        UPDATE `notice`
+        SET
+            <if test="title != null and title != ''">title=#{title}, </if>
+            <if test="type != null and type != ''">type=#{type}, </if>
+            <if test="content != null and content != ''"> content=#{content}, </if>
+            <if test="uid != null and uid != ''">uid=#{uid},</if>
+            <if test="publishDate != null"> publishDate=#{publishDate},</if>
+            <if test="views != null and views != ''">views=#{views}</if>
+        WHERE nid=#{nid}
+    </update>
+
+    <delete id="deleteByNid">
+        DELETE FROM `notice` WHERE nid=#{nid}
+    </delete>
 </mapper>

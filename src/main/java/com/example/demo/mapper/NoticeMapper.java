@@ -14,11 +14,9 @@ public interface NoticeMapper {
 
     Notice selectByUid(@Param("uid") Long uid);
 
-    int addNotice(Notice notice);
+    int insertNotice(Notice notice);
 
     void updateNotice(Notice notice);
-
-    void updateById(Notice notice);
 
     void deleteByNid(Notice notice);
 }

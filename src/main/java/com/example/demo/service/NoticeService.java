@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Notice;
+import com.example.demo.entity.SignRecord;
 import com.example.demo.exception.CustomerException;
 import com.example.demo.mapper.NoticeMapper;
 import com.github.pagehelper.PageHelper;
@@ -8,6 +9,7 @@ import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -25,16 +27,25 @@ public class NoticeService {
         return PageInfo.of(list);
     }
 
+    public void insertNotice(Notice notice) {
+        if (notice.getPublishDate() == null) {
+            notice.setPublishDate(new Date());
+        }
+        noticeMapper.insertNotice(notice);
+    }
+
+    public void insertBatch(List<Notice> list) {
+        for (Notice notice : list) {
+            this.insertNotice(notice);
+        }
+    }
+
     public Notice selectByNid(Long nid){
         return noticeMapper.selectByNid(nid);
     }
 
     public void updateNotice(Notice notice){
         noticeMapper.updateNotice(notice);
-    }
-
-    public void updateContent(Notice notice){
-        noticeMapper.updateById(notice);
     }
 
     public void deleteByNid(Notice notice){
