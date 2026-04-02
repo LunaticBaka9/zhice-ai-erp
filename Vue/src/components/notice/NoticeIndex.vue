@@ -244,7 +244,9 @@ const filteredList = computed(() => {
         );
     }
     // 排除草稿状态的公告
-    list = list.filter((item) => item.status !== "草稿" && item.status !== "定时发布");
+    list = list.filter(
+        (item) => item.status !== "草稿" && item.status !== "定时发布",
+    );
     return list;
 });
 
@@ -343,7 +345,6 @@ const viewDetail = async (item) => {
         ElMessage.error("更新阅读数请求失败");
     }
 };
-
 
 const markAsRead = () => {
     dialogVisible.value = false;
