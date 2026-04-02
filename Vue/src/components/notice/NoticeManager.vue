@@ -74,14 +74,14 @@
             >
                 <el-table-column type="selection" />
                 <el-table-column prop="nid" label="ID" width="50" />
-                <el-table-column prop="title" label="公告标题" width="240" />
-                <el-table-column prop="summary" label="公告摘要" />
+                <el-table-column prop="title" label="公告标题" width="200" />
+                <el-table-column prop="summary" label="公告摘要" width="200" />
                 <el-table-column prop="content" label="公告内容">
-                  <template #default="{ row }">
-                    <div class="ellipsis-text">
-                      {{ row.content }}
-                    </div>
-                  </template>
+                    <template #default="{ row }">
+                        <div class="ellipsis-text">
+                            {{ row.content }}
+                        </div>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="author" label="发布者" width="100" />
                 <el-table-column prop="type" label="公告类型" width="100">
@@ -94,7 +94,7 @@
                 <el-table-column
                     prop="publishDate"
                     label="发布时间"
-                    width="200"
+                    width="160"
                     sortable
                 >
                     <template #default="{ row }">
@@ -105,8 +105,9 @@
                         }}
                     </template>
                 </el-table-column>
+                <el-table-column prop="status" label="公告状态" width="90" />
                 <el-table-column prop="views" label="阅读次数" width="90" />
-                <el-table-column label="操作" width="200" fixed="right">
+                <el-table-column label="操作" width="150" fixed="right">
                     <template #default="scope">
                         <el-button
                             link
@@ -142,59 +143,18 @@
                 />
             </div>
         </el-card>
-
-        <!--    修改表格 -->
-        <el-dialog
-            v-model="data.formVisible"
-            title="公告修改"
-            width="600px"
-            :close-on-click-modal="false"
-        >
-            <el-form ref="formRef" :model="data.form">
-                <el-form-item label="公告标题" prop="title">
-                    <el-input v-model="data.form.title" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="公告类型" prop="type">
-                    <el-select v-model="data.form.type" placeholder="公告类型">
-                        <el-option label="系统更新" value="系统更新" />
-                        <el-option label="维护通知" value="维护通知" />
-                        <el-option label="功能上线" value="功能上线" />
-                        <el-option label="其他公告" value="其他公告" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="发布者" prop="author">
-                    <el-input v-model="data.form.author" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="公告内容" prop="content">
-                    <el-input v-model="data.form.content" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="发布时间" prop="publishDate">
-                    <el-date-picker
-                        v-model="data.form.publishDate"
-                        placeholder="选择日期时间"
-                        type="datetime"
-                        autocomplete="off"
-                    />
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <div class="dialog-footer">
-                    <el-button @click="data.formVisible = false"
-                        >取消</el-button
-                    >
-                    <el-button type="primary" @click="update">更新</el-button>
-                </div>
-            </template>
-        </el-dialog>
     </div>
 </template>
 
 <script setup>
 import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search, Refresh, Edit, Delete, Plus } from "@element-plus/icons-vue";
 import request from "../../utils/request.js";
 import { formatDateTime, parseDate } from "../../utils/date.js";
+
+const user = JSON.parse(localStorage.getItem("local_user"));
 
 const data = reactive({
     title: null,
@@ -210,8 +170,10 @@ const data = reactive({
 });
 
 const formRef = ref();
+const router = useRouter();
 
 const load = () => {
+    const isAdmin = user && user.role && String(user.role).includes("管理员");
     request
         .get("/notice/list", {
             params: {
@@ -220,6 +182,12 @@ const load = () => {
                 title: data.title,
                 author: data.author,
                 type: data.type,
+                // 非管理员传 uid 给后端过滤
+                uid: isAdmin
+                    ? undefined
+                    : user && user.uid
+                      ? user.uid
+                      : undefined,
             },
         })
         .then((res) => {
@@ -246,13 +214,17 @@ const resetSearch = () => {
     load();
 };
 
-// 编辑用户
+// 编辑公告
 const handleEdit = (row) => {
-    data.form = JSON.parse(JSON.stringify(row));
-    data.formVisible = true;
+    try {
+        sessionStorage.setItem("editNotice", JSON.stringify(row));
+    } catch (e) {
+        console.warn("无法写入 sessionStorage", e);
+    }
+    router.push({ name: "noticePost" });
 };
 
-const handleSelectionChange = (row) => {
+const handleSelectionChange = (rows) => {
     data.rows = rows;
 };
 
@@ -275,23 +247,6 @@ const exportData = () => {
     window.open("http://localhost:8080/notice/exportData");
 };
 
-// // 修改状态
-const update = (row) => {
-    formRef.value.validate((valid) => {
-        if (valid) {
-            request.post("/notice/update", data.form).then((res) => {
-                if (res.code === "200") {
-                    data.formVisible = false;
-                    ElMessage.success("修改成功");
-                    load();
-                }
-            });
-        } else {
-            ElMessage.error(res.msg);
-        }
-    });
-};
-
 const handleImport = (res, file, filelist) => {
     if (res.code === "200") {
         ElMessage.success("数据导入成功");
@@ -311,11 +266,9 @@ const getTagType = (type) => {
     };
     return typeMap[type] || "info";
 };
-
 </script>
 
 <style scoped>
-
 .user-management {
     padding: 20px;
     background-color: #f5f7fa;
@@ -450,9 +403,8 @@ const getTagType = (type) => {
 
 /* 字数省略样式 */
 .ellipsis-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-
 </style>

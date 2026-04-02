@@ -40,15 +40,14 @@
                 <!-- 公告状态 -->
                 <el-form-item label="发布状态" prop="status">
                     <el-radio-group v-model="formData.status">
-                        <el-radio :label="0">草稿</el-radio>
-                        <el-radio :label="1">立即发布</el-radio>
-                        <el-radio :label="2">定时发布</el-radio>
+                        <el-radio label="已发布">立即发布</el-radio>
+                        <el-radio label="定时发布">定时发布</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
                 <!-- 定时发布时间（仅当状态为定时发布时显示） -->
                 <el-form-item
-                    v-if="formData.status === 2"
+                    v-if="formData.status === '定时发布'"
                     label="发布时间"
                     prop="publishDate"
                 >
@@ -136,7 +135,7 @@
         <el-dialog
             v-model="previewVisible"
             :title="formData.title"
-            width="600px"
+            width="1200px"
             class="detail-dialog"
             :before-close="handleClosePreview"
         >
@@ -145,9 +144,9 @@
                     <el-tag :type="getTagType(formData.type)" size="small">
                         {{ formData.type }}
                     </el-tag>
-                    <span class="date">{{
-                        formatDateTime(formData.publishDate) || "待发布"
-                    }}</span>
+                    <span class="date">
+                        {{ formatDateTime(formData.publishDate) || "待发布" }}
+                    </span>
                     <span class="author">发布人：{{ formData.author }}</span>
                 </div>
                 <div class="detail-body" v-html="formData.content"></div>
@@ -169,6 +168,7 @@ import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import "@wangeditor/editor/dist/css/style.css";
+import request from "../../utils/request.js";
 
 // 路由
 const router = useRouter();
@@ -177,17 +177,18 @@ const route = useRoute();
 const user = JSON.parse(localStorage.getItem("local_user"));
 // 表单数据
 const formData = reactive({
-    id: null,
+    nid: null,
+    uid: user.uid,
     title: "",
     type: "",
     author: user.name,
-    status: "发布",
+    status: "已发布",
     publishDate: "",
     summary: "",
     content: "",
     attachments: [],
 });
-
+console.log(formData);
 // 附件列表
 const fileList = ref([]);
 
@@ -226,6 +227,8 @@ const editor = ref(null);
 const formRef = ref(null);
 const submitting = ref(false);
 const previewVisible = ref(false);
+// 是否为编辑模式
+const isEditor = ref(false);
 
 // 时间选择器配置
 const pickerOptions = {
@@ -280,6 +283,23 @@ const editorConfig = {
 const handleEditorCreated = (instance) => {
     editor.value = instance;
     console.log("编辑器创建成功", instance);
+    // 如果是从管理页编辑过来，编辑器创建后需要将 HTML 内容显式设置到编辑器实例
+    if (isEditor.value && formData.content) {
+        const html =
+            typeof formData.content === "string"
+                ? formData.content
+                : String(formData.content);
+        try {
+            // 尝试常见的 API：setHtml
+            if (typeof instance.setHtml === "function") {
+                instance.setHtml(html);
+                return;
+            }
+        } catch (e) {
+            console.warn("注入编辑器内容失败", e);
+            formData.content = html;
+        }
+    }
 };
 
 // 编辑器内容变化回调
@@ -301,7 +321,7 @@ const handleSubmit = async () => {
         }
 
         // 定时发布需要验证发布时间
-        if (formData.status === 2 && !formData.publishDate) {
+        if (formData.status === "定时发布" && !formData.publishDate) {
             ElMessage.warning("请选择发布时间");
             return;
         }
@@ -317,7 +337,9 @@ const handleSubmit = async () => {
 const handleConfirmPublish = async () => {
     previewVisible.value = false;
     submitting.value = true;
-
+    if(!formData.status === "定时发布"){
+      formData.publishDate = Date.now();
+    }
     try {
         // 准备提交数据
         const submitData = {
@@ -329,12 +351,23 @@ const handleConfirmPublish = async () => {
             })),
         };
 
-        // 模拟 API 请求
-        // const res = await api.publishNotice(submitData)
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        ElMessage.success(isEdit.value ? "公告更新成功" : "公告发布成功");
+        if (isEditor.value) {
+            request.post("/notice/update", submitData).then((res) => {
+                if (res.code === "200") {
+                    ElMessage.success("公告修改成功");
+                } else {
+                    ElMessage.error("修改失败");
+                }
+            });
+        } else {
+            request.post("/notice/postNotice", submitData).then((res) => {
+                if (res.code === "200") {
+                    ElMessage.success("公告发布成功");
+                } else {
+                    ElMessage.error("发布失败");
+                }
+            });
+        }
 
         // 延迟跳转
         setTimeout(() => {
@@ -353,14 +386,36 @@ const handleSaveDraft = async () => {
     try {
         const draftData = {
             ...formData,
-            status: 0, // 草稿状态
-            attachments: fileList.value,
+            status: "草稿", // 草稿状态
+            attachments: fileList.value.map((file) => ({
+                name: file.name,
+                url: file.url,
+                size: file.size,
+            })),
         };
+        formData.publishDate = Date.now();
+        if (isEditor.value) {
+            request.post("/notice/update", draftData).then((res) => {
+                if (res.code === "200") {
+                    ElMessage.success("草稿修改成功");
+                } else {
+                    ElMessage.error("保存草稿失败");
+                }
+            });
+        } else {
+            request.post("/notice/saveDraft", draftData).then((res) => {
+                if (res.code === "200") {
+                    ElMessage.success("草稿保存成功");
+                } else {
+                    ElMessage.error("保存草稿失败");
+                }
+            });
+        }
 
-        // 模拟 API 请求
-        // await api.saveDraft(draftData)
-
-        ElMessage.success("草稿保存成功");
+        // 延迟跳转
+        setTimeout(() => {
+            router.push("/notice/index");
+        }, 1500);
     } catch (error) {
         ElMessage.error("保存草稿失败");
     }
@@ -400,16 +455,6 @@ const handleClosePreview = () => {
     previewVisible.value = false;
 };
 
-// 获取类型标签
-const getTypeLabel = (type) => {
-    const typeMap = {
-        notice: "普通公告",
-        warning: "重要通知",
-        emergency: "紧急公告",
-    };
-    return typeMap[type] || "未知";
-};
-
 // 组件卸载前销毁编辑器
 onBeforeUnmount(() => {
     if (editor.value) {
@@ -417,6 +462,7 @@ onBeforeUnmount(() => {
     }
 });
 
+// 获取类型标签
 const getTagType = (type) => {
     const typeMap = {
         系统更新: "primary",
@@ -428,7 +474,32 @@ const getTagType = (type) => {
 };
 
 // 初始化
-onMounted(() => {});
+onMounted(() => {
+    try {
+        const editRaw = sessionStorage.getItem("editNotice");
+        if (editRaw) {
+            const obj = JSON.parse(editRaw);
+            isEditor.value = true;
+            formData.nid = obj.nid || obj.id || formData.nid;
+            formData.title = obj.title || formData.title;
+            formData.type = obj.type || formData.type;
+            formData.author = obj.author || formData.author;
+            // 支持后端有字符串或时间戳
+            if (obj.publishDate) {
+                const d = new Date(obj.publishDate);
+                formData.publishDate = isNaN(d.getTime()) ? obj.publishDate : d;
+            }
+            formData.summary = obj.summary || formData.summary;
+            formData.content = obj.content || formData.content;
+            if (obj.attachments) {
+                fileList.value = obj.attachments;
+            }
+            sessionStorage.removeItem("editNotice");
+        }
+    } catch (e) {
+        console.warn("读取编辑数据失败", e);
+    }
+});
 </script>
 
 <style scoped lang="scss">

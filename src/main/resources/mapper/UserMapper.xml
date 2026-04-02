@@ -21,7 +21,7 @@
         </where>
     </select>
 
-    <update id="updateStatusById">
+    <update id="updateStatusById" parameterType="com.example.demo.entity.User">
         UPDATE `user`
         SET status=#{status},updateTime=NOW()
         WHERE uid=#{uid}

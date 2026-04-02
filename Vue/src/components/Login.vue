@@ -26,7 +26,7 @@ const login = () => {
                     const userStr = localStorage.getItem("local_user");
                     console.log(userStr);
                     ElMessage.success("登录成功");
-                    location.href = "/index";
+                    location.href = "/";
                 } else {
                     ElMessage.error(res.msg);
                 }

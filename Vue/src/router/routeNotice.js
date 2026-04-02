@@ -11,6 +11,11 @@ const routeNotice = [
         component: () => import("../components/notice/NoticePost.vue"),
     },
     {
+        path: "/notice/edit",
+        name: "noticeEdit",
+        component: () => import("../components/notice/NoticeEdit.vue"),
+    },
+    {
         path: "/notice/manager",
         name: "noticeManager",
         component: () => import("../components/notice/NoticeManager.vue"),

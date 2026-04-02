@@ -22,15 +22,9 @@
             active-text-color="#409EFF"
             :unique-opened="true"
         >
-            <el-menu-item index="/index">
+            <el-menu-item index="/">
                 <el-icon><House /></el-icon>
                 <span>首页</span>
-            </el-menu-item>
-
-            <!-- 签到打卡 -->
-            <el-menu-item index="/signboard">
-                <el-icon><Grid /></el-icon>
-                <span>签到打卡</span>
             </el-menu-item>
 
             <!-- 系统公告 -->
@@ -45,7 +39,7 @@
                 <el-menu-item index="/notice/post">
                     <span>公告发布</span>
                 </el-menu-item>
-                <el-menu-item index="/notice/manager" v-if="isAdmin">
+                <el-menu-item index="/notice/manager">
                     <span>公告管理</span>
                 </el-menu-item>
             </el-sub-menu>

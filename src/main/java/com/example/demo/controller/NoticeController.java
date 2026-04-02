@@ -5,8 +5,6 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.example.demo.common.Result;
 import com.example.demo.entity.Notice;
-import com.example.demo.entity.SignRecord;
-import com.example.demo.entity.User;
 import com.example.demo.service.NoticeService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -46,6 +44,18 @@ public class NoticeController {
                              Notice notice){
         PageInfo<Notice> pageInfo = noticeService.selectPage(pageNum, pageSize, notice);
         return Result.success(pageInfo);
+    }
+
+    @PostMapping("/postNotice")
+    public Result postNotice(@RequestBody Notice notice){
+        noticeService.insertNotice(notice);
+        return Result.success();
+    }
+
+    @PostMapping("/saveDraft")
+    public Result saveDraft(@RequestBody Notice notice){
+        noticeService.insertNotice(notice);
+        return Result.success();
     }
 
     @PostMapping("/update")

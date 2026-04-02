@@ -35,6 +35,15 @@
                 <el-option label="其他公告" value="其他公告" />
             </el-select>
 
+            <el-input
+                v-model="searchAuthor"
+                placeholder="搜索发布者"
+                clearable
+                style="width: 180px"
+                @clear="handleSearch"
+                @keyup.enter="handleSearch"
+            />
+
             <el-button type="primary" @click="handleSearch">
                 <el-icon><Search /></el-icon>
                 搜索
@@ -52,7 +61,11 @@
                     :type="getTimelineType(item.type)"
                     :hollow="true"
                 >
-                    <el-card class="announcement-card" shadow="hover" @click="viewDetail(item)">
+                    <el-card
+                        class="announcement-card"
+                        shadow="hover"
+                        @click="viewDetail(item)"
+                    >
                         <template #header>
                             <div class="card-header">
                                 <div class="title-section">
@@ -112,11 +125,11 @@
             />
         </div>
 
-        <!-- 详情对话框 -->
+        <!-- 详情公告内容框 -->
         <el-dialog
             v-model="dialogVisible"
             :title="selectedAnnouncement?.title"
-            width="600px"
+            width="1200px"
             class="detail-dialog"
         >
             <div v-if="selectedAnnouncement" class="detail-content">
@@ -158,6 +171,9 @@ import { Search, User, View } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import request from "../../utils/request.js";
 import { formatDateTime, parseDate } from "../../utils/date.js";
+import router from "../../router/index.js";
+
+const user = JSON.parse(localStorage.getItem("local_user"));
 
 // 公告数据（从后端加载）
 const announcements = ref([]);
@@ -173,10 +189,12 @@ const mapNoticeToAnnouncement = (notice) => {
     return {
         id: notice.nid,
         title: notice.title || "未命名公告",
+        status: notice.status || "",
         type: notice.type,
         summary: notice.summary || stripHtml(content).slice(0, 140),
         content: content,
         publishDate: notice.publishDate ? parseDate(notice.publishDate) : null,
+        uid: notice.uid,
         author: notice.author
             ? notice.author
             : notice.uid
@@ -204,9 +222,10 @@ const loadNotices = async () => {
 // 筛选相关
 const searchKeyword = ref("");
 const selectedType = ref("");
+const searchAuthor = ref("");
 const filteredList = computed(() => {
     let list = announcements.value;
-
+    //按照输入的值进行筛选
     if (searchKeyword.value) {
         list = list.filter((item) =>
             item.title
@@ -214,11 +233,18 @@ const filteredList = computed(() => {
                 .includes(searchKeyword.value.toLowerCase()),
         );
     }
-
     if (selectedType.value) {
         list = list.filter((item) => item.type === selectedType.value);
     }
-
+    if (searchAuthor.value) {
+        list = list.filter((item) =>
+            item.author
+                .toLowerCase()
+                .includes(searchAuthor.value.toLowerCase()),
+        );
+    }
+    // 排除草稿状态的公告
+    list = list.filter((item) => item.status !== "草稿" && item.status !== "定时发布");
     return list;
 });
 
@@ -317,6 +343,7 @@ const viewDetail = async (item) => {
         ElMessage.error("更新阅读数请求失败");
     }
 };
+
 
 const markAsRead = () => {
     dialogVisible.value = false;
@@ -467,6 +494,19 @@ onMounted(() => {
 
 .detail-body :deep(p) {
     margin: 0 0 12px 0;
+}
+
+/* 修复 blockquote 显示，适配 v-html 渲染的引用样式 */
+.detail-body :deep(blockquote) {
+    margin: 0 0 12px 0;
+    padding: 12px 16px;
+    border-left: 4px solid #e6e6e6;
+    background: #fafafa;
+    color: #606266;
+    font-style: italic;
+}
+.detail-body :deep(blockquote p) {
+    margin: 0;
 }
 
 .detail-body :deep(ul) {

@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Notice;
-import com.example.demo.entity.SignRecord;
 import com.example.demo.exception.CustomerException;
 import com.example.demo.mapper.NoticeMapper;
 import com.github.pagehelper.PageHelper;

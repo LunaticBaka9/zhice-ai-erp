@@ -8,7 +8,7 @@
             </el-icon>
             <!-- 面包屑导航 -->
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item :to="{ path: '/index' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
                 <el-breadcrumb-item v-for="(item, index) in breadcrumbs" :key="index">
                     <template v-if="item.path && index !== breadcrumbs.length - 1">
                         <el-link type="primary" @click="handleNavigate(item.path)">
@@ -153,7 +153,6 @@ const route = useRoute();
 const router = useRouter();
 
 const breadcrumbMap = {
-    "/signboard": "打卡签到",
     "/userInfo": "个人中心",
     "/message": "消息中心",
     "/notice/index": "公告详情",

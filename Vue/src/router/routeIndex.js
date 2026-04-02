@@ -1,13 +1,8 @@
 const routeIndex = [
   {
-    path: "/index",
-    name: "index",
+    path: "/",
+    name: "",
     component: () => import("../components/index.vue"),
-  },
-  {
-    path: "/signboard",
-    name: "signboard",
-    component: () => import("../components/SignBoard.vue"),
   },
   {
     path: "/message",
