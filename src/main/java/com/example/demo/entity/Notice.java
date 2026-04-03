@@ -37,4 +37,7 @@ public class Notice {
 
     @Alias("查看数量")
     Long views;
+
+    @Alias("附件")
+    String attachments;
 }

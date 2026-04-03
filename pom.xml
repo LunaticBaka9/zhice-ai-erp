@@ -84,6 +84,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.30</version> <!-- 建议使用最新稳定版 -->
             <scope>annotationProcessor</scope>
         </dependency>
         <dependency>

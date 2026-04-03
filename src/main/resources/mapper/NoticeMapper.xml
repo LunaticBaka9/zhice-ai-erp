@@ -22,8 +22,8 @@
     </select>
 
     <insert id="insertNotice" parameterType="com.example.demo.entity.Notice">
-        INSERT into notice(title,type,summary,content,publishDate,uid,author,status)
-        values (#{title},#{type},#{summary},#{content},#{publishDate},#{uid},#{author},#{status})
+        INSERT into notice(title,type,summary,attachments,content,publishDate,uid,author,status)
+        values (#{title},#{type},#{summary},#{attachments},#{content},#{publishDate},#{uid},#{author},#{status})
     </insert>
 
     <update id="updateNotice">
@@ -35,7 +35,8 @@
             <if test="content != null and content != ''"> content=#{content}, </if>
             <if test="publishDate != null"> publishDate=#{publishDate},</if>
             <if test="views != null and views != ''">views=#{views},</if>
-            <if test="status != null and status != ''">status=#{status}</if>
+            <if test="status != null and status != ''">status=#{status},</if>
+            <if test="attachments != null and attachments != ''">attachments=#{attachments}</if>
         </set>
         WHERE nid=#{nid}
     </update>

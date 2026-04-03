@@ -98,20 +98,26 @@
                 <!-- 附件上传 -->
                 <el-form-item label="附件">
                     <el-upload
+                        ref="uploadRef"
                         class="upload-demo"
-                        action="/api/upload"
+                        :action="uploadAction"
+                        :headers="uploadHeaders"
                         :on-success="handleUploadSuccess"
+                        :on-error="handleUploadError"
                         :on-remove="handleUploadRemove"
-                        :file-list="fileList"
+                        :on-change="handleFileChange"
+                        :before-upload="beforeUpload"
+                        v-model:file-list="fileList"
                         :limit="5"
                         :on-exceed="handleExceed"
                         multiple
+                        :auto-upload="true"
                     >
                         <el-button type="primary">上传附件</el-button>
                         <template #tip>
                             <div class="el-upload__tip">
                                 支持上传图片、文档、压缩包等，单个文件不超过
-                                10MB
+                                10MB，最多5个文件
                             </div>
                         </template>
                     </el-upload>
@@ -150,6 +156,33 @@
                     <span class="author">发布人：{{ formData.author }}</span>
                 </div>
                 <div class="detail-body" v-html="formData.content"></div>
+                <!-- 附件预览 -->
+                <div v-if="fileList.length > 0" class="attachment-section">
+                    <h4>附件列表</h4>
+                    <div class="attachment-list">
+                        <div
+                            v-for="(file, index) in fileList"
+                            :key="index"
+                            class="attachment-item"
+                        >
+                            <el-icon class="attachment-icon"
+                                ><Document
+                            /></el-icon>
+                            <span class="attachment-name">{{ file.name }}</span>
+                            <span class="attachment-size">{{
+                                formatFileSize(file.size)
+                            }}</span>
+                            <el-button
+                                type="primary"
+                                link
+                                size="small"
+                                @click="handleDownloadFile(file)"
+                            >
+                                下载
+                            </el-button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <template #footer>
                 <el-button @click="previewVisible = false">关闭</el-button>
@@ -162,10 +195,18 @@
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeUnmount, onMounted, computed } from "vue";
+import {
+    ref,
+    reactive,
+    onBeforeUnmount,
+    onMounted,
+    computed,
+    watch,
+} from "vue";
 import { formatDateTime } from "../../utils/date.js";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { Document, Download } from "@element-plus/icons-vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import "@wangeditor/editor/dist/css/style.css";
 import request from "../../utils/request.js";
@@ -188,9 +229,33 @@ const formData = reactive({
     content: "",
     attachments: [],
 });
-console.log(formData);
+
 // 附件列表
 const fileList = ref([]);
+const uploadRef = ref(null);
+
+// 表单更改检测
+const isFormDirty = ref(false);
+const originalFormData = ref(null);
+
+// 上传配置
+const uploadAction = computed(() => {
+    // el-upload 的 action 需要完整的 URL
+    // 由于使用了代理，直接使用相对路径即可
+    return "/api/file/upload";
+});
+
+const uploadHeaders = computed(() => {
+    // 文件上传使用 multipart/form-data，不要设置 Content-Type
+    // 浏览器会自动设置正确的 Content-Type 和 boundary
+    const headers = {};
+    // 如果需要认证 token，可以在这里添加
+    const token = localStorage.getItem("token");
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+});
 
 // 表单校验规则
 const formRules = {
@@ -253,13 +318,12 @@ const editorConfig = {
     MENU_CONF: {
         // 上传图片配置
         uploadImage: {
-            server: "/api/upload/image",
+            server: "/file/upload",
             fieldName: "file",
             maxFileSize: 5 * 1024 * 1024, // 5MB
             maxNumberOfFiles: 10,
             allowedFileTypes: ["image/*"],
             onSuccess(file, res) {
-                // 上传成功回调
                 console.log("图片上传成功", res);
             },
             onFailed(file, res) {
@@ -271,7 +335,7 @@ const editorConfig = {
         },
         // 上传视频配置
         uploadVideo: {
-            server: "/api/upload/video",
+            server: "/file/upload",
             fieldName: "file",
             maxFileSize: 20 * 1024 * 1024, // 20MB
             allowedFileTypes: ["video/*"],
@@ -302,7 +366,6 @@ const handleEditorCreated = (instance) => {
     }
 };
 
-// 编辑器内容变化回调
 const handleEditorChange = (editor) => {
     // 可以在这里做实时保存等操作
     console.log("内容已变化");
@@ -337,24 +400,35 @@ const handleSubmit = async () => {
 const handleConfirmPublish = async () => {
     previewVisible.value = false;
     submitting.value = true;
-    if(!formData.status === "定时发布"){
-      formData.publishDate = Date.now();
+    if (!formData.status === "定时发布") {
+        formData.publishDate = Date.now();
     }
     try {
         // 准备提交数据
+        // 打印 fileList 用于调试
+        console.log("当前 fileList:", JSON.stringify(fileList.value));
+
+        // 过滤掉没有 url 的文件（只要有 url 就认为是上传成功的）
+        const validFiles = fileList.value.filter((f) => f.url);
+        console.log("有效附件:", JSON.stringify(validFiles));
+
         const submitData = {
             ...formData,
-            attachments: fileList.value.map((file) => ({
-                name: file.name,
-                url: file.url,
-                size: file.size,
-            })),
+            attachments: JSON.stringify(
+                validFiles.map((file) => ({
+                    name: file.name,
+                    url: file.url,
+                    size: file.size,
+                })),
+            ),
         };
+        console.log("提交数据:", submitData);
 
         if (isEditor.value) {
             request.post("/notice/update", submitData).then((res) => {
                 if (res.code === "200") {
                     ElMessage.success("公告修改成功");
+                    isFormDirty.value = false; // 重置脏状态
                 } else {
                     ElMessage.error("修改失败");
                 }
@@ -363,6 +437,7 @@ const handleConfirmPublish = async () => {
             request.post("/notice/postNotice", submitData).then((res) => {
                 if (res.code === "200") {
                     ElMessage.success("公告发布成功");
+                    isFormDirty.value = false; // 重置脏状态
                 } else {
                     ElMessage.error("发布失败");
                 }
@@ -371,8 +446,9 @@ const handleConfirmPublish = async () => {
 
         // 延迟跳转
         setTimeout(() => {
+            isFormDirty.value = false; // 跳转前重置脏状态
             router.push("/notice/index");
-        }, 1500);
+        }, 1000);
     } catch (error) {
         ElMessage.error("发布失败");
         console.error("提交失败", error);
@@ -384,14 +460,20 @@ const handleConfirmPublish = async () => {
 // 保存草稿
 const handleSaveDraft = async () => {
     try {
+        // 过滤掉没有 url 的文件
+        const validFiles = fileList.value.filter(
+            (f) => f.url && f.status === "success",
+        );
         const draftData = {
             ...formData,
             status: "草稿", // 草稿状态
-            attachments: fileList.value.map((file) => ({
-                name: file.name,
-                url: file.url,
-                size: file.size,
-            })),
+            attachments: JSON.stringify(
+                validFiles.map((file) => ({
+                    name: file.name,
+                    url: file.url,
+                    size: file.size,
+                })),
+            ),
         };
         formData.publishDate = Date.now();
         if (isEditor.value) {
@@ -414,8 +496,9 @@ const handleSaveDraft = async () => {
 
         // 延迟跳转
         setTimeout(() => {
+            isFormDirty.value = false; // 跳转前重置脏状态
             router.push("/notice/index");
-        }, 1500);
+        }, 1000);
     } catch (error) {
         ElMessage.error("保存草稿失败");
     }
@@ -429,38 +512,142 @@ const handleCancel = () => {
         type: "warning",
     })
         .then(() => {
+            isFormDirty.value = false; // 重置脏状态
             router.back();
         })
         .catch(() => {});
 };
 
+// 上传前校验
+const beforeUpload = (file) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+        ElMessage.error(`文件 ${file.name} 超过 10MB 限制`);
+        return false;
+    }
+    return true;
+};
+
 // 上传成功回调
 const handleUploadSuccess = (response, file) => {
-    file.url = response.data.url;
-    ElMessage.success(`文件 ${file.name} 上传成功`);
+    try {
+        let url = "";
+        let name = file.name;
+        let size = file.size;
+
+        if (response && response.code === "200" && response.data) {
+            // 后端返回格式：{ code: "200", msg: "", data: { url, name, size, type } }
+            if (typeof response.data === "object") {
+                url = response.data.url || "";
+                name = response.data.name || file.name;
+                size = response.data.size || file.size;
+            } else if (typeof response.data === "string") {
+                url = response.data;
+            }
+        }
+
+        if (url) {
+            // 更新 fileList 中的对应项
+            const index = fileList.value.findIndex((f) => f.uid === file.uid);
+            if (index !== -1) {
+                fileList.value[index].url = url;
+                fileList.value[index].name = name;
+                fileList.value[index].size = size;
+                fileList.value[index].status = "success";
+            } else {
+                // 如果没找到，直接添加到 fileList
+                fileList.value.push({
+                    uid: file.uid,
+                    name: name,
+                    size: size,
+                    url: url,
+                    status: "success",
+                });
+            }
+
+            console.log("更新后的 fileList:", JSON.stringify(fileList.value));
+            ElMessage.success(`文件 ${name} 上传成功`);
+        } else {
+            ElMessage.error("上传失败，未返回文件路径");
+            // 从列表中移除上传失败的文件
+            const index = fileList.value.findIndex((f) => f.uid === file.uid);
+            if (index !== -1) {
+                fileList.value.splice(index, 1);
+            }
+        }
+    } catch (e) {
+        console.error("处理上传返回值失败", e, response);
+        ElMessage.error("处理上传结果失败");
+    }
+};
+
+// 上传失败回调
+const handleUploadError = (error, file) => {
+    console.error("文件上传失败", error);
+    ElMessage.error(`文件 ${file.name} 上传失败`);
+    // 从列表中移除上传失败的文件
+    const index = fileList.value.findIndex((f) => f.uid === file.uid);
+    if (index !== -1) {
+        fileList.value.splice(index, 1);
+    }
+};
+
+// 文件变化回调（文件添加或移除时触发）
+const handleFileChange = (file, uploadedFileList) => {
+    console.log("文件变化:", file.name, "状态:", file.status);
+    // fileList 已通过 v-model:file-list 自动更新
 };
 
 // 移除附件
-const handleUploadRemove = (file, fileList) => {
+const handleUploadRemove = (file, uploadedFileList) => {
     console.log("移除附件", file);
+    // 从 fileList 中移除
+    const index = fileList.value.findIndex(
+        (f) => f.uid === file.uid || f.name === file.name,
+    );
+    if (index !== -1) {
+        fileList.value.splice(index, 1);
+    }
 };
 
 // 超出文件数量限制
-const handleExceed = (files, fileList) => {
+const handleExceed = (files, uploadedFileList) => {
     ElMessage.warning("最多只能上传 5 个附件");
+};
+
+// 下载文件
+const handleDownloadFile = (file) => {
+    if (!file.url) {
+        ElMessage.warning("文件路径不存在");
+        return;
+    }
+    // 后端返回的路径已经包含 /api 前缀
+    // 如果路径不以 http 开头，直接使用相对路径
+    const downloadUrl = file.url.startsWith("http") ? file.url : file.url;
+
+    // 创建隐藏的 a 标签进行下载
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = file.name;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toFixed(2) + " " + sizes[i];
 };
 
 // 关闭预览
 const handleClosePreview = () => {
     previewVisible.value = false;
 };
-
-// 组件卸载前销毁编辑器
-onBeforeUnmount(() => {
-    if (editor.value) {
-        editor.value.destroy();
-    }
-});
 
 // 获取类型标签
 const getTagType = (type) => {
@@ -473,8 +660,73 @@ const getTagType = (type) => {
     return typeMap[type] || "info";
 };
 
+// 检查表单是否有更改
+const checkFormDirty = () => {
+    // 如果有任何附件上传，认为是脏的
+    if (fileList.value.length > 0) {
+        isFormDirty.value = true;
+        return;
+    }
+    // 检查表单字段
+    if (
+        formData.title ||
+        formData.type ||
+        formData.summary ||
+        formData.content
+    ) {
+        isFormDirty.value = true;
+    }
+};
+
+// 监听表单数据变化
+watch(
+    () => [
+        formData.title,
+        formData.type,
+        formData.summary,
+        formData.content,
+        formData.status,
+        fileList.value.length,
+    ],
+    () => {
+        checkFormDirty();
+    },
+    { deep: true },
+);
+
+// 浏览器刷新/关闭前的提示
+const handleBeforeUnload = (e) => {
+    if (isFormDirty.value) {
+        e.preventDefault();
+        e.returnValue = "页面内容将不会保存，确定要离开吗？";
+        return "页面内容将不会保存，确定要离开吗？";
+    }
+};
+
+// 路由离开前的提示
+const handleBeforeRouteLeave = (to, from, next) => {
+    if (isFormDirty.value) {
+        ElMessageBox.confirm("页面内容将不会保存，确定要离开吗？", "提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+        })
+            .then(() => {
+                next();
+            })
+            .catch(() => {
+                next(false);
+            });
+    } else {
+        next();
+    }
+};
+
 // 初始化
 onMounted(() => {
+    // 添加浏览器刷新/关闭监听
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     try {
         const editRaw = sessionStorage.getItem("editNotice");
         if (editRaw) {
@@ -492,12 +744,30 @@ onMounted(() => {
             formData.summary = obj.summary || formData.summary;
             formData.content = obj.content || formData.content;
             if (obj.attachments) {
-                fileList.value = obj.attachments;
+                try {
+                    fileList.value =
+                        typeof obj.attachments === "string"
+                            ? JSON.parse(obj.attachments)
+                            : obj.attachments;
+                } catch (e) {
+                    fileList.value = obj.attachments || [];
+                }
             }
             sessionStorage.removeItem("editNotice");
         }
     } catch (e) {
         console.warn("读取编辑数据失败", e);
+    }
+});
+
+// 组件卸载前
+onBeforeUnmount(() => {
+    // 移除浏览器刷新/关闭监听
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+
+    // 销毁编辑器
+    if (editor.value) {
+        editor.value.destroy();
     }
 });
 </script>
@@ -507,6 +777,91 @@ onMounted(() => {
     padding: 24px 20px;
     background-color: #f5f7fa;
     min-height: calc(100vh - 60px);
+}
+
+// 附件列表样式
+.file-list {
+    margin-top: 10px;
+    border: 1px solid #ebeef5;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #fafafa;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ebeef5;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.file-icon {
+    color: #909399;
+    margin-right: 8px;
+}
+
+.file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #606266;
+}
+
+.file-size {
+    color: #909399;
+    font-size: 12px;
+    margin: 0 10px;
+}
+
+// 预览对话框中的附件样式
+.attachment-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ebeef5;
+
+    h4 {
+        margin: 0 0 10px 0;
+        color: #303133;
+        font-size: 14px;
+    }
+}
+
+.attachment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f5f7fa;
+    border-radius: 4px;
+}
+
+.attachment-icon {
+    color: #909399;
+    margin-right: 8px;
+}
+
+.attachment-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #606266;
+}
+
+.attachment-size {
+    color: #909399;
+    font-size: 12px;
+    margin: 0 10px;
 }
 
 .page-header {

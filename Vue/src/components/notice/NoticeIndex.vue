@@ -151,6 +151,43 @@
                     class="detail-body"
                     v-html="selectedAnnouncement.content"
                 ></div>
+                <!-- 附件列表 -->
+                <div
+                    v-if="
+                        selectedAnnouncement.attachments &&
+                        selectedAnnouncement.attachments.length > 0
+                    "
+                    class="attachment-section"
+                >
+                    <h4 class="attachment-title">
+                        <el-icon><Document /></el-icon> 附件下载
+                    </h4>
+                    <div class="attachment-list">
+                        <div
+                            v-for="(
+                                file, index
+                            ) in selectedAnnouncement.attachments"
+                            :key="index"
+                            class="attachment-item"
+                        >
+                            <el-icon class="attachment-icon"
+                                ><Document
+                            /></el-icon>
+                            <span class="attachment-name">{{ file.name }}</span>
+                            <span class="attachment-size">{{
+                                formatFileSize(file.size)
+                            }}</span>
+                            <el-button
+                                type="primary"
+                                link
+                                size="small"
+                                @click="handleDownloadFile(file)"
+                            >
+                                <el-icon><Download /></el-icon> 下载
+                            </el-button>
+                        </div>
+                    </div>
+                </div>
                 <div class="detail-footer">
                     <span>阅读次数：{{ selectedAnnouncement.views }}</span>
                 </div>
@@ -167,7 +204,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { Search, User, View } from "@element-plus/icons-vue";
+import {
+    Search,
+    User,
+    View,
+    Document,
+    Download,
+} from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import request from "../../utils/request.js";
 import { formatDateTime, parseDate } from "../../utils/date.js";
@@ -184,6 +227,20 @@ const mapNoticeToAnnouncement = (notice) => {
         if (!html) return "";
         return html.replace(/<[^>]*>/g, "");
     };
+
+    // 解析附件数据
+    let attachments = [];
+    if (notice.attachments) {
+        try {
+            attachments =
+                typeof notice.attachments === "string"
+                    ? JSON.parse(notice.attachments)
+                    : notice.attachments;
+        } catch (e) {
+            console.warn("解析附件数据失败", e);
+            attachments = [];
+        }
+    }
 
     const content = notice.content || "";
     return {
@@ -202,6 +259,7 @@ const mapNoticeToAnnouncement = (notice) => {
               : "系统管理员",
         views: notice.views ? notice.views : 0,
         isRead: false,
+        attachments: attachments,
     };
 };
 
@@ -344,6 +402,34 @@ const viewDetail = async (item) => {
     } catch (e) {
         ElMessage.error("更新阅读数请求失败");
     }
+};
+
+// 下载文件
+const handleDownloadFile = (file) => {
+    if (!file.url) {
+        ElMessage.warning("文件路径不存在");
+        return;
+    }
+    // 后端返回的路径已经包含 /api 前缀
+    const downloadUrl = file.url.startsWith("http") ? file.url : file.url;
+
+    // 创建隐藏的 a 标签进行下载
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = file.name;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toFixed(2) + " " + sizes[i];
 };
 
 const markAsRead = () => {
@@ -491,6 +577,60 @@ onMounted(() => {
 .detail-body {
     line-height: 1.8;
     color: #303133;
+}
+
+/* 附件样式 */
+.attachment-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ebeef5;
+}
+
+.attachment-title {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #303133;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.attachment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background-color: #f5f7fa;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.attachment-item:hover {
+    background-color: #e8eef5;
+}
+
+.attachment-icon {
+    color: #909399;
+    margin-right: 8px;
+}
+
+.attachment-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #606266;
+}
+
+.attachment-size {
+    color: #909399;
+    font-size: 12px;
+    margin: 0 10px;
 }
 
 .detail-body :deep(p) {
