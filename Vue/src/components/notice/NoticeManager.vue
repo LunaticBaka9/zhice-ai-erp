@@ -371,18 +371,18 @@ const getTagType = (type) => {
 }
 
 /* 设置表格行高 */
-::v-deep .el-table__row {
+:deep(.el-table__row) {
     height: 60px;
 }
 
 /* 或者设置单元格内边距 */
-::v-deep .el-table__body td {
+:deep(.el-table__body td) {
     padding: 15px 0;
 }
 
 /* 或者设置单元格的高度 */
-::v-deep .el-table td,
-::v-deep .el-table th {
+:deep(.el-table td),
+:deep(.el-table th) {
     padding: 12px 0;
 }
 

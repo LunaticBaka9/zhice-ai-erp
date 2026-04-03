@@ -1,10 +1,10 @@
 package com.example.demo.entity;
 
+import java.util.Date;
+
 import cn.hutool.core.annotation.Alias;
 import cn.hutool.core.annotation.PropIgnore;
 import lombok.Data;
-
-import java.util.Date;
 
 @Data
 public class SignRecord {

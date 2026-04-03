@@ -37,6 +37,12 @@ public class SignController {
 
     @PostMapping("/add")
     public Result add(@RequestBody SignRecord signRecord) {
+        // 检查今日是否已经打卡
+        SignRecord todaySign = signService.selectTodaySign(signRecord.getUid());
+        if (todaySign != null) {
+            return Result.error("今天已经打卡了");
+        }
+
         Date now = new Date();
         // 设置创建时间、打卡日期和打卡时间
         if (signRecord.getCreateTime() == null) {
@@ -127,30 +133,31 @@ public class SignController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String name,
             HttpServletResponse response) throws IOException{
-        ExcelWriter writer = ExcelUtil.getWriter(username, name);
         //全局
-        CellStyle cellStyle = writer.getCellStyle();
-        //创建标题字体
-        Font font = writer.createFont();
-        //大小
-        font.setFontHeightInPoints((short) 10);
-        font.setFontName("宋体");
-        cellStyle.setFont(font);
-        //全局  宽15
-        writer.setColumnWidth(-1,15);
-        writer.setColumnWidth(0,20);
-        //全局  高25
-        writer.setRowHeight(-1,25);
-
-        List<SignRecord> list = signService.selectAllSign();
-        writer.write(list,true);
-        //response为HttpServletResponse对象
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-        response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode("签到信息表", StandardCharsets.UTF_8) +".xls");
-        ServletOutputStream out = response.getOutputStream();
-        writer.flush(out,true);
-        writer.close();
+        try (ExcelWriter writer = ExcelUtil.getWriter(username, name)) {
+            //全局
+            CellStyle cellStyle = writer.getCellStyle();
+            //创建标题字体
+            Font font = writer.createFont();
+            //大小
+            font.setFontHeightInPoints((short) 10);
+            font.setFontName("宋体");
+            cellStyle.setFont(font);
+            //全局  宽15
+            writer.setColumnWidth(-1,15);
+            writer.setColumnWidth(0,20);
+            //全局  高25
+            writer.setRowHeight(-1,25);
+            
+            List<SignRecord> list = signService.selectAllSign();
+            writer.write(list,true);
+            //response为HttpServletResponse对象
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode("签到信息表", StandardCharsets.UTF_8) +".xls");
+            ServletOutputStream out = response.getOutputStream();
+            writer.flush(out,true);
+        }
     }
 
     @GetMapping("/latest")
@@ -159,6 +166,16 @@ public class SignController {
             return Result.error("缺少 uid");
         }
         SignRecord r = signService.selectLatestSign(uid);
+        return Result.success(r);
+    }
+
+    // 检查今日是否已经打卡
+    @GetMapping("/today")
+    public Result today(@RequestParam Long uid) {
+        if (uid == null) {
+            return Result.error("缺少 uid");
+        }
+        SignRecord r = signService.selectTodaySign(uid);
         return Result.success(r);
     }
 

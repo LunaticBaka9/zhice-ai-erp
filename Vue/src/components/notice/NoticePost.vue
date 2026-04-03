@@ -347,6 +347,47 @@ const editorConfig = {
 const handleEditorCreated = (instance) => {
     editor.value = instance;
     console.log("编辑器创建成功", instance);
+
+    // 添加工具栏菜单收起功能
+    setTimeout(() => {
+        // 获取工具栏元素
+        const toolbarElement = document.querySelector(".w-e-toolbar");
+        const editorElement = document.querySelector(".w-e-text-container");
+
+        if (toolbarElement) {
+            // 点击工具栏空白处收起菜单
+            toolbarElement.addEventListener("click", (e) => {
+                // 检查是否点击的是工具栏本身而不是按钮
+                if (
+                    e.target === toolbarElement ||
+                    e.target.classList.contains("w-e-bar-item")
+                ) {
+                    closeAllMenus();
+                }
+            });
+        }
+
+        if (editorElement) {
+            // 点击编辑器区域收起菜单
+            editorElement.addEventListener("click", () => {
+                closeAllMenus();
+            });
+        }
+
+        // 按 ESC 键收起菜单
+        const handleEscKey = (e) => {
+            if (e.key === "Escape" || e.keyCode === 27) {
+                closeAllMenus();
+            }
+        };
+        document.addEventListener("keydown", handleEscKey);
+
+        // 保存清理函数引用
+        instance._cleanupEscHandler = () => {
+            document.removeEventListener("keydown", handleEscKey);
+        };
+    }, 500);
+
     // 如果是从管理页编辑过来，编辑器创建后需要将 HTML 内容显式设置到编辑器实例
     if (isEditor.value && formData.content) {
         const html =
@@ -364,6 +405,29 @@ const handleEditorCreated = (instance) => {
             formData.content = html;
         }
     }
+};
+
+// 关闭所有打开的菜单
+const closeAllMenus = () => {
+    // 查找所有打开的菜单面板
+    const menus = document.querySelectorAll(
+        ".w-e-bar-item .w-e-drop-panel, .w-e-drop-panel",
+    );
+    menus.forEach((menu) => {
+        if (menu.style.display !== "none") {
+            menu.style.display = "none";
+        }
+    });
+
+    // 移除菜单的激活状态
+    const activeButtons = document.querySelectorAll(
+        ".w-e-bar-item button.w-e-active",
+    );
+    activeButtons.forEach((btn) => {
+        btn.classList.remove("w-e-active");
+    });
+
+    console.log("已收起工具栏菜单");
 };
 
 const handleEditorChange = (editor) => {
@@ -767,6 +831,10 @@ onBeforeUnmount(() => {
 
     // 销毁编辑器
     if (editor.value) {
+        // 清理 ESC 键监听器
+        if (editor.value._cleanupEscHandler) {
+            editor.value._cleanupEscHandler();
+        }
         editor.value.destroy();
     }
 });

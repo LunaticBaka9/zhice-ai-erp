@@ -87,4 +87,24 @@
     <delete id="deleteById" parameterType="com.example.demo.entity.SignRecord">
         delete from sign_record where sid=#{sid}
     </delete>
+
+    <!-- 查询用户今日是否有打卡记录 -->
+    <select id="selectTodaySign" parameterType="long" resultType="com.example.demo.entity.SignRecord">
+        select
+            sr.sid as sid,
+            sr.uid as uid,
+            sr.sign_in_time as signInTime,
+            sr.sign_out_time as signOutTime,
+            sr.sign_in_status as signInStatus,
+            sr.sign_out_status as signOutStatus,
+            sr.remark as remark,
+            sr.create_time as createTime,
+            u.username as username
+        from sign_record sr
+        left join `user` u on sr.uid = u.uid
+        where sr.uid = #{uid}
+          and DATE(sr.sign_in_time) = CURDATE()
+        order by sr.sign_in_time desc
+        limit 1
+    </select>
 </mapper>

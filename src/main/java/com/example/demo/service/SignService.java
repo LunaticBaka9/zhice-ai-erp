@@ -1,14 +1,16 @@
 package com.example.demo.service;
 
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.entity.SignRecord;
 import com.example.demo.mapper.SignMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import jakarta.annotation.Resource;
 
 @Service
 public class SignService {
@@ -50,5 +52,10 @@ public class SignService {
 
     public void deleteById(SignRecord signRecord){
         signMapper.deleteById(signRecord);
+    }
+
+    // 查询用户今日是否有打卡记录
+    public SignRecord selectTodaySign(Long uid) {
+        return signMapper.selectTodaySign(uid);
     }
 }

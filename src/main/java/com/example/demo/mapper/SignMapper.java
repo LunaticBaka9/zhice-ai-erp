@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.example.demo.entity.SignRecord;
 
+
 @Mapper
 public interface SignMapper {
     List<SignRecord> selectAllSign(SignRecord signRecord);
@@ -21,4 +22,7 @@ public interface SignMapper {
     void updateById(SignRecord signRecord);
 
     void deleteById(SignRecord signRecord);
+
+    // 查询用户今日是否有打卡记录
+    SignRecord selectTodaySign(Long uid);
 }
