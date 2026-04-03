@@ -70,8 +70,8 @@ public class FileController {
             Files.copy(file.getInputStream(), target);
             // 返回前端可访问的静态资源路径
             publicPath =  "api/static/upload/picture/" + fileName;
-        } if (suffix.contains("txt") || suffix.contains("doc") || suffix.contains("png")) {
-            File uploadDirFile = new File(staticDir, "upload/picture");
+        } if (suffix.contains("txt") || suffix.contains("doc") || suffix.contains("xls")) {
+            File uploadDirFile = new File(staticDir, "upload/files");
             if (!uploadDirFile.exists()) {
                 uploadDirFile.mkdirs();
             }
