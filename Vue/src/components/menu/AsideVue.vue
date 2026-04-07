@@ -151,7 +151,7 @@
             </el-sub-menu>
 
             <!-- 系统监控 -->
-            <el-sub-menu v-if="isTech || isAdmin" index="/monitor">
+            <el-sub-menu v-if="isTech || isAdmin">
                 <template #title>
                     <el-icon><Monitor /></el-icon>
                     <span>系统监控</span>
@@ -159,7 +159,7 @@
                 <el-menu-item index="/monitor/online">
                     <span>在线用户</span>
                 </el-menu-item>
-                <el-menu-item index="/monitor/log">
+                <el-menu-item index="/system/operationLog">
                     <span>操作日志</span>
                 </el-menu-item>
             </el-sub-menu>

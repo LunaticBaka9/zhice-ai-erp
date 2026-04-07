@@ -75,13 +75,27 @@
                 <el-table-column prop="sid" label="ID" width="80" />
                 <el-table-column prop="username" label="用户名" width="120" />
                 <el-table-column prop="name" label="姓名" width="120" />
-                <el-table-column prop="signInTime" label="签到时间" sortable />
+                <el-table-column prop="signInTime" label="签到时间" sortable>
+                    <template #default="{ row }">
+                        {{
+                            row.signInTime ? formatDateTime(row.signInTime) : ""
+                        }}
+                    </template>
+                </el-table-column>
                 <el-table-column
                     prop="signInStatus"
                     label="签到状态"
                     width="90"
                 ></el-table-column>
-                <el-table-column prop="signOutTime" label="签退时间" sortable />
+                <el-table-column prop="signOutTime" label="签退时间" sortable>
+                    <template #default="{ row }">
+                        {{
+                            row.signOutTime
+                                ? formatDateTime(row.signOutTime)
+                                : ""
+                        }}
+                    </template>
+                </el-table-column>
                 <el-table-column
                     prop="signOutStatus"
                     label="签退状态"
@@ -189,6 +203,9 @@ import {
     Key,
 } from "@element-plus/icons-vue";
 import request from "../../utils/request.js";
+import { formatDateTime, parseDate } from "../../utils/date.js";
+
+const user = JSON.parse(localStorage.getItem("local_user"));
 
 const data = reactive({
     username: null,
@@ -207,6 +224,7 @@ const data = reactive({
 const formRef = ref();
 
 const load = () => {
+    const isAdmin = user && user.role && String(user.role).includes("管理员");
     request
         .get("/sign/selectPage", {
             params: {
@@ -214,6 +232,11 @@ const load = () => {
                 pageSize: data.pageSize,
                 username: data.username,
                 name: data.name,
+                uid: isAdmin
+                    ? undefined
+                    : user && user.uid
+                      ? user.uid
+                      : undefined,
             },
         })
         .then((res) => {

@@ -94,7 +94,13 @@
                                 size="small"
                                 >{{ notice.type }}</el-tag
                             >
-                            <span class="notice-title">{{ notice.title }}</span>
+                            <span class="notice-title">
+                                <span
+                                    v-if="!isNoticeRead(notice.nid)"
+                                    class="unread-badge"
+                                ></span>
+                                {{ notice.title }}
+                            </span>
                             <span class="notice-date">{{
                                 formatDateTime(notice.publishDate)
                             }}</span>
@@ -274,19 +280,7 @@ import {
     formatTime as fmtTime,
     parseDate,
 } from "../utils/date";
-import {
-    Document,
-    Bell,
-    Calendar,
-    User,
-    EditPen,
-    List,
-    Clock,
-    TrendCharts,
-    ChatDotRound,
-    Setting,
-    Download,
-} from "@element-plus/icons-vue";
+import { Document, Download } from "@element-plus/icons-vue";
 
 const router = useRouter();
 
@@ -345,13 +339,13 @@ const quickAccessItems = [
         name: "打卡记录",
         icon: "Calendar",
         color: "#E6A23C",
-        route: "/sign/manager",
+        route: "/system/sign",
     },
     {
-        name: "用户管理",
+        name: "个人中心",
         icon: "User",
         color: "#F56C6C",
-        route: "/user/manager",
+        route: "/userInfo",
     },
     {
         name: "消息中心",
@@ -490,6 +484,41 @@ async function fetchLastSignTime() {
     }
 }
 
+// 获取已读公告ID列表（从localStorage）
+function getReadNoticeIds() {
+    try {
+        const userId = getLocalUserId();
+        if (!userId) return [];
+        const key = `read_notices_${userId}`;
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+// 保存已读公告ID到localStorage
+function saveReadNoticeId(noticeId) {
+    try {
+        const userId = getLocalUserId();
+        if (!userId) return;
+        const key = `read_notices_${userId}`;
+        const ids = getReadNoticeIds();
+        if (!ids.includes(noticeId)) {
+            ids.push(noticeId);
+            localStorage.setItem(key, JSON.stringify(ids));
+        }
+    } catch (e) {
+        console.error("保存已读公告ID失败", e);
+    }
+}
+
+// 检查公告是否已读
+function isNoticeRead(noticeId) {
+    const ids = getReadNoticeIds();
+    return ids.includes(noticeId);
+}
+
 // 获取最近公告
 async function fetchRecentNotices() {
     try {
@@ -499,10 +528,26 @@ async function fetchRecentNotices() {
         if (res && (res.code === "200" || res.code === 200)) {
             recentNotices.value = res.data?.list || [];
             // 更新未读公告统计
-            statsCards.value[1].value = recentNotices.value.length;
+            updateUnreadNoticeCount();
         }
     } catch (e) {
         console.error("fetchRecentNotices error", e);
+    }
+}
+
+// 更新未读公告数量
+async function updateUnreadNoticeCount() {
+    try {
+        const userId = getLocalUserId();
+        if (!userId) return;
+        const res = await request.get("/notice/unreadCount", {
+            params: { userId },
+        });
+        if (res && (res.code === "200" || res.code === 200)) {
+            statsCards.value[1].value = res.data || 0;
+        }
+    } catch (e) {
+        console.error("获取未读公告数失败", e);
     }
 }
 
@@ -589,7 +634,9 @@ const viewNotice = async (item) => {
     }
 
     dialogVisible.value = true;
-    // 本地标记为已读并增加阅读数
+    // 标记为已读（localStorage）
+    saveReadNoticeId(item.nid);
+    // 增加阅读数
     if (selectedAnnouncement.value && !selectedAnnouncement.value.isRead) {
         selectedAnnouncement.value.isRead = true;
         selectedAnnouncement.value.views =
@@ -601,6 +648,14 @@ const viewNotice = async (item) => {
             views: selectedAnnouncement.value.views,
         };
         const res = await request.post(`/notice/updateViews`, payload);
+        // 同时调用后端标记已读接口
+        const userId = getLocalUserId();
+        if (userId) {
+            await request.post("/notice/markAsRead", {
+                noticeId: item.nid,
+                userId: userId,
+            });
+        }
         if (res && (res.code === "200" || res.code === 200)) {
             // 同步更新本地列表中的阅读数
             const idx = recentNotices.value.findIndex(
@@ -822,6 +877,32 @@ onMounted(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
     color: #303133;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 未读公告标记 */
+.unread-badge {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #f56c6c;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
 }
 
 .notice-item .notice-date {

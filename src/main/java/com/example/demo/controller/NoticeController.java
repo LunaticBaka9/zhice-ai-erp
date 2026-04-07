@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.common.OperationLogAnnotation;
 import com.example.demo.common.Result;
 import com.example.demo.entity.Notice;
 import com.example.demo.service.NoticeService;
+import com.example.demo.service.NoticeReadRecordService;
 import com.github.pagehelper.PageInfo;
 
 import cn.hutool.poi.excel.ExcelReader;
@@ -33,6 +35,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class NoticeController {
     @Resource
     NoticeService noticeService;
+    
+    @Resource
+    NoticeReadRecordService noticeReadRecordService;
 
     @GetMapping("/selectByNid/{nid}")
     public Result getUserById(@PathVariable Long nid){
@@ -54,6 +59,7 @@ public class NoticeController {
         return Result.success(pageInfo);
     }
 
+    @OperationLogAnnotation(module="公告管理", type="新增", value="新增公告")
     @PostMapping("/postNotice")
     public Result postNotice(@RequestBody Notice notice){
         noticeService.insertNotice(notice);
@@ -126,5 +132,43 @@ public class NoticeController {
             return Result.error("数据批量导入错误");
         }
         return Result.success();
+    }
+    
+    /**
+     * 标记公告为已读
+     */
+    @PostMapping("/markAsRead")
+    public Result markAsRead(@RequestBody java.util.Map<String, Long> params) {
+        Long noticeId = params.get("noticeId");
+        Long userId = params.get("userId");
+        if (noticeId == null || userId == null) {
+            return Result.error("参数错误");
+        }
+        noticeReadRecordService.markAsRead(noticeId, userId);
+        return Result.success();
+    }
+    
+    /**
+     * 获取用户未读公告数量
+     */
+    @GetMapping("/unreadCount")
+    public Result getUnreadCount(@RequestParam Long userId) {
+        if (userId == null) {
+            return Result.error("用户ID不能为空");
+        }
+        int count = noticeReadRecordService.getUnreadCount(userId);
+        return Result.success(count);
+    }
+    
+    /**
+     * 获取用户已读的公告ID列表
+     */
+    @GetMapping("/readNoticeIds")
+    public Result getReadNoticeIds(@RequestParam Long userId) {
+        if (userId == null) {
+            return Result.error("用户ID不能为空");
+        }
+        List<Long> readIds = noticeReadRecordService.getReadNoticeIds(userId);
+        return Result.success(readIds);
     }
 }

@@ -69,7 +69,13 @@
                         <template #header>
                             <div class="card-header">
                                 <div class="title-section">
-                                    <span class="title">{{ item.title }}</span>
+                                    <span class="title">
+                                        <span
+                                            v-if="!isNoticeRead(item.id)"
+                                            class="unread-badge"
+                                        ></span>
+                                        {{ item.title }}
+                                    </span>
                                     <el-tag
                                         :type="getTagType(item.type)"
                                         size="small"
@@ -194,8 +200,8 @@
             </div>
             <template #footer>
                 <el-button @click="dialogVisible = false">关闭</el-button>
-                <el-button type="primary" @click="markAsRead"
-                    >我知道了</el-button
+                <el-button type="primary" @click="markAsRead">
+                    我知道了</el-button
                 >
             </template>
         </el-dialog>
@@ -219,6 +225,41 @@ const user = JSON.parse(localStorage.getItem("local_user"));
 
 // 公告数据（从后端加载）
 const announcements = ref([]);
+
+// 获取已读公告ID列表（从localStorage）
+function getReadNoticeIds() {
+    try {
+        const userId = user?.uid;
+        if (!userId) return [];
+        const key = `read_notices_${userId}`;
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+// 保存已读公告ID到localStorage
+function saveReadNoticeId(noticeId) {
+    try {
+        const userId = user?.uid;
+        if (!userId) return;
+        const key = `read_notices_${userId}`;
+        const ids = getReadNoticeIds();
+        if (!ids.includes(noticeId)) {
+            ids.push(noticeId);
+            localStorage.setItem(key, JSON.stringify(ids));
+        }
+    } catch (e) {
+        console.error("保存已读公告ID失败", e);
+    }
+}
+
+// 检查公告是否已读
+function isNoticeRead(noticeId) {
+    const ids = getReadNoticeIds();
+    return ids.includes(noticeId);
+}
 
 // 将后端 Notice 映射到组件展示结构
 const mapNoticeToAnnouncement = (notice) => {
@@ -376,6 +417,19 @@ const viewDetail = async (item) => {
     }
 
     dialogVisible.value = true;
+    // 标记为已读（localStorage + 后端）
+    saveReadNoticeId(item.id);
+    try {
+        const userId = user?.uid;
+        if (userId) {
+            await request.post("/notice/markAsRead", {
+                noticeId: item.id,
+                userId: userId,
+            });
+        }
+    } catch (e) {
+        console.error("标记已读失败", e);
+    }
     // 本地标记为已读并增加阅读数
     if (selectedAnnouncement.value && !selectedAnnouncement.value.isRead) {
         selectedAnnouncement.value.isRead = true;
@@ -508,6 +562,32 @@ onMounted(() => {
     font-size: 16px;
     font-weight: 500;
     color: #303133;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 未读公告标记 */
+.unread-badge {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #f56c6c;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
 }
 
 .badge-new {

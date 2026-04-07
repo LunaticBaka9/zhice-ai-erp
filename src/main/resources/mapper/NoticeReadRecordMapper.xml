@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.NoticeReadRecordMapper">
+    
+    <!-- 插入阅读记录 -->
+    <insert id="insertReadRecord" parameterType="com.example.demo.entity.NoticeReadRecord">
+        INSERT INTO notice_read_record(notice_id, user_id, read_time)
+        VALUES (#{noticeId}, #{userId}, #{readTime})
+    </insert>
+    
+    <!-- 查询用户是否已读某公告 -->
+    <select id="selectByNoticeIdAndUserId" resultType="com.example.demo.entity.NoticeReadRecord">
+        SELECT * FROM notice_read_record
+        WHERE notice_id = #{noticeId} AND user_id = #{userId}
+        LIMIT 1
+    </select>
+    
+    <!-- 获取用户未读公告数量 -->
+    <select id="countUnreadNotices" resultType="int">
+        SELECT COUNT(*) FROM notice n
+        WHERE n.status = '已发布'
+        AND n.nid NOT IN (
+            SELECT notice_id FROM notice_read_record WHERE user_id = #{userId}
+        )
+    </select>
+    
+    <!-- 获取用户已读的公告ID列表 -->
+    <select id="selectReadNoticeIdsByUserId" resultType="long">
+        SELECT notice_id FROM notice_read_record
+        WHERE user_id = #{userId}
+    </select>
+    
+</mapper>

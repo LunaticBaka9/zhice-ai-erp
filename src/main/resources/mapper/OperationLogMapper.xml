@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.OperationLogMapper">
+    
+    <insert id="insertLog" parameterType="com.example.demo.entity.OperationLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO operation_log(username, operation, method, params, time, ip, create_time, module, type)
+        VALUES (#{username}, #{operation}, #{method}, #{params}, #{time}, #{ip}, #{createTime}, #{module}, #{type})
+    </insert>
+    
+    <select id="selectAllLogs" resultType="com.example.demo.entity.OperationLog">
+        SELECT * FROM operation_log ORDER BY create_time DESC
+    </select>
+    
+    <select id="selectByPage" resultType="com.example.demo.entity.OperationLog">
+        SELECT * FROM operation_log
+        <where>
+            <if test="username != null and username != ''">AND username LIKE concat('%', #{username}, '%')</if>
+            <if test="module != null and module != ''">AND module LIKE concat('%', #{module}, '%')</if>
+            <if test="type != null and type != ''">AND type = #{type}</if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{pageNum}, #{pageSize}
+    </select>
+    
+    <select id="selectCount" resultType="int">
+        SELECT COUNT(*) FROM operation_log
+        <where>
+            <if test="username != null and username != ''">AND username LIKE concat('%', #{username}, '%')</if>
+            <if test="module != null and module != ''">AND module LIKE concat('%', #{module}, '%')</if>
+            <if test="type != null and type != ''">AND type = #{type}</if>
+        </where>
+    </select>
+    
+    <delete id="deleteBatch">
+        DELETE FROM operation_log WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteAll">
+        DELETE FROM operation_log
+    </delete>
+    
+</mapper>

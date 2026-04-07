@@ -8,10 +8,20 @@
             </el-icon>
             <!-- 面包屑导航 -->
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                <el-breadcrumb-item v-for="(item, index) in breadcrumbs" :key="index">
-                    <template v-if="item.path && index !== breadcrumbs.length - 1">
-                        <el-link type="primary" @click="handleNavigate(item.path)">
+                <el-breadcrumb-item :to="{ path: '/' }"
+                    >首页</el-breadcrumb-item
+                >
+                <el-breadcrumb-item
+                    v-for="(item, index) in breadcrumbs"
+                    :key="index"
+                >
+                    <template
+                        v-if="item.path && index !== breadcrumbs.length - 1"
+                    >
+                        <el-link
+                            type="primary"
+                            @click="handleNavigate(item.path)"
+                        >
                             {{ item.name }}
                         </el-link>
                     </template>
@@ -33,8 +43,15 @@
                 @show="handleMessagePopoverShow"
             >
                 <template #reference>
-                    <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
-                        <div class="action-icon message-icon" @click="fetchMessages">
+                    <el-badge
+                        :value="unreadCount"
+                        :hidden="unreadCount === 0"
+                        :max="99"
+                    >
+                        <div
+                            class="action-icon message-icon"
+                            @click="fetchMessages"
+                        >
                             <el-icon :size="20"><Bell /></el-icon>
                         </div>
                     </el-badge>
@@ -43,7 +60,13 @@
                 <div class="message-panel">
                     <div class="message-header">
                         <span class="title">消息通知</span>
-                        <el-button v-if="unreadCount > 0" type="primary" link size="small" @click="markAllAsRead">
+                        <el-button
+                            v-if="unreadCount > 0"
+                            type="primary"
+                            link
+                            size="small"
+                            @click="markAllAsRead"
+                        >
                             全部已读
                         </el-button>
                     </div>
@@ -58,36 +81,78 @@
                                 @click="handleMessageClick(item)"
                             >
                                 <div class="message-icon-wrapper">
-                                    <el-icon :size="20" :color="getMessageIconColor(item.type)">
-                                        <component :is="getMessageIcon(item.type)" />
+                                    <el-icon
+                                        :size="20"
+                                        :color="getMessageIconColor(item.type)"
+                                    >
+                                        <component
+                                            :is="getMessageIcon(item.type)"
+                                        />
                                     </el-icon>
                                 </div>
                                 <div class="message-content">
-                                    <div class="message-title">{{ item.title }}</div>
-                                    <div class="message-desc">{{ item.content }}</div>
+                                    <div class="message-title">
+                                        {{ item.title }}
+                                    </div>
+                                    <div class="message-desc">
+                                        {{ item.content }}
+                                    </div>
                                     <div class="message-time">
                                         {{ formatTime(item.createTime) }}
                                     </div>
                                 </div>
-                                <div v-if="!item.isRead" class="unread-dot"></div>
+                                <div
+                                    v-if="!item.isRead"
+                                    class="unread-dot"
+                                ></div>
                             </div>
                         </template>
-                        <el-empty v-else description="暂无消息" :image-size="80" />
+                        <el-empty
+                            v-else
+                            description="暂无消息"
+                            :image-size="80"
+                        />
                     </div>
 
-                    <div class="message-footer" v-if="messageList.length > 0 && total > messageList.length">
-                        <el-button type="primary" link @click="loadMore">查看更多</el-button>
+                    <div
+                        class="message-footer"
+                        v-if="
+                            messageList.length > 0 && total > messageList.length
+                        "
+                    >
+                        <el-button type="primary" link @click="loadMore"
+                            >查看更多</el-button
+                        >
                     </div>
                 </div>
             </el-popover>
+
+            <!-- 公告未读角标 -->
+            <el-badge
+                :value="noticeUnreadCount"
+                :hidden="noticeUnreadCount === 0"
+                :max="99"
+                class="notice-badge"
+            >
+                <el-icon class="header-icon" @click="goToNotices" title="公告">
+                    <Document />
+                </el-icon>
+            </el-badge>
 
             <el-icon class="header-icon" @click="toggleFullscreen">
                 <FullScreen v-if="!isFullscreen" />
                 <Aim v-else />
             </el-icon>
-            <el-dropdown @command="handleCommand" trigger="click" v-if="data.user">
+            <el-dropdown
+                @command="handleCommand"
+                trigger="click"
+                v-if="data.user"
+            >
                 <div class="user-dropdown">
-                    <el-avatar :src="data.userInfo.avatar || defaultAvatar" :size="32" />
+                    <el-avatar
+                        :src="data.userInfo.avatar || defaultAvatar"
+                        :size="32"
+                    />
                     <span class="username">{{ data.userInfo.name }}</span>
                     <el-icon class="arrow-down"><ArrowDown /></el-icon>
                 </div>
@@ -160,6 +225,7 @@ const breadcrumbMap = {
     "/notice/manager": "公告管理",
     "/system/user": "用户管理",
     "/system/sign": "打卡管理",
+    "/system/operationLog": "操作日志",
     "/user/list": "用户列表",
     "/user/detail": "用户详情",
     "/order": "订单管理",
@@ -203,7 +269,8 @@ const handleNavigate = (path) => {
 };
 
 // 默认头像
-const defaultAvatar = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
+const defaultAvatar =
+    "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
 
 // 搜索关键词
 const searchKeyword = ref("");
@@ -216,6 +283,7 @@ const theme = ref(localStorage.getItem("theme") || "light");
 
 // 消息相关状态
 const unreadCount = ref(0);
+const noticeUnreadCount = ref(0);
 const messageList = ref([]);
 const loading = ref(false);
 const currentPage = ref(1);
@@ -405,8 +473,30 @@ const simulateRealTimeMessage = () => {
     }, 10000);
 };
 
+// 获取公告未读数量
+const fetchNoticeUnreadCount = async () => {
+    try {
+        const user = JSON.parse(localStorage.getItem("local_user"));
+        if (!user || !user.uid) return;
+        const res = await request.get("/notice/unreadCount", {
+            params: { userId: user.uid },
+        });
+        if (res && (res.code === "200" || res.code === 200)) {
+            noticeUnreadCount.value = res.data || 0;
+        }
+    } catch (e) {
+        console.error("获取公告未读数失败", e);
+    }
+};
+
+// 跳转到公告页
+const goToNotices = () => {
+    router.push("/notice/index");
+};
+
 onMounted(() => {
     updateUnreadCount();
+    fetchNoticeUnreadCount();
     // 模拟实时消息
     simulateRealTimeMessage();
     // 加载用户详细信息，确保头像和名称可用
@@ -421,7 +511,10 @@ onMounted(() => {
                         const localUser = JSON.parse(localUserStr);
                         if (!localUser.avatar && data.userInfo.avatar) {
                             localUser.avatar = data.userInfo.avatar;
-                            localStorage.setItem("local_user", JSON.stringify(localUser));
+                            localStorage.setItem(
+                                "local_user",
+                                JSON.stringify(localUser),
+                            );
                         }
                     } catch (e) {}
                 }
