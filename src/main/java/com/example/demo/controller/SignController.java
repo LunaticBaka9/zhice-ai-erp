@@ -179,4 +179,17 @@ public class SignController {
         return Result.success(r);
     }
 
+    // 查询用户本月签到次数
+    @GetMapping("/monthCount")
+    public Result monthCount(@RequestParam Long uid) {
+        if (uid == null) {
+            return Result.error("缺少 uid");
+        }
+        Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH) + 1; // Calendar.MONTH 从 0 开始
+        int count = signService.selectMonthSignCount(uid, year, month);
+        return Result.success(count);
+    }
+
 }

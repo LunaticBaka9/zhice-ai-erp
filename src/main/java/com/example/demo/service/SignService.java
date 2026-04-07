@@ -58,4 +58,9 @@ public class SignService {
     public SignRecord selectTodaySign(Long uid) {
         return signMapper.selectTodaySign(uid);
     }
+
+    // 查询用户本月签到次数
+    public int selectMonthSignCount(Long uid, int year, int month) {
+        return signMapper.selectMonthSignCount(uid, year, month);
+    }
 }

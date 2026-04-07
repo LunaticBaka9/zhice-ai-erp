@@ -107,4 +107,13 @@
         order by sr.sign_in_time desc
         limit 1
     </select>
+
+    <!-- 查询用户本月签到次数 -->
+    <select id="selectMonthSignCount" resultType="int">
+        select count(*)
+        from sign_record sr
+        where sr.uid = #{uid}
+          and YEAR(sr.sign_in_time) = #{year}
+          and MONTH(sr.sign_in_time) = #{month}
+    </select>
 </mapper>

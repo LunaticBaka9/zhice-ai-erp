@@ -25,4 +25,9 @@ public interface SignMapper {
 
     // 查询用户今日是否有打卡记录
     SignRecord selectTodaySign(Long uid);
+
+    // 查询用户本月签到次数
+    int selectMonthSignCount(@org.apache.ibatis.annotations.Param("uid") Long uid,
+                             @org.apache.ibatis.annotations.Param("year") int year,
+                             @org.apache.ibatis.annotations.Param("month") int month);
 }
