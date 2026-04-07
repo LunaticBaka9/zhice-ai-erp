@@ -225,7 +225,7 @@ const breadcrumbMap = {
     "/notice/manager": "公告管理",
     "/system/user": "用户管理",
     "/system/sign": "打卡管理",
-    "/system/operationLog": "操作日志",
+    "/monitor/operationLog": "操作日志",
     "/user/list": "用户列表",
     "/user/detail": "用户详情",
     "/order": "订单管理",

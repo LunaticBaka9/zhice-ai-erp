@@ -85,7 +85,6 @@ public class OperationLogAspect {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
-                String token = request.getHeader("token");
                 // 这里可以根据token获取用户信息
                 log.setUsername("系统");
                 

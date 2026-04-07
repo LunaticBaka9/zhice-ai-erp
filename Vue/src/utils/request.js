@@ -13,6 +13,13 @@ request.interceptors.request.use(
         if (!isUpload) {
             config.headers["Content-Type"] = "application/json;charset=utf-8";
         }
+
+        // 添加JWT token到请求头
+        const token = localStorage.getItem("token");
+        if (token) {
+            config.headers["token"] = token;
+        }
+
         return config;
     },
     (error) => {

@@ -24,7 +24,7 @@ public class UserService {
         if(!dbuser.getPassword().equals(user.getPassword())){
             throw new CustomerException("账号或密码错误");
         }
-        if(dbuser.getStatus().equals("禁用")){
+        if(dbuser.getStatus() != null && dbuser.getStatus().equals("禁用")){
             throw new CustomerException("账号已被禁用");
         }
         return dbuser;

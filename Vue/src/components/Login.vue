@@ -21,10 +21,18 @@ const login = () => {
             request.post("/login", data.form).then((res) => {
                 console.log(res);
                 if (res.code === "200") {
-                    //存储用户信息
-                    localStorage.setItem("local_user", JSON.stringify(res.data || "{}"));
-                    const userStr = localStorage.getItem("local_user");
-                    console.log(userStr);
+                    // 后端返回 { user: {...}, token: "..." }
+                    const userData = res.data?.user || res.data || {};
+                    const token = res.data?.token || "";
+
+                    //存储用户信息和token
+                    localStorage.setItem(
+                        "local_user",
+                        JSON.stringify(userData),
+                    );
+                    if (token) {
+                        localStorage.setItem("token", token);
+                    }
                     ElMessage.success("登录成功");
                     location.href = "/";
                 } else {
@@ -38,9 +46,31 @@ const login = () => {
 
 <template>
     <el-main class="login-card">
-        <div style="width: 350px; height: 400px; background-color: #ffff; border-radius: 5px; padding: 20px">
-            <el-form ref="formRef" :model="data.form" :rules="data.rules" style="padding: 20px 30px 10px 0">
-                <div style="margin: 20px 0; text-align: center; font-weight: bold; font-size: 24px">登 录</div>
+        <div
+            style="
+                width: 350px;
+                height: 400px;
+                background-color: #ffff;
+                border-radius: 5px;
+                padding: 20px;
+            "
+        >
+            <el-form
+                ref="formRef"
+                :model="data.form"
+                :rules="data.rules"
+                style="padding: 20px 30px 10px 0"
+            >
+                <div
+                    style="
+                        margin: 20px 0;
+                        text-align: center;
+                        font-weight: bold;
+                        font-size: 24px;
+                    "
+                >
+                    登 录
+                </div>
                 <el-form-item prop="username">
                     <el-input
                         v-model="data.form.username"
@@ -61,11 +91,20 @@ const login = () => {
                     />
                 </el-form-item>
                 <div>
-                    <el-button size="large" type="primary" style="width: 100%; margin: 20px 0" @click="login">
+                    <el-button
+                        size="large"
+                        type="primary"
+                        style="width: 100%; margin: 20px 0"
+                        @click="login"
+                    >
                         登 录
                     </el-button>
                 </div>
-                <div style="text-align: right">没有账号？请<a style="color: #274afa" href="/register">注册</a></div>
+                <div style="text-align: right">
+                    没有账号？请<a style="color: #274afa" href="/register"
+                        >注册</a
+                    >
+                </div>
             </el-form>
         </div>
     </el-main>

@@ -72,6 +72,7 @@ public class NoticeController {
         return Result.success();
     }
 
+    @OperationLogAnnotation(module="公告管理", type="修改", value="修改公告")
     @PostMapping("/update")
     public Result updateNotice(@RequestBody Notice notice){
         noticeService.updateNotice(notice);
@@ -84,6 +85,7 @@ public class NoticeController {
         return Result.success();
     }
 
+    @OperationLogAnnotation(module="公告管理", type="删除", value="删除公告")
     @PostMapping("/delete")
     public Result deleteById(@RequestBody Notice notice){
         noticeService.deleteByNid(notice);
@@ -122,6 +124,7 @@ public class NoticeController {
         }
     }
 
+    @OperationLogAnnotation(module="公告管理", type="新增", value="公告批量导入")
     @PostMapping("/importData")
     public Result importData(MultipartFile file) throws IOException{
         ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
@@ -134,9 +137,7 @@ public class NoticeController {
         return Result.success();
     }
     
-    /**
-     * 标记公告为已读
-     */
+    //标记公告为已读
     @PostMapping("/markAsRead")
     public Result markAsRead(@RequestBody java.util.Map<String, Long> params) {
         Long noticeId = params.get("noticeId");

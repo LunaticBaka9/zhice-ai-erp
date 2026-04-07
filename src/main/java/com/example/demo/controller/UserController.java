@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.common.OperationLogAnnotation;
 import com.example.demo.common.Result;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
@@ -54,30 +55,35 @@ public class UserController {
         return Result.success(pageInfo);
     }
 
+    @OperationLogAnnotation(module="用户管理", type="修改", value="修改用户")
     @PostMapping("/updateInfo")
     public Result updateInfo(@RequestBody User user){
         userService.updateInfo(user);
         return Result.success();
     }
 
+    @OperationLogAnnotation(module="用户管理", type="修改", value="修改用户密码")
     @PostMapping("/updatePassword")
     public Result updatePassword(@RequestBody User user){
         userService.updatePassword(user);
         return Result.success();
     }
 
+    @OperationLogAnnotation(module="用户管理", type="修改", value="修改用户状态")
     @PostMapping("/updateStatus")
     public Result updateStatus(@RequestBody User user){
         userService.updateStatus(user);
         return Result.success();
     }
 
+    @OperationLogAnnotation(module="用户管理", type="新增", value="新增用户")
     @PostMapping("/add")
     public Result add(@RequestBody User user){
         userService.insert(user);
         return Result.success();
     }
 
+    @OperationLogAnnotation(module="用户管理", type="删除", value="删除用户")
     @PostMapping("/delete")
     public Result deleteById(@RequestBody User user){
         userService.deleteById(user);
@@ -121,6 +127,7 @@ public class UserController {
         writer.close();
     }
 
+    @OperationLogAnnotation(module="用户管理", type="新增", value="批量导入用户")
     @PostMapping("/importData")
     public Result importData(MultipartFile file) throws IOException{
         ExcelReader reader = ExcelUtil.getReader(file.getInputStream());

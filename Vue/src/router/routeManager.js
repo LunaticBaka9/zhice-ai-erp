@@ -10,7 +10,7 @@ const routeManager = [
         component: () => import("../components/system/SignManager.vue"),
     },
     {
-        path: "/system/operationLog",
+        path: "/monitor/operationLog",
         name: "operationLogManager",
         component: () => import("../components/system/OperationLogManager.vue"),
     },

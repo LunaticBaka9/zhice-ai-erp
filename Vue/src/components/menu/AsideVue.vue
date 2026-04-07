@@ -28,7 +28,7 @@
             </el-menu-item>
 
             <!-- 系统公告 -->
-            <el-sub-menu>
+            <el-sub-menu index="notice">
                 <template #title>
                     <el-icon><Notification /></el-icon>
                     <span>系统公告</span>
@@ -151,7 +151,7 @@
             </el-sub-menu>
 
             <!-- 系统监控 -->
-            <el-sub-menu v-if="isTech || isAdmin">
+            <el-sub-menu v-if="isTech || isAdmin" index="/monitor">
                 <template #title>
                     <el-icon><Monitor /></el-icon>
                     <span>系统监控</span>
@@ -159,7 +159,7 @@
                 <el-menu-item index="/monitor/online">
                     <span>在线用户</span>
                 </el-menu-item>
-                <el-menu-item index="/system/operationLog">
+                <el-menu-item index="/monitor/operationLog">
                     <span>操作日志</span>
                 </el-menu-item>
             </el-sub-menu>
