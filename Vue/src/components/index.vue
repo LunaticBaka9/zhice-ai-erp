@@ -357,7 +357,7 @@ const quickAccessItems = [
         name: "系统设置",
         icon: "Setting",
         color: "#909399",
-        route: "/system/role",
+        route: "/system/setting",
     },
 ];
 
@@ -495,6 +495,22 @@ async function fetchMonthSignCount() {
         }
     } catch (e) {
         console.error("获取本月签到次数失败", e);
+    }
+}
+
+// 获取连续打卡天数
+async function fetchContinuousDays() {
+    const uid = getLocalUserId();
+    if (!uid) return;
+    try {
+        const res = await request.get("/sign/continuousDays", {
+            params: { uid },
+        });
+        if (res && (res.code === "200" || res.code === 200)) {
+            statsCards.value[3].value = res.data || 0;
+        }
+    } catch (e) {
+        console.error("获取连续打卡天数失败", e);
     }
 }
 
@@ -747,6 +763,7 @@ onMounted(() => {
     fetchLastSignTime();
     fetchRecentNotices();
     fetchMonthSignCount();
+    fetchContinuousDays();
 });
 </script>
 

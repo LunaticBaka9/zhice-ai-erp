@@ -204,7 +204,7 @@ import {
     watch,
 } from "vue";
 import { formatDateTime } from "../../utils/date.js";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Document, Download } from "@element-plus/icons-vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
@@ -426,8 +426,6 @@ const closeAllMenus = () => {
     activeButtons.forEach((btn) => {
         btn.classList.remove("w-e-active");
     });
-
-    console.log("已收起工具栏菜单");
 };
 
 const handleEditorChange = (editor) => {
@@ -724,22 +722,45 @@ const getTagType = (type) => {
     return typeMap[type] || "info";
 };
 
-// 检查表单是否有更改
+// 保存初始表单状态
+const saveOriginalState = () => {
+    originalFormData.value = {
+        title: formData.title,
+        type: formData.type,
+        summary: formData.summary,
+        content: formData.content,
+        status: formData.status,
+        publishDate: formData.publishDate,
+        attachments: JSON.stringify(fileList.value),
+    };
+};
+
+// 检查表单是否有更改（与初始状态比较）
 const checkFormDirty = () => {
-    // 如果有任何附件上传，认为是脏的
-    if (fileList.value.length > 0) {
-        isFormDirty.value = true;
+    if (!originalFormData.value) {
+        isFormDirty.value = false;
         return;
     }
-    // 检查表单字段
-    if (
-        formData.title ||
-        formData.type ||
-        formData.summary ||
-        formData.content
-    ) {
-        isFormDirty.value = true;
-    }
+
+    const currentState = {
+        title: formData.title,
+        type: formData.type,
+        summary: formData.summary,
+        content: formData.content,
+        status: formData.status,
+        publishDate: formData.publishDate,
+        attachments: JSON.stringify(fileList.value),
+    };
+
+    // 比较每个字段
+    isFormDirty.value =
+        currentState.title !== originalFormData.value.title ||
+        currentState.type !== originalFormData.value.type ||
+        currentState.summary !== originalFormData.value.summary ||
+        currentState.content !== originalFormData.value.content ||
+        currentState.status !== originalFormData.value.status ||
+        currentState.publishDate !== originalFormData.value.publishDate ||
+        currentState.attachments !== originalFormData.value.attachments;
 };
 
 // 监听表单数据变化
@@ -750,7 +771,8 @@ watch(
         formData.summary,
         formData.content,
         formData.status,
-        fileList.value.length,
+        formData.publishDate,
+        fileList.value,
     ],
     () => {
         checkFormDirty();
@@ -758,39 +780,48 @@ watch(
     { deep: true },
 );
 
-// 浏览器刷新/关闭前的提示
-const handleBeforeUnload = (e) => {
-    if (isFormDirty.value) {
-        e.preventDefault();
-        e.returnValue = "页面内容将不会保存，确定要离开吗？";
-        return "页面内容将不会保存，确定要离开吗？";
-    }
+// 浏览器刷新/关闭前的提示（使用组合式 API 封装）
+const useBeforeUnload = (isDirty) => {
+    const handleBeforeUnload = (e) => {
+        if (isDirty.value) {
+            e.preventDefault();
+            e.returnValue = "页面内容将不会保存，确定要离开吗？";
+            return "页面内容将不会保存，确定要离开吗？";
+        }
+    };
+
+    onMounted(() => {
+        window.addEventListener("beforeunload", handleBeforeUnload);
+    });
+
+    onBeforeUnmount(() => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+    });
 };
 
-// 路由离开前的提示
-const handleBeforeRouteLeave = (to, from, next) => {
+// 注册浏览器刷新/关闭监听
+useBeforeUnload(isFormDirty);
+
+// 路由离开前的提示（Vue Router 导航守卫）
+onBeforeRouteLeave((to, from) => {
     if (isFormDirty.value) {
-        ElMessageBox.confirm("页面内容将不会保存，确定要离开吗？", "提示", {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
-        })
-            .then(() => {
-                next();
-            })
-            .catch(() => {
-                next(false);
-            });
-    } else {
-        next();
+        return ElMessageBox.confirm(
+            "页面内容将不会保存，确定要离开吗？",
+            "提示",
+            {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            },
+        )
+            .then(() => true)
+            .catch(() => false);
     }
-};
+    return true;
+});
 
 // 初始化
 onMounted(() => {
-    // 添加浏览器刷新/关闭监听
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
     try {
         const editRaw = sessionStorage.getItem("editNotice");
         if (editRaw) {
@@ -822,13 +853,16 @@ onMounted(() => {
     } catch (e) {
         console.warn("读取编辑数据失败", e);
     }
+
+    // 保存初始表单状态（用于后续脏检测比较）
+    // 使用 nextTick 确保数据已完全加载
+    setTimeout(() => {
+        saveOriginalState();
+    }, 100);
 });
 
 // 组件卸载前
 onBeforeUnmount(() => {
-    // 移除浏览器刷新/关闭监听
-    window.removeEventListener("beforeunload", handleBeforeUnload);
-
     // 销毁编辑器
     if (editor.value) {
         // 清理 ESC 键监听器

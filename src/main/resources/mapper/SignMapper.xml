@@ -22,7 +22,7 @@
             <if test="username != null">u.username like concat('%', #{username}, '%')</if>
             <if test="name != null">and u.name like concat('%', #{name}, '%')</if>
             <if test="signInStatus != null">and sr.sign_in_status like concat('%', #{signInStatus}, '%')</if>
-            <if test="signOutStatus != null">>and sr.sign_out_status like concat('%', #{signOutStatus}, '%')</if>
+            <if test="signOutStatus != null">and sr.sign_out_status like concat('%', #{signOutStatus}, '%')</if>
         </where>
         order by create_time desc
     </select>
@@ -115,5 +115,13 @@
         where sr.uid = #{uid}
           and YEAR(sr.sign_in_time) = #{year}
           and MONTH(sr.sign_in_time) = #{month}
+    </select>
+
+    <!-- 查询用户所有打卡日期（用于计算连续打卡天数） -->
+    <select id="selectSignDates" resultType="string">
+        SELECT DISTINCT DATE(sign_in_time) as sign_date
+        FROM sign_record
+        WHERE uid = #{uid}
+        ORDER BY sign_date DESC
     </select>
 </mapper>

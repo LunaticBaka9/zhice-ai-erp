@@ -19,6 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/sign")
@@ -192,4 +195,15 @@ public class SignController {
         return Result.success(count);
     }
 
+
+    // 查询用户连续打卡天数
+    @GetMapping("/continuousDays")
+    public Result continuousDays(@RequestParam Long uid) {
+        if (uid == null) {
+            return Result.error("缺少 uid");
+        }
+        int days = signService.selectContinuousSignDays(uid);
+        return Result.success(days);
+    }
+    
 }

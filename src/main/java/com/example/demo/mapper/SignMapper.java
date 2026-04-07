@@ -30,4 +30,7 @@ public interface SignMapper {
     int selectMonthSignCount(@org.apache.ibatis.annotations.Param("uid") Long uid,
                              @org.apache.ibatis.annotations.Param("year") int year,
                              @org.apache.ibatis.annotations.Param("month") int month);
+
+    // 查询用户所有打卡日期（用于计算连续打卡天数）
+    List<String> selectSignDates(@org.apache.ibatis.annotations.Param("uid") Long uid);
 }

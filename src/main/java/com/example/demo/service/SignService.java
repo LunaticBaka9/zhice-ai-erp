@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -62,5 +64,32 @@ public class SignService {
     // 查询用户本月签到次数
     public int selectMonthSignCount(Long uid, int year, int month) {
         return signMapper.selectMonthSignCount(uid, year, month);
+    }
+
+    // 查询用户连续打卡天数
+    public int selectContinuousSignDays(Long uid) {
+        List<String> signDates = signMapper.selectSignDates(uid);
+        if (signDates == null || signDates.isEmpty()) {
+            return 0;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate today = LocalDate.now();
+        int consecutiveDays = 0;
+
+        for (String dateStr : signDates) {
+            LocalDate signDate = LocalDate.parse(dateStr, formatter);
+            LocalDate expectedDate = today.minusDays(consecutiveDays);
+
+            if (signDate.equals(expectedDate)) {
+                consecutiveDays++;
+            } else if (signDate.isBefore(expectedDate)) {
+                // 出现断档，停止计算
+                break;
+            }
+            // 如果 signDate 是未来日期（可能是数据错误），跳过
+        }
+
+        return consecutiveDays;
     }
 }
