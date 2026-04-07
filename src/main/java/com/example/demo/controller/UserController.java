@@ -101,30 +101,31 @@ public class UserController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String name,
             HttpServletResponse response) throws IOException{
-        ExcelWriter writer = ExcelUtil.getWriter(username, name);
         //全局
-        CellStyle cellStyle = writer.getCellStyle();
-        //创建标题字体
-        Font font = writer.createFont();
-        //大小
-        font.setFontHeightInPoints((short) 10);
-        font.setFontName("宋体");
-        cellStyle.setFont(font);
-        //全局  宽15
-        writer.setColumnWidth(-1,15);
-        writer.setColumnWidth(0,20);
-        //全局  高25
-        writer.setRowHeight(-1,25);
-
-        List<User> list = userService.selectAllUsers();
-        writer.write(list,true);
-        //response为HttpServletResponse对象
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-        response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode("用户信息表", StandardCharsets.UTF_8) +".xls");
-        ServletOutputStream out = response.getOutputStream();
-        writer.flush(out,true);
-        writer.close();
+        try (ExcelWriter writer = ExcelUtil.getWriter(username, name)) {
+            //全局
+            CellStyle cellStyle = writer.getCellStyle();
+            //创建标题字体
+            Font font = writer.createFont();
+            //大小
+            font.setFontHeightInPoints((short) 10);
+            font.setFontName("宋体");
+            cellStyle.setFont(font);
+            //全局  宽15
+            writer.setColumnWidth(-1,15);
+            writer.setColumnWidth(0,20);
+            //全局  高25
+            writer.setRowHeight(-1,25);
+            
+            List<User> list = userService.selectAllUsers();
+            writer.write(list,true);
+            //response为HttpServletResponse对象
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode("用户信息表", StandardCharsets.UTF_8) +".xls");
+            ServletOutputStream out = response.getOutputStream();
+            writer.flush(out,true);
+        }
     }
 
     @OperationLogAnnotation(module="用户管理", type="新增", value="批量导入用户")

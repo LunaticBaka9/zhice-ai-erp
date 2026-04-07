@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.common.PasswordUtil;
 import com.example.demo.entity.User;
 import com.example.demo.exception.CustomerException;
 import com.example.demo.mapper.UserMapper;
@@ -14,6 +15,7 @@ import java.util.List;
 public class UserService {
     @Resource
     UserMapper userMapper;
+    
 
     public User login(User user){
         //验证账号是否存在
@@ -21,7 +23,8 @@ public class UserService {
         if(dbuser == null){
             throw new CustomerException("账号或密码错误");
         }
-        if(!dbuser.getPassword().equals(user.getPassword())){
+        // 使用BCrypt验证密码
+        if(!PasswordUtil.matches(user.getPassword(), dbuser.getPassword())){
             throw new CustomerException("账号或密码错误");
         }
         if(dbuser.getStatus() != null && dbuser.getStatus().equals("禁用")){
@@ -38,6 +41,8 @@ public class UserService {
         }
         user.setName(user.getUsername());
         System.out.println(user.getName());
+        // 对密码进行加密
+        user.setPassword(PasswordUtil.encode(user.getPassword()));
         userMapper.insertUser(user);
     }
 
@@ -68,6 +73,8 @@ public class UserService {
     }
 
     public void updatePassword(User user){
+        // 对密码进行加密
+        user.setPassword(PasswordUtil.encode(user.getPassword()));
         userMapper.updatePasswordById(user);
     }
 

@@ -9,6 +9,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
+
 @Component
 @ConfigurationProperties(prefix = "config.jwt")
 public class JwtConfig {
@@ -32,6 +37,7 @@ public class JwtConfig {
     }
 
     // 生成Token
+    @SuppressWarnings("deprecation")
     public String createToken(String subject) {
         Date nowDate = new Date();
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
@@ -46,13 +52,14 @@ public class JwtConfig {
     }
 
     // 解析Token获取Claims
+    @SuppressWarnings("deprecation")
     public Claims getClaimsByToken(String token) {
         try {
             return Jwts.parser()
                     .setSigningKey(secret)
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (Exception e) {
+        } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | SignatureException | IllegalArgumentException e) {
             return null;
         }
     }

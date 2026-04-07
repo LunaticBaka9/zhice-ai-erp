@@ -5,7 +5,10 @@ import { ElMessage } from "element-plus";
 
 const formRef = ref();
 const data = reactive({
-    form: {},
+    form: {
+        username: "",
+        password: "",
+    },
     rules: {
         username: [
             { required: true, message: "请填写账号", trigger: "blur" },
@@ -18,7 +21,7 @@ const data = reactive({
 const login = () => {
     formRef.value.validate((valid: any) => {
         if (valid) {
-            request.post("/login", data.form).then((res) => {
+            request.post("/login", data.form).then((res: any) => {
                 console.log(res);
                 if (res.code === "200") {
                     // 后端返回 { user: {...}, token: "..." }
