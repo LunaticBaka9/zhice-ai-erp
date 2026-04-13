@@ -22,12 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns(
-                    "http://localhost:[*]",           // 本地开发环境
-                    "http://127.0.0.1:[*]",          // 本地IP
-                    "http://192.168.*.*:[*]",        // 局域网
-                    "https://*.example.com"          // 生产域名示例
-                )
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)

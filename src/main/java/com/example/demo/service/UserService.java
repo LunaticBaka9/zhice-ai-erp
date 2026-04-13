@@ -16,7 +16,6 @@ public class UserService {
     @Resource
     UserMapper userMapper;
     
-
     public User login(User user){
         //验证账号是否存在
         User dbuser = userMapper.selectByUsername(user.getUsername());
