@@ -2,11 +2,7 @@
     <el-aside :width="isCollapse ? '64px' : '240px'">
         <!-- Logo区域 -->
         <div class="logo-container">
-            <img
-                src="https://element-plus.org/images/element-plus-logo.svg"
-                alt="logo"
-                class="logo"
-            />
+            <img src="https://element-plus.org/images/element-plus-logo.svg" alt="logo" class="logo" />
             <span v-show="!isCollapse" class="logo-text">ERP System</span>
         </div>
 
@@ -182,13 +178,7 @@
 <script setup>
 import { computed, onBeforeMount, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import {
-    Grid,
-    Setting,
-    Monitor,
-    Avatar,
-    Message,
-} from "@element-plus/icons-vue";
+import { Grid, Setting, Monitor, Avatar, Message } from "@element-plus/icons-vue";
 import { useMenuStore } from "../../store/menu.ts";
 import { storeToRefs } from "pinia";
 const { isCollapse } = storeToRefs(useMenuStore());
@@ -202,30 +192,22 @@ console.log(data.user?.role);
 
 const isTech = computed(() => {
     return (
-        data.user?.department === "研发组" ||
-        data.user?.department === "测试组" ||
-        data.user?.department === "运维组"
+        data.user?.department === "研发组" || data.user?.department === "测试组" || data.user?.department === "运维组"
     );
 });
 const isProdect = computed(() => {
     return (
-        data.user?.department === "产品组" ||
-        data.user?.department === "设计组" ||
-        data.user?.department === "交互组"
+        data.user?.department === "产品组" || data.user?.department === "设计组" || data.user?.department === "交互组"
     );
 });
 const isMarket = computed(() => {
     return (
-        data.user?.department === "运营组" ||
-        data.user?.department === "销售组" ||
-        data.user?.department === "公关组"
+        data.user?.department === "运营组" || data.user?.department === "销售组" || data.user?.department === "公关组"
     );
 });
 const isAD = computed(() => {
     return (
-        data.user?.department === "人力资源" ||
-        data.user?.department === "财务组" ||
-        data.user?.department === "办公室"
+        data.user?.department === "人力资源" || data.user?.department === "财务组" || data.user?.department === "办公室"
     );
 });
 const isAdmin = computed(() => {
@@ -261,11 +243,20 @@ const handleMenuClick = (path) => {
     overflow: hidden;
 }
 .aside-container {
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     background-color: #304156;
     transition: 0.6s ease-out;
     height: 100vh;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 折叠状态下隐藏滚动条和滚动条轨道 */
+.el-menu--collapse.aside-container {
+    overflow: hidden;
+}
+.el-menu--collapse.aside-container::-webkit-scrollbar {
+    display: none;
 }
 
 /* Logo区域样式 */
@@ -296,32 +287,32 @@ const handleMenuClick = (path) => {
     letter-spacing: 1px;
 }
 
-.aside-menu .el-menu-item,
-.aside-menu .el-sub-menu__title {
+.aside-container .el-menu-item,
+.aside-container .el-sub-menu__title {
     white-space: nowrap;
     font-size: 14px;
 }
 
-.aside-menu .el-menu-item:hover,
-.aside-menu .el-sub-menu__title:hover {
+.aside-container .el-menu-item:hover,
+.aside-container .el-sub-menu__title:hover {
     background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* 自定义滚动条 */
-.aside-menu::-webkit-scrollbar {
+.aside-container::-webkit-scrollbar {
     width: 6px;
 }
 
-.aside-menu::-webkit-scrollbar-thumb {
+.aside-container::-webkit-scrollbar-thumb {
     background-color: #263445;
     border-radius: 3px;
 }
 
-.aside-menu::-webkit-scrollbar-thumb:hover {
+.aside-container::-webkit-scrollbar-thumb:hover {
     background-color: #1f2d3d;
 }
 
-.aside-menu::-webkit-scrollbar-track {
+.aside-container::-webkit-scrollbar-track {
     background-color: #1f2d3d;
 }
 
