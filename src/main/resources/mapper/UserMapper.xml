@@ -18,6 +18,7 @@
             <if test="name != null">and name like concat('%', #{name}, '%')</if>
             <if test="phone != null">and phone like concat('%', #{phone}, '%')</if>
             <if test="email != null">and email like concat('%', #{email}, '%')</if>
+            and del_flag != 1
         </where>
     </select>
 
@@ -41,16 +42,16 @@
         WHERE uid = #{uid}
     </update>
 
-    <update id="updateAvatarById">
+    <update id="updateAvatarById" parameterType="com.example.demo.entity.User">
         UPDATE `user` SET avatar = #{path}, updateTime = NOW() WHERE uid = #{uid}
     </update>
 
-    <insert id="insertUser">
+    <insert id="insertUser" parameterType="com.example.demo.entity.User">
         insert into `user` (username,name,password,email,role,department,phone,bio,joinDate,status,createTime)
         values(#{username},#{name}, #{password},#{email},#{role},#{department},#{phone},#{bio},#{joinDate},#{status},NOW())
     </insert>
 
-    <delete id="deleteById">
-        DELETE u, s FROM `user` u LEFT JOIN sign_record s ON u.uid = s.uid WHERE u.uid = #{uid}
-    </delete>
+    <update id="deleteById">
+        update `user` set del_flag = 1;
+    </update>
 </mapper>

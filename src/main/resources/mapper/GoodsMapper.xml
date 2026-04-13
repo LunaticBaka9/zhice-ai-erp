@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.GoodsMapper">
+    <select id="selectAllGoods" resultType="com.example.demo.entity.Goods">
+        SELECT * FROM `goods`
+        <where>
+            <if test="skuCode != null and skuCode != ''">and sku_code like concat('%', #{skuCode}, '%')</if>
+            <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
+            <if test="brand != null and brand != ''">and brand like concat('%', #{brand}, '%')</if>
+            <if test="barcode != null and barcode != ''">and barcode like concat('%', #{barcode}, '%')</if>
+            <if test="spec != null and spec != ''">and spec like concat('%', #{spec}, '%')</if>
+            and (del_flag IS NULL OR del_flag != 1)
+        </where>
+    </select>
+
+    <select id="selectById" parameterType="long" resultType="com.example.demo.entity.Goods">
+        SELECT *
+        FROM `goods`
+        WHERE id = #{id} AND (del_flag IS NULL OR del_flag != 1)
+    </select>
+
+    <insert id="insertGoods" parameterType="com.example.demo.entity.Goods" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `goods`(
+            sku_code,name,category_id,brand,spec,unit,barcode,
+            purchase_price,sale_price,cost_price,stock_low,stock_high,
+            create_time,update_time,del_flag
+        )
+        VALUES (
+            #{skuCode},#{name},#{categoryId},#{brand},#{spec},#{unit},#{barcode},
+            #{purchasePrice},#{salePrice},#{costPrice},
+            #{stockLow},#{stockHigh},
+            NOW(),NOW(),0
+        )
+    </insert>
+
+    <update id="updateGoods" parameterType="com.example.demo.entity.Goods">
+        UPDATE `goods`
+        <set>
+            <if test="skuCode != null">sku_code = #{skuCode},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="brand != null">brand = #{brand},</if>
+            <if test="spec != null">spec = #{spec},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="barcode != null">barcode = #{barcode},</if>
+            <if test="purchasePrice != null">purchase_price = #{purchasePrice},</if>
+            <if test="salePrice != null">sale_price = #{salePrice},</if>
+            <if test="costPrice != null">cost_price = #{costPrice},</if>
+            <if test="stockLow != null">stock_low = #{stockLow},</if>
+            <if test="stockHigh != null">stock_high = #{stockHigh},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND (del_flag IS NULL OR del_flag != 1)
+    </update>
+
+    <update id="deleteGoods" parameterType="long">
+        UPDATE `goods` SET del_flag = 1 WHERE id = #{id}
+    </update>
+</mapper>

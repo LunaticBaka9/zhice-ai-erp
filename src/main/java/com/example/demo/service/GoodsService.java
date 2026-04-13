@@ -17,7 +17,7 @@ public class GoodsService {
     @Resource
     private GoodsMapper goodsMapper;
 
-    public List<Goods> selectAllUsers(){
+    public List<Goods> selectAllGoods(){
         return goodsMapper.selectAllGoods(null);
     }
 
@@ -27,25 +27,37 @@ public class GoodsService {
         return PageInfo.of(list);
     }
     
-    public Goods selectById(Long uid){
-        return goodsMapper.selectById(uid);
+    public Goods selectById(Long id){
+        return goodsMapper.selectById(id);
     }
 
     public void insert(Goods goods){
         goodsMapper.insertGoods(goods);
     }
     
-    public void deleteById(Goods goods){
-        Goods dbGoods = goodsMapper.selectById(goods.getId());
+    public void deleteById(Long id){
+        Goods dbGoods = goodsMapper.selectById(id);
         if(dbGoods == null){
-            throw new CustomerException("找不到用户，无法删除");
+            throw new CustomerException("找不到商品，无法删除");
         }
-        goodsMapper.deleteById(goods);
+        goodsMapper.deleteGoods(id);
+    }
+    
+    public void deleteById(Goods goods){
+        this.deleteById(goods.getId());
     }
 
     public void deleteBatch(List<Goods> list){
-        for(Goods user: list){
-            this.deleteById(user);
+        for(Goods goods: list){
+            this.deleteById(goods.getId());
         }
+    }
+    
+    public void updateGoods(Goods goods){
+        Goods dbGoods = goodsMapper.selectById(goods.getId());
+        if(dbGoods == null){
+            throw new CustomerException("找不到商品，无法更新");
+        }
+        goodsMapper.updateGoods(goods);
     }
 }

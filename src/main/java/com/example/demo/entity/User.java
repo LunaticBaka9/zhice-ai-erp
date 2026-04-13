@@ -47,4 +47,7 @@ public class User {
 
     @PropIgnore
     private String avatar;
+
+    @PropIgnore
+    private int delFlag;
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.WarehouseMapper">
+    <select id="selectAllWarehouse" resultType="com.example.demo.entity.Warehouse">
+        SELECT * FROM `warehouse`
+        <where>
+            <if test="code != null and code != ''">and name like concat('%', #{code}, '%')</if>
+            <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
+            and del_flag!=1
+        </where>
+    </select>
+
+    <select id="selectById" parameterType="long" resultType="com.example.demo.entity.Warehouse">
+        SELECT *
+        FROM `warehouse`
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertWarehouse" parameterType="com.example.demo.entity.Warehouse">
+        insert into `warehouse`(code,name,address,manager,status,create_time) 
+        values (#{code},#{name},#{address},#{manager},#{status},#{createTime})
+    </insert>
+</mapper>

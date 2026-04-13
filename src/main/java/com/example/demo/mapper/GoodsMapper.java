@@ -14,5 +14,7 @@ public interface GoodsMapper {
 
     List<Goods> selectAllGoods(Goods goods);
 
-    void deleteById(Goods goods);
+    void deleteGoods(@Param("id") Long id);
+    
+    void updateGoods(Goods goods);
 }

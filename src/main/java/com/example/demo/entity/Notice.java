@@ -40,4 +40,7 @@ public class Notice {
 
     @Alias("附件")
     String attachments;
+
+    @PropIgnore
+    private int delFlag;
 }

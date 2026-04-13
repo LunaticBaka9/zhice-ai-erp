@@ -17,7 +17,7 @@
 
     <select id="selectByNid" parameterType="long" resultType="com.example.demo.entity.Notice">
         SELECT *
-        FROM `notice` n
+        FROM `notice`
         WHERE nid = #{nid}
     </select>
 
