@@ -89,7 +89,17 @@ public class OperationLogAspect {
                 log.setUsername("系统");
                 
                 // 获取IP地址
-                String ip = request.getRemoteAddr();
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                    ip = request.getHeader("X-Real-IP");
+                }
+                if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                    ip = request.getRemoteAddr();
+                }
+                // 处理 "X-Forwarded-For" 可能包含多个IP的情况，取第一个
+                if (ip != null && ip.contains(",")) {
+                    ip = ip.split(",")[0].trim();
+                }
                 log.setIp(ip);
             }
         } catch (Exception e) {
