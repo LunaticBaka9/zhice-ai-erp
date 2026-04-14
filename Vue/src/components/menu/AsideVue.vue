@@ -2,7 +2,11 @@
     <el-aside :width="isCollapse ? '64px' : '240px'">
         <!-- Logo区域 -->
         <div class="logo-container">
-            <img src="https://element-plus.org/images/element-plus-logo.svg" alt="logo" class="logo" />
+            <img
+                src="https://element-plus.org/images/element-plus-logo.svg"
+                alt="logo"
+                class="logo"
+            />
             <span v-show="!isCollapse" class="logo-text">进销存系统</span>
         </div>
 
@@ -22,7 +26,7 @@
                 <el-icon><House /></el-icon>
                 <span>工作台</span>
             </el-menu-item>
-            
+
             <!-- 系统公告 -->
             <el-sub-menu index="notice">
                 <template #title>
@@ -95,9 +99,6 @@
                 <el-menu-item index="/inventory/warning">
                     <span>库存预警</span>
                 </el-menu-item>
-                <el-menu-item index="/inventory/settings">
-                    <span>仓库基础设置</span>
-                </el-menu-item>
             </el-sub-menu>
 
             <!-- 财务管理 -->
@@ -140,7 +141,7 @@
                 </el-menu-item>
             </el-sub-menu>
 
-             <!-- 基础资料 -->
+            <!-- 基础资料 -->
             <el-sub-menu v-if="showBaseMenu" index="base">
                 <template #title>
                     <el-icon><Goods /></el-icon>
@@ -159,7 +160,7 @@
                     <span>仓库管理</span>
                 </el-menu-item>
             </el-sub-menu>
-            
+
             <!-- 系统管理 -->
             <el-sub-menu v-if="isAdmin" index="/system">
                 <template #title>
@@ -218,7 +219,7 @@ import {
     Setting,
     Monitor,
     Avatar,
-    Message
+    Message,
 } from "@element-plus/icons-vue";
 import { useMenuStore } from "../../store/menu.ts";
 import { storeToRefs } from "pinia";
@@ -233,7 +234,9 @@ console.log(data.user?.role);
 
 const isTech = computed(() => {
     return (
-        data.user?.department === "研发组" || data.user?.department === "测试组" || data.user?.department === "运维组"
+        data.user?.department === "研发组" ||
+        data.user?.department === "测试组" ||
+        data.user?.department === "运维组"
     );
 });
 const isAdmin = computed(() => {
@@ -242,15 +245,27 @@ const isAdmin = computed(() => {
 
 // 菜单权限控制
 const showPurchaseMenu = computed(() => {
-    return isAdmin.value || data.user?.department === "采购组" || data.user?.department === "供应链组";
+    return (
+        isAdmin.value ||
+        data.user?.department === "采购组" ||
+        data.user?.department === "供应链组"
+    );
 });
 
 const showSaleMenu = computed(() => {
-    return isAdmin.value || data.user?.department === "销售组" || data.user?.department === "运营组";
+    return (
+        isAdmin.value ||
+        data.user?.department === "销售组" ||
+        data.user?.department === "运营组"
+    );
 });
 
 const showInventoryMenu = computed(() => {
-    return isAdmin.value || data.user?.department === "仓库组" || data.user?.department === "物流组";
+    return (
+        isAdmin.value ||
+        data.user?.department === "仓库组" ||
+        data.user?.department === "物流组"
+    );
 });
 
 const showFinanceMenu = computed(() => {
@@ -352,17 +367,17 @@ const handleMenuClick = (path) => {
 /* 激活菜单项样式 */
 .aside-container .el-menu-item.is-active {
     background-color: rgba(64, 158, 255, 0.15) !important;
-    color: #409EFF !important;
-    border-right: 3px solid #409EFF;
+    color: #409eff !important;
+    border-right: 3px solid #409eff;
 }
 
 .aside-container .el-menu-item.is-active .el-icon {
-    color: #409EFF;
+    color: #409eff;
 }
 
 /* 子菜单激活状态 */
 .aside-container .el-sub-menu.is-active .el-sub-menu__title {
-    color: #409EFF !important;
+    color: #409eff !important;
 }
 
 /* 菜单项之间的分隔线 */

@@ -10,9 +10,9 @@ const routeInventory = [
         component: () => import("../components/inventory/Operation.vue"),
     },
     {
-        path: "/inventory/settings",
-        name: "InventorySetting",
-        component: () => import("../components/inventory/Settings.vue"),
+        path: "/inventory/warning",
+        name: "InventoryWarning",
+        component: () => import("../components/inventory/Warning.vue"),
     },
 ];
 

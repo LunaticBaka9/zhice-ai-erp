@@ -44,6 +44,14 @@ public class GoodsController {
         return Result.success(pageInfo);
     }
 
+    @GetMapping("/alertlist")
+    public Result getMethodName(@RequestParam(defaultValue = "1") Integer pageNum,
+                             @RequestParam(defaultValue = "10") Integer pageSize,
+                             Goods goods) {
+        PageInfo<Goods> pageInfo = goodsService.selectPage(pageNum, pageSize, goods);
+        return Result.success(pageInfo);
+    }
+
     @OperationLogAnnotation(module="商品管理", type="新增", value="新增商品")
     @PostMapping("/add")
     public Result insertGoods(@RequestBody Goods goods){

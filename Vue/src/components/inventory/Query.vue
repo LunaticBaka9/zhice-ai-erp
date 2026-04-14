@@ -103,6 +103,14 @@
             >
                 <el-button type="primary">导入表格</el-button>
             </el-upload>
+            <el-button
+                type="info"
+                @click="showStockFlow"
+                style="margin-left: 10px"
+            >
+                <el-icon><Document /></el-icon>
+                库存流水
+            </el-button>
         </div>
 
         <!-- 库存统计卡片 -->
@@ -238,7 +246,7 @@
                         {{ formatDateTime(row.createTime) }}
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="200" fixed="right">
+                <el-table-column label="操作" width="280" fixed="right">
                     <template #default="{ row }">
                         <el-button
                             link
@@ -257,6 +265,15 @@
                         >
                             <el-icon><Edit /></el-icon>
                             编辑
+                        </el-button>
+                        <el-button
+                            link
+                            type="warning"
+                            size="small"
+                            @click="handleViewStockFlow(row)"
+                        >
+                            <el-icon><Document /></el-icon>
+                            流水
                         </el-button>
                         <el-button
                             link
@@ -497,6 +514,9 @@
                 <el-descriptions-item label="库存预警上限">{{
                     viewDialog.data.stockHigh
                 }}</el-descriptions-item>
+                <el-descriptions-item label="当前库存">{{
+                    viewDialog.data.stockQuantity || 0
+                }}</el-descriptions-item>
                 <el-descriptions-item label="创建时间">{{
                     formatDateTime(viewDialog.data.createTime)
                 }}</el-descriptions-item>
@@ -504,6 +524,86 @@
                     formatDateTime(viewDialog.data.updateTime)
                 }}</el-descriptions-item>
             </el-descriptions>
+        </el-dialog>
+
+        <!-- 库存流水对话框 -->
+        <el-dialog
+            v-model="stockFlowDialog.visible"
+            title="库存流水"
+            width="900px"
+            :close-on-click-modal="false"
+        >
+            <el-table
+                :data="stockFlowDialog.data"
+                v-loading="stockFlowDialog.loading"
+                stripe
+                border
+                style="width: 100%"
+            >
+                <el-table-column
+                    prop="operationNo"
+                    label="作业编号"
+                    width="150"
+                />
+                <el-table-column
+                    prop="operationType"
+                    label="作业类型"
+                    width="100"
+                >
+                    <template #default="{ row }">
+                        <el-tag
+                            :type="getOperationTypeTagType(row.operationType)"
+                        >
+                            {{ getOperationTypeName(row.operationType) }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    prop="fromWarehouseName"
+                    label="来源仓库"
+                    width="120"
+                />
+                <el-table-column
+                    prop="toWarehouseName"
+                    label="目标仓库"
+                    width="120"
+                />
+                <el-table-column prop="quantity" label="数量" width="80" />
+                <el-table-column prop="operator" label="操作人" width="100" />
+                <el-table-column prop="status" label="状态" width="100">
+                    <template #default="{ row }">
+                        <el-tag :type="getStatusTagType(row.status)">
+                            {{ getStatusText(row.status) }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="createTime" label="创建时间" width="150">
+                    <template #default="{ row }">
+                        {{ formatDateTime(row.createTime) }}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    prop="completeTime"
+                    label="完成时间"
+                    width="150"
+                >
+                    <template #default="{ row }">
+                        {{
+                            row.completeTime
+                                ? formatDateTime(row.completeTime)
+                                : "-"
+                        }}
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="stockFlowDialog.visible = false"
+                        >关闭</el-button
+                    >
+                </span>
+            </template>
         </el-dialog>
     </div>
 </template>
@@ -522,6 +622,7 @@ import {
     Box,
     Warning,
     WarningFilled,
+    Document,
 } from "@element-plus/icons-vue";
 import request from "../../utils/request.js";
 import { formatDateTime } from "../../utils/date.js";
@@ -649,6 +750,14 @@ const viewDialog = reactive({
     data: {},
 });
 
+// 库存流水对话框
+const stockFlowDialog = reactive({
+    visible: false,
+    loading: false,
+    data: [],
+    currentSkuCode: "",
+});
+
 // 格式化价格
 const formatPrice = (price) => {
     if (!price) return "0.00";
@@ -706,6 +815,68 @@ const getStockStatusClass = (row) => {
     }
 };
 
+// 获取作业类型标签类型
+const getOperationTypeTagType = (type) => {
+    switch (type) {
+        case "inbound":
+            return "success";
+        case "outbound":
+            return "danger";
+        case "transfer":
+            return "warning";
+        default:
+            return "info";
+    }
+};
+
+// 获取作业类型名称
+const getOperationTypeName = (type) => {
+    switch (type) {
+        case "inbound":
+            return "入库";
+        case "outbound":
+            return "出库";
+        case "transfer":
+            return "调拨";
+        case "adjustment":
+            return "盘点";
+        default:
+            return type;
+    }
+};
+
+// 获取状态标签类型
+const getStatusTagType = (status) => {
+    switch (status) {
+        case "pending":
+            return "info";
+        case "processing":
+            return "warning";
+        case "completed":
+            return "success";
+        case "cancelled":
+            return "danger";
+        default:
+            return "info";
+    }
+};
+
+// 获取状态文本
+const getStatusText = (status) => {
+    switch (status) {
+        case "pending":
+            return "待处理";
+        case "processing":
+            return "处理中";
+        case "completed":
+            return "已完成";
+        case "cancelled":
+            return "已取消";
+        default:
+            return status;
+    }
+};
+
 // 获取商品列表
 const getGoodsList = async () => {
     loading.value = true;
@@ -757,6 +928,58 @@ const getGoodsList = async () => {
         ElMessage.error("获取商品列表失败");
     } finally {
         loading.value = false;
+    }
+};
+
+// 获取库存流水
+const getStockFlow = async (skuCode = null) => {
+    try {
+        const params = {
+            pageNum: 1,
+            pageSize: 100, // 获取最近100条记录
+        };
+
+        if (skuCode) {
+            params.skuCode = skuCode;
+        }
+
+        const res = await request.get("/inventoryOperation/list", { params });
+        if (res.code === "200") {
+            return res.data.records || res.data.list || [];
+        } else {
+            ElMessage.error(res.msg || "获取库存流水失败");
+            return [];
+        }
+    } catch (error) {
+        ElMessage.error("获取库存流水失败");
+        return [];
+    }
+};
+
+// 显示库存流水
+const showStockFlow = async () => {
+    stockFlowDialog.loading = true;
+    stockFlowDialog.visible = true;
+
+    try {
+        const flowData = await getStockFlow();
+        stockFlowDialog.data = flowData;
+    } finally {
+        stockFlowDialog.loading = false;
+    }
+};
+
+// 查看特定商品的库存流水
+const handleViewStockFlow = async (row) => {
+    stockFlowDialog.loading = true;
+    stockFlowDialog.visible = true;
+    stockFlowDialog.currentSkuCode = row.skuCode;
+
+    try {
+        const flowData = await getStockFlow(row.skuCode);
+        stockFlowDialog.data = flowData;
+    } finally {
+        stockFlowDialog.loading = false;
     }
 };
 
@@ -890,6 +1113,21 @@ const handleDelete = (row) => {
         .catch(() => {});
 };
 
+// 导出表格
+const exportData = () => {
+    ElMessage.info("导出功能待实现");
+};
+
+// 处理导入
+const handleImport = (response) => {
+    if (response.code === "200") {
+        ElMessage.success("导入成功");
+        getGoodsList();
+    } else {
+        ElMessage.error(response.msg || "导入失败");
+    }
+};
+
 // 上传前校验
 const beforeUpload = (file) => {
     const maxSize = 10 * 1024 * 1024; // 10MB
@@ -898,6 +1136,23 @@ const beforeUpload = (file) => {
         return false;
     }
     return true;
+};
+
+// 上传图片成功
+const handleImageSuccess = (response) => {
+    if (response.code === "200") {
+        dialog.form.mainImage = response.data.url;
+        ElMessage.success("上传成功");
+    } else {
+        ElMessage.error(response.msg || "上传失败");
+    }
+};
+
+// 关闭对话框
+const handleDialogClose = () => {
+    if (goodsFormRef.value) {
+        goodsFormRef.value.clearValidate();
+    }
 };
 
 onMounted(() => {
