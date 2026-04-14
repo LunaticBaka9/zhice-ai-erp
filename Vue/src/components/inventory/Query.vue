@@ -30,6 +30,13 @@
                         @keyup.enter="handleSearch"
                     />
                 </el-form-item>
+            </el-form>
+            <el-form
+                :inline="true"
+                :model="searchForm"
+                class="search-form"
+                style="margin-top: 10px"
+            >
                 <el-form-item label="分类">
                     <el-select
                         v-model="searchForm.categoryId"

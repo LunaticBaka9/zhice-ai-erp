@@ -11,7 +11,7 @@
  Target Server Version : 50726 (5.7.26)
  File Encoding         : 65001
 
- Date: 14/04/2026 15:11:20
+ Date: 14/04/2026 17:17:51
 */
 
 SET NAMES utf8mb4;
@@ -116,6 +116,8 @@ CREATE TABLE `inventory`  (
   `last_outbound_time` datetime NULL DEFAULT NULL COMMENT '最后出库时间',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `create_by` int(11) NULL DEFAULT NULL COMMENT '创建人 ID',
+  `update_by` int(11) NULL DEFAULT NULL COMMENT '更新人 ID',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_inventory`(`goods_id`, `warehouse_id`, `batch_no`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存快照表（实时库存）' ROW_FORMAT = Dynamic;
@@ -123,7 +125,53 @@ CREATE TABLE `inventory`  (
 -- ----------------------------
 -- Records of inventory
 -- ----------------------------
-INSERT INTO `inventory` VALUES (1, 1, 1, 'A-1', '1', 100.00, 100.00, 0.00, 200000.00, '2026-04-14 11:17:57', NULL, '2026-04-14 11:17:12', '2026-04-14 11:53:53');
+INSERT INTO `inventory` VALUES (1, 1, 1, 'A-1', '1', 100.00, 100.00, 0.00, 200000.00, '2026-04-14 11:17:57', NULL, '2026-04-14 11:17:12', '2026-04-14 11:53:53', NULL, NULL);
+
+-- ----------------------------
+-- Table structure for inventory_operation
+-- ----------------------------
+DROP TABLE IF EXISTS `inventory_operation`;
+CREATE TABLE `inventory_operation`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '作业 ID',
+  `operation_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '作业单号',
+  `operation_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '作业类型：inbound-入库，outbound-出库，transfer-调拨，adjustment-盘点',
+  `from_warehouse_id` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '源仓库 ID（出库/调拨时有值）',
+  `from_warehouse_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '源仓库名称（冗余字段，方便查询）',
+  `to_warehouse_id` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '目标仓库 ID（入库/调拨时有值）',
+  `to_warehouse_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '目标仓库名称（冗余字段，方便查询）',
+  `goods_id` int(10) UNSIGNED NOT NULL COMMENT '商品 ID',
+  `goods_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称（冗余字段，方便查询）',
+  `sku_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU 编码（冗余字段，方便查询）',
+  `quantity` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '作业数量',
+  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '单位',
+  `operator` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '操作员',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending' COMMENT '状态：pending-待处理，completed-已完成，cancelled-已取消',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `source_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '来源类型：purchase-采购，sales-销售，manual-手工',
+  `source_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '来源单号（关联采购单/销售单等）',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `complete_time` datetime NULL DEFAULT NULL COMMENT '完成时间',
+  `create_by` int(11) NULL DEFAULT NULL COMMENT '创建人 ID',
+  `update_by` int(11) NULL DEFAULT NULL COMMENT '更新人 ID',
+  `del_flag` tinyint(1) NOT NULL DEFAULT 0 COMMENT '删除标志：0-未删除，1-已删除',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_operation_no`(`operation_no`) USING BTREE,
+  INDEX `idx_operation_type`(`operation_type`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_goods_id`(`goods_id`) USING BTREE,
+  INDEX `idx_from_warehouse`(`from_warehouse_id`) USING BTREE,
+  INDEX `idx_to_warehouse`(`to_warehouse_id`) USING BTREE,
+  INDEX `idx_create_time`(`create_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存作业表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of inventory_operation
+-- ----------------------------
+INSERT INTO `inventory_operation` VALUES (1, 'WH1776155534114', 'inbound', NULL, NULL, 1, '一号仓库', 1, '苹果', 'APL001', 5.00, '个', 'Test', 'completed', '', 'manual', NULL, '2026-04-14 16:32:30', '2026-04-14 17:14:26', '2026-04-14 17:14:24', NULL, NULL, 0);
+INSERT INTO `inventory_operation` VALUES (2, 'WH1776156962129', 'transfer', 1, '一号仓库', 2, '二号仓库', 1, '苹果', 'APL001', 2.00, '个', 'Test', 'cancelled', '', 'manual', NULL, '2026-04-14 16:56:16', '2026-04-14 17:14:31', '2026-04-14 17:14:27', NULL, NULL, 0);
+INSERT INTO `inventory_operation` VALUES (3, 'WH1776157025744', 'outbound', 1, '一号仓库', NULL, NULL, 1, '苹果', 'APL001', 1.00, '个', 'Test', 'completed', '', 'manual', NULL, '2026-04-14 16:57:16', '2026-04-14 16:57:21', NULL, NULL, NULL, 0);
+INSERT INTO `inventory_operation` VALUES (4, 'WH1776157051705', 'adjustment', 1, '一号仓库', 1, '一号仓库', 1, '苹果', 'APL001', 5.00, '个', 'TEST', 'completed', '', 'manual', NULL, '2026-04-14 16:57:48', '2026-04-14 17:14:15', '2026-04-14 17:14:15', NULL, NULL, 0);
 
 -- ----------------------------
 -- Table structure for message
@@ -248,7 +296,7 @@ CREATE TABLE `operation_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_username`(`username`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 93 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 101 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operation_log
@@ -345,6 +393,14 @@ INSERT INTO `operation_log` VALUES (89, '系统', '修改仓库状态', 'com.exa
 INSERT INTO `operation_log` VALUES (90, '系统', '修改仓库信息', 'com.example.demo.controller.WarehouseController.updateWarehouse()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 4, '0:0:0:0:0:0:0:1', '2026-04-14 14:58:09', '用户管理', '修改');
 INSERT INTO `operation_log` VALUES (91, '系统', '删除商品', 'com.example.demo.controller.WarehouseController.deleteGoods()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":1,\"createTime\":1776148499000,\"delFlag\":0}]', 2, '0:0:0:0:0:0:0:1', '2026-04-14 14:58:41', '商品管理', '删除');
 INSERT INTO `operation_log` VALUES (92, '系统', '删除商品', 'com.example.demo.controller.WarehouseController.deleteGoods()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":1,\"createTime\":1776148499000,\"delFlag\":0}]', 2, '0:0:0:0:0:0:0:1', '2026-04-14 14:59:04', '商品管理', '删除');
+INSERT INTO `operation_log` VALUES (93, '系统', '新增库存作业', 'com.example.demo.controller.InventoryOperationController.insert()', '[{\"作业单号\":\"WH1776155534114\",\"作业类型\":\"inbound\",\"目标仓库\":\"一号仓库\",\"商品名称\":\"苹果\",\"SKU 编码\":\"APL001\",\"数量\":5,\"单位\":\"个\",\"操作员\":\"Test\",\"状态\":\"pending\",\"备注\":\"\"}]', 12, '0:0:0:0:0:0:0:1', '2026-04-14 16:32:31', '库存作业管理', '新增');
+INSERT INTO `operation_log` VALUES (94, '系统', '新增库存作业', 'com.example.demo.controller.InventoryOperationController.insert()', '[{\"作业单号\":\"WH1776156962129\",\"作业类型\":\"transfer\",\"源仓库\":\"一号仓库\",\"目标仓库\":\"二号仓库\",\"商品名称\":\"苹果\",\"SKU 编码\":\"APL001\",\"数量\":2,\"单位\":\"个\",\"操作员\":\"Test\",\"状态\":\"pending\",\"备注\":\"\"}]', 27, '0:0:0:0:0:0:0:1', '2026-04-14 16:56:17', '库存作业管理', '新增');
+INSERT INTO `operation_log` VALUES (95, '系统', '更新库存作业状态', 'com.example.demo.controller.InventoryOperationController.updateStatus()', '[1,\"completed\"]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 16:56:24', '库存作业管理', '修改');
+INSERT INTO `operation_log` VALUES (96, '系统', '更新库存作业状态', 'com.example.demo.controller.InventoryOperationController.updateStatus()', '[2,\"cancelled\"]', 9, '0:0:0:0:0:0:0:1', '2026-04-14 16:56:45', '库存作业管理', '修改');
+INSERT INTO `operation_log` VALUES (97, '系统', '新增库存作业', 'com.example.demo.controller.InventoryOperationController.insert()', '[{\"作业单号\":\"WH1776157025744\",\"作业类型\":\"outbound\",\"源仓库\":\"一号仓库\",\"商品名称\":\"苹果\",\"SKU 编码\":\"APL001\",\"数量\":1,\"单位\":\"个\",\"操作员\":\"Test\",\"状态\":\"pending\",\"备注\":\"\"}]', 17, '0:0:0:0:0:0:0:1', '2026-04-14 16:57:16', '库存作业管理', '新增');
+INSERT INTO `operation_log` VALUES (98, '系统', '更新库存作业状态', 'com.example.demo.controller.InventoryOperationController.updateStatus()', '[3,\"completed\"]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 16:57:21', '库存作业管理', '修改');
+INSERT INTO `operation_log` VALUES (99, '系统', '新增库存作业', 'com.example.demo.controller.InventoryOperationController.insert()', '[{\"作业单号\":\"WH1776157051705\",\"作业类型\":\"adjustment\",\"源仓库\":\"一号仓库\",\"目标仓库\":\"一号仓库\",\"商品名称\":\"苹果\",\"SKU 编码\":\"APL001\",\"数量\":5,\"单位\":\"个\",\"操作员\":\"TEST\",\"状态\":\"pending\",\"备注\":\"\"}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 16:57:48', '库存作业管理', '新增');
+INSERT INTO `operation_log` VALUES (100, '系统', '更新库存作业状态', 'com.example.demo.controller.InventoryOperationController.updateStatus()', '[4,\"completed\"]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 17:14:15', '库存作业管理', '修改');
 
 -- ----------------------------
 -- Table structure for purchase

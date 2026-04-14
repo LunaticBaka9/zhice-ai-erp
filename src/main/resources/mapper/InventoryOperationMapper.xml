@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.InventoryOperationMapper">
+
+    <resultMap id="inventoryOperationMap" type="com.example.demo.entity.InventoryOperation">
+        <id property="id" column="id"/>
+        <result property="operationNo" column="operation_no"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="fromWarehouseId" column="from_warehouse_id"/>
+        <result property="fromWarehouseName" column="from_warehouse_name"/>
+        <result property="toWarehouseId" column="to_warehouse_id"/>
+        <result property="toWarehouseName" column="to_warehouse_name"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="skuCode" column="sku_code"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unit" column="unit"/>
+        <result property="operator" column="operator"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="sourceType" column="source_type"/>
+        <result property="sourceNo" column="source_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="completeTime" column="complete_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.demo.entity.InventoryOperation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `inventory_operation` (
+            operation_no,operation_type,from_warehouse_id,from_warehouse_name,to_warehouse_id,to_warehouse_name,
+            goods_id,goods_name,sku_code,quantity,unit,operator,status,remark,
+            source_type,source_no,create_time,update_time,complete_time,
+            create_by,update_by
+        ) VALUES (
+            #{operationNo},#{operationType},#{fromWarehouseId},#{fromWarehouseName},#{toWarehouseId},#{toWarehouseName},
+            #{goodsId},#{goodsName},#{skuCode},#{quantity},#{unit},#{operator},#{status},#{remark},
+            #{sourceType},#{sourceNo},NOW(),NOW(),#{completeTime},
+            #{createBy},#{updateBy}
+        )
+    </insert>
+
+    <select id="selectById" parameterType="long" resultMap="inventoryOperationMap">
+        SELECT *
+        FROM `inventory_operation`
+        WHERE id = #{id} AND del_flag != 1
+    </select>
+
+    <select id="selectByOperationNo" parameterType="string" resultMap="inventoryOperationMap">
+        SELECT *
+        FROM `inventory_operation`
+        WHERE operation_no = #{operationNo} AND del_flag != 1
+    </select>
+
+    <select id="selectList" parameterType="com.example.demo.entity.InventoryOperation" resultMap="inventoryOperationMap">
+        SELECT *
+        FROM `inventory_operation`
+        <where>
+            <if test="operationNo != null and operationNo != ''">
+                AND operation_no LIKE CONCAT('%', #{operationNo}, '%')
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND goods_name LIKE CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND operation_type = #{operationType}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="fromWarehouseId != null">
+                AND from_warehouse_id = #{fromWarehouseId}
+            </if>
+            <if test="toWarehouseId != null">
+                AND to_warehouse_id = #{toWarehouseId}
+            </if>
+            AND del_flag != 1
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="update" parameterType="com.example.demo.entity.InventoryOperation">
+        UPDATE `inventory_operation`
+        <set>
+            <if test="operationNo != null">operation_no = #{operationNo},</if>
+            <if test="operationType != null">operation_type = #{operationType},</if>
+            <if test="fromWarehouseId != null">from_warehouse_id = #{fromWarehouseId},</if>
+            <if test="fromWarehouseName != null">from_warehouse_name = #{fromWarehouseName},</if>
+            <if test="toWarehouseId != null">to_warehouse_id = #{toWarehouseId},</if>
+            <if test="toWarehouseName != null">to_warehouse_name = #{toWarehouseName},</if>
+            <if test="goodsId != null">goods_id = #{goodsId},</if>
+            <if test="goodsName != null">goods_name = #{goodsName},</if>
+            <if test="skuCode != null">sku_code = #{skuCode},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="operator != null">operator = #{operator},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="sourceType != null">source_type = #{sourceType},</if>
+            <if test="sourceNo != null">source_no = #{sourceNo},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND del_flag != 1
+    </update>
+
+    <update id="deleteById" parameterType="long">
+        UPDATE `inventory_operation` SET del_flag = 1 WHERE id = #{id}
+    </update>
+
+    <update id="deleteBatch" parameterType="list">
+        UPDATE `inventory_operation` SET del_flag = 1 WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE `inventory_operation` SET status = #{status}, update_time = NOW(),
+        <if test='status == "completed"'>
+                complete_time = NOW()
+        </if>
+        WHERE id = #{id} AND del_flag != 1
+    </update>
+
+    <select id="count" parameterType="com.example.demo.entity.InventoryOperation" resultType="int">
+        SELECT COUNT(*)
+        FROM `inventory_operation`
+        <where>
+            <if test="operationNo != null and operationNo != ''">
+                AND operation_no LIKE CONCAT('%', #{operationNo}, '%')
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND goods_name LIKE CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND operation_type = #{operationType}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="fromWarehouseId != null">
+                AND from_warehouse_id = #{fromWarehouseId}
+            </if>
+            <if test="toWarehouseId != null">
+                AND to_warehouse_id = #{toWarehouseId}
+            </if>
+            AND del_flag != 1
+        </where>
+    </select>
+
+</mapper>

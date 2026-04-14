@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.OperationLogAnnotation;
 import com.example.demo.common.Result;
-import com.example.demo.entity.Goods;
 import com.example.demo.entity.Warehouse;
 import com.example.demo.service.WarehouseService;
 import com.github.pagehelper.PageInfo;
