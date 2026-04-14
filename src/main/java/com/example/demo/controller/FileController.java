@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.service.GoodsService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,11 +24,19 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/file")
 public class FileController {
 
+    private final GoodsService goodsService;
+    private final GoodsController goodsController;
     @Resource
     UserService userService;
 
+    FileController(GoodsController goodsController, GoodsService goodsService) {
+        this.goodsController = goodsController;
+        this.goodsService = goodsService;
+    }
+
     @PostMapping("/uploadAvatar")
-    public Result uploadAvatar(@RequestParam(required = false) Long uid, @RequestParam("photo") MultipartFile photo, HttpServletRequest request) throws IOException{
+    public Result uploadAvatar(@RequestParam(required = false) Long uid, @RequestParam("photo") MultipartFile photo,
+            HttpServletRequest request) throws IOException {
         if (photo == null || photo.isEmpty()) {
             return Result.error("上传文件为空");
         }
@@ -44,7 +53,7 @@ public class FileController {
         Files.copy(photo.getInputStream(), target);
 
         // 返回前端可访问的静态资源路径
-        String publicPath =  "api/static/upload/avatars/" + fileName; // 前端访问地址: /static/upload 映射到 /upload/
+        String publicPath = "api/static/upload/avatars/" + fileName; // 前端访问地址: /static/upload 映射到 /upload/
         userService.updateAvatar(uid, publicPath);
         return Result.success(publicPath);
     }
@@ -54,17 +63,17 @@ public class FileController {
         if (file.isEmpty()) {
             return Result.error("上传文件为空");
         }
-        
+
         String original = file.getOriginalFilename();
         // 获取文件后缀
         String suffix = FilenameUtils.getExtension(original).toLowerCase();
-        
+
         // 使用 ResourceUtils 获取 classpath 下的 static 目录
         File staticDir = ResourceUtils.getFile("classpath:static");
         File uploadDirFile;
         String fileName;
         String publicPath;
-        
+
         // 根据文件类型分类存储
         // 注意：返回的路径需要加上 /api 前缀，以便前端通过代理访问
         if (suffix.matches(".*(jpg|jpeg|png|gif|bmp|webp|svg|ico).*")) {
@@ -100,18 +109,18 @@ public class FileController {
             fileName = System.currentTimeMillis() + "_" + (original != null ? original : "file");
             publicPath = "/api/static/upload/other/" + fileName;
         }
-        
+
         // 保存文件
         Path target = uploadDirFile.toPath().resolve(fileName);
         Files.copy(file.getInputStream(), target);
-        
+
         // 返回文件信息
         java.util.Map<String, Object> fileInfo = new java.util.HashMap<>();
         fileInfo.put("url", publicPath);
         fileInfo.put("name", original);
         fileInfo.put("size", file.getSize());
         fileInfo.put("type", suffix);
-        
+
         System.out.println(fileInfo);
 
         return Result.success(fileInfo);

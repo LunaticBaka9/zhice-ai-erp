@@ -17,4 +17,6 @@ public interface WarehouseMapper {
     List<Warehouse> selectAllWarehouse(Warehouse warehouse);
 
     void deleteById(Warehouse warehouse);
+
+    void updateById(Warehouse warehouse);
 }

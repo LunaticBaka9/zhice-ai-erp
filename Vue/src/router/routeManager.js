@@ -5,11 +5,6 @@ const routeManager = [
         component: () => import("../components/system/UserManager.vue"),
     },
     {
-        path: "/system/sign",
-        name: "signManager",
-        component: () => import("../components/system/SignManager.vue"),
-    },
-    {
         path: "/system/sysMenu",
         name: "sysMenuManager",
         component: () => import("../components/system/SysMenuManager.vue")

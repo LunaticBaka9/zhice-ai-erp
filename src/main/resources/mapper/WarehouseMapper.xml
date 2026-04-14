@@ -6,7 +6,7 @@
     <select id="selectAllWarehouse" resultType="com.example.demo.entity.Warehouse">
         SELECT * FROM `warehouse`
         <where>
-            <if test="code != null and code != ''">and name like concat('%', #{code}, '%')</if>
+            <if test="code != null and code != ''">and code like concat('%', #{code}, '%')</if>
             <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
             and del_flag!=1
         </where>
@@ -18,8 +18,26 @@
         WHERE id = #{id}
     </select>
 
-    <insert id="insertWarehouse" parameterType="com.example.demo.entity.Warehouse">
-        insert into `warehouse`(code,name,address,manager,status,create_time) 
-        values (#{code},#{name},#{address},#{manager},#{status},#{createTime})
+    <insert id="insert" parameterType="com.example.demo.entity.Warehouse">
+        insert into `warehouse`(code,name,kind,address,manager,phone,status,create_time) 
+        values (#{code},#{name},#{kind},#{address},#{manager},#{phone},#{status},NOW())
     </insert>
+
+    <update id="updateById" parameterType="com.example.demo.entity.Warehouse">
+        UPDATE `warehouse`
+        <set>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="kind != null">kind = #{kind},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="manager != null">manager = #{manager},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id} AND (del_flag IS NULL OR del_flag != 1)
+    </update>
+
+    <update id="deleteById" parameterType="com.example.demo.entity.Warehouse">
+        update `warehouse` set del_flag = 1 where id = #{id}
+    </update>
 </mapper>

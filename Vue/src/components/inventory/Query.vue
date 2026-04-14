@@ -30,6 +30,21 @@
                         @keyup.enter="handleSearch"
                     />
                 </el-form-item>
+                <el-form-item label="分类">
+                    <el-select
+                        v-model="searchForm.categoryId"
+                        placeholder="请选择分类"
+                        clearable
+                        @change="handleSearch"
+                        style="width: 120px"
+                    >
+                        <el-option label="全部" value="" />
+                        <el-option label="水果" value="2" />
+                        <el-option label="蔬菜" value="3" />
+                        <el-option label="饮料" value="4" />
+                        <el-option label="零食" value="5" />
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="条码">
                     <el-input
                         v-model="searchForm.barcode"
@@ -38,6 +53,21 @@
                         @clear="handleSearch"
                         @keyup.enter="handleSearch"
                     />
+                </el-form-item>
+                <el-form-item label="库存状态">
+                    <el-select
+                        v-model="searchForm.stockStatus"
+                        placeholder="请选择库存状态"
+                        clearable
+                        @change="handleSearch"
+                        style="width: 120px"
+                    >
+                        <el-option label="全部" value="" />
+                        <el-option label="缺货" value="out_of_stock" />
+                        <el-option label="库存不足" value="low_stock" />
+                        <el-option label="库存正常" value="normal" />
+                        <el-option label="库存过剩" value="high_stock" />
+                    </el-select>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="handleSearch">
@@ -68,6 +98,70 @@
             </el-upload>
         </div>
 
+        <!-- 库存统计卡片 -->
+        <el-row :gutter="20" style="margin-bottom: 20px">
+            <el-col :span="6">
+                <el-card shadow="hover" class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-title">总商品数</div>
+                        <div class="stat-value">
+                            {{ statistics.totalGoods }}
+                        </div>
+                        <div class="stat-trend">
+                            <el-icon color="#67C23A"><TrendCharts /></el-icon>
+                            <span>共{{ goodsList.length }}个商品</span>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="hover" class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-title">总库存量</div>
+                        <div class="stat-value">
+                            {{ statistics.totalStock }}
+                        </div>
+                        <div class="stat-trend">
+                            <el-icon color="#409EFF"><Box /></el-icon>
+                            <span
+                                >库存总额: ¥{{
+                                    formatPrice(statistics.totalStockValue)
+                                }}</span
+                            >
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="hover" class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-title">缺货商品</div>
+                        <div class="stat-value" style="color: #f56c6c">
+                            {{ statistics.outOfStock }}
+                        </div>
+                        <div class="stat-trend">
+                            <el-icon color="#F56C6C"><Warning /></el-icon>
+                            <span>需要及时补货</span>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="hover" class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-title">库存不足</div>
+                        <div class="stat-value" style="color: #e6a23c">
+                            {{ statistics.lowStock }}
+                        </div>
+                        <div class="stat-trend">
+                            <el-icon color="#E6A23C"><WarningFilled /></el-icon>
+                            <span>低于预警下限</span>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+        </el-row>
+
         <!-- 商品表格 -->
         <el-card class="table-card" shadow="never">
             <el-table
@@ -85,7 +179,33 @@
                 <el-table-column prop="spec" label="规格型号" width="150" />
                 <el-table-column prop="unit" label="单位" width="80" />
                 <el-table-column prop="barcode" label="条码" width="150" />
-                <el-table-column prop="purchasePrice" label="采购价" width="120">
+                <el-table-column
+                    prop="stockQuantity"
+                    label="库存数量"
+                    width="120"
+                >
+                    <template #default="{ row }">
+                        <span :class="getStockStatusClass(row)">{{
+                            row.stockQuantity || 0
+                        }}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    prop="stockStatus"
+                    label="库存状态"
+                    width="120"
+                >
+                    <template #default="{ row }">
+                        <el-tag :type="getStockStatusTagType(row)" size="small">
+                            {{ getStockStatusText(row) }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    prop="purchasePrice"
+                    label="采购价"
+                    width="120"
+                >
                     <template #default="{ row }">
                         ¥{{ formatPrice(row.purchasePrice) }}
                     </template>
@@ -101,8 +221,12 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="stockLow" label="库存下限" width="100" />
-                <el-table-column prop="stockHigh" label="库存上限" width="100" />
-                <el-table-column prop="createTime" label="创建时间" width="100" >
+                <el-table-column
+                    prop="stockHigh"
+                    label="库存上限"
+                    width="100"
+                />
+                <el-table-column prop="createTime" label="创建时间" width="100">
                     <template #default="{ row }">
                         {{ formatDateTime(row.createTime) }}
                     </template>
@@ -169,6 +293,18 @@
                 label-width="120px"
                 status-icon
             >
+                <el-form-item label="商品图片" prop="mainImage">
+                    <el-upload
+                        action="/file/upload"
+                        :on-success="handleImageSuccess"
+                        :before-upload="beforeUpload"
+                        :file-list="imageList"
+                        list-type="picture-card"
+                    >
+                        <el-icon><Plus /></el-icon>
+                    </el-upload>
+                </el-form-item>
+
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="SKU编码" prop="skuCode">
@@ -191,7 +327,6 @@
                 </el-row>
 
                 <el-row :gutter="20">
-                    
                     <el-col :span="12">
                         <el-form-item label="商品种类" prop="categoryId">
                             <el-select
@@ -268,8 +403,7 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-
-                <el-row :gutter="20">
+                <el-row>
                     <el-col :span="12">
                         <el-form-item label="成本价" prop="costPrice">
                             <el-input
@@ -323,9 +457,6 @@
         <!-- 查看商品详情对话框 -->
         <el-dialog v-model="viewDialog.visible" title="商品详情" width="600px">
             <el-descriptions :column="1" border>
-                <el-descriptions-item label="ID">{{
-                    viewDialog.data.id
-                }}</el-descriptions-item>
                 <el-descriptions-item label="SKU编码">{{
                     viewDialog.data.skuCode
                 }}</el-descriptions-item>
@@ -371,7 +502,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
     Plus,
@@ -380,8 +511,12 @@ import {
     View,
     Edit,
     Delete,
+    TrendCharts,
+    Box,
+    Warning,
+    WarningFilled,
 } from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import request from "../../utils/request.js";
 import { formatDateTime } from "../../utils/date.js";
 
 // 搜索表单
@@ -389,7 +524,9 @@ const searchForm = reactive({
     skuCode: "",
     name: "",
     brand: "",
+    categoryId: "",
     barcode: "",
+    stockStatus: "",
 });
 
 // 商品列表数据
@@ -405,6 +542,38 @@ const pagination = reactive({
 
 // 选中的行
 const selectedRows = ref([]);
+
+// 统计信息
+const statistics = computed(() => {
+    let totalGoods = goodsList.value.length;
+    let totalStock = 0;
+    let totalStockValue = 0;
+    let outOfStock = 0;
+    let lowStock = 0;
+
+    goodsList.value.forEach((item) => {
+        const stock = item.stockQuantity || 0;
+        const low = item.stockLow || 0;
+        const cost = parseFloat(item.costPrice) || 0;
+
+        totalStock += stock;
+        totalStockValue += stock * cost;
+
+        if (stock <= 0) {
+            outOfStock++;
+        } else if (stock < low) {
+            lowStock++;
+        }
+    });
+
+    return {
+        totalGoods,
+        totalStock,
+        totalStockValue: totalStockValue.toFixed(2),
+        outOfStock,
+        lowStock,
+    };
+});
 
 // 新增/编辑对话框
 const goodsFormRef = ref();
@@ -447,9 +616,7 @@ const dialog = reactive({
                 trigger: "blur",
             },
         ],
-        unit: [
-            { required: true, message: "请输入单位", trigger: "blur" },
-        ],
+        unit: [{ required: true, message: "请输入单位", trigger: "blur" }],
         purchasePrice: [
             { required: true, message: "请输入采购价", trigger: "blur" },
             {
@@ -481,21 +648,101 @@ const formatPrice = (price) => {
     return parseFloat(price).toFixed(2);
 };
 
+// 获取库存状态文本
+const getStockStatusText = (row) => {
+    const stock = row.stockQuantity || 0;
+    const low = row.stockLow || 0;
+    const high = row.stockHigh || 999999;
+
+    if (stock <= 0) {
+        return "缺货";
+    } else if (stock < low) {
+        return "库存不足";
+    } else if (stock > high) {
+        return "库存过剩";
+    } else {
+        return "库存正常";
+    }
+};
+
+// 获取库存状态标签类型
+const getStockStatusTagType = (row) => {
+    const stock = row.stockQuantity || 0;
+    const low = row.stockLow || 0;
+    const high = row.stockHigh || 999999;
+
+    if (stock <= 0) {
+        return "danger";
+    } else if (stock < low) {
+        return "warning";
+    } else if (stock > high) {
+        return "info";
+    } else {
+        return "success";
+    }
+};
+
+// 获取库存状态CSS类
+const getStockStatusClass = (row) => {
+    const stock = row.stockQuantity || 0;
+    const low = row.stockLow || 0;
+    const high = row.stockHigh || 999999;
+
+    if (stock <= 0) {
+        return "stock-out";
+    } else if (stock < low) {
+        return "stock-low";
+    } else if (stock > high) {
+        return "stock-high";
+    } else {
+        return "stock-normal";
+    }
+};
+
 // 获取商品列表
 const getGoodsList = async () => {
     loading.value = true;
     try {
+        // 构建查询参数，移除stockStatus（这是前端筛选条件）
+        const { stockStatus, ...otherParams } = searchForm;
         const params = {
             pageNum: pagination.pageNum,
             pageSize: pagination.pageSize,
-            ...searchForm,
+            ...otherParams,
         };
+
         const res = await request.get("/goods/list", { params });
         if (res.code === "200") {
-            goodsList.value = res.data.records || res.data.list || [];
-            pagination.total = res.data.total || 0;
+            let data = res.data.records || res.data.list || [];
+            const originalTotal = res.data.total || data.length;
             console.log(res.data);
-            
+
+            // 前端库存状态筛选
+            if (stockStatus) {
+                data = data.filter((item) => {
+                    const stock = item.stockQuantity || 0;
+                    const low = item.stockLow || 0;
+                    const high = item.stockHigh || 999999;
+
+                    switch (stockStatus) {
+                        case "out_of_stock":
+                            return stock <= 0;
+                        case "low_stock":
+                            return stock > 0 && stock < low;
+                        case "normal":
+                            return stock >= low && stock <= high;
+                        case "high_stock":
+                            return stock > high;
+                        default:
+                            return true;
+                    }
+                });
+            }
+
+            goodsList.value = data;
+            // 如果进行了前端筛选，使用筛选后的数量作为分页总数
+            // 否则使用后端返回的总数
+            pagination.total = stockStatus ? data.length : originalTotal;
         } else {
             ElMessage.error(res.msg || "获取商品列表失败");
         }
@@ -595,10 +842,7 @@ const submitGoods = async () => {
                 } else {
                     delete submitData.password;
                     delete submitData.confirmPassword;
-                    const res = await request.post(
-                        "/goods/update",
-                        submitData,
-                    );
+                    const res = await request.post("/goods/update", submitData);
                     if (res.code === "200") {
                         ElMessage.success("更新商品成功");
                         dialog.visible = false;
@@ -616,7 +860,7 @@ const submitGoods = async () => {
     });
 };
 
-// 删除用户
+// 删除商品
 const handleDelete = (row) => {
     ElMessageBox.confirm(`确定要删除商品"${row.name}"吗？`, "提示", {
         confirmButtonText: "确定",
@@ -628,7 +872,7 @@ const handleDelete = (row) => {
                 const res = await request.post(`/goods/delete`, row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
-                    getUserList();
+                    getGoodsList();
                 } else {
                     ElMessage.error(res.msg || "删除失败");
                 }
@@ -639,9 +883,19 @@ const handleDelete = (row) => {
         .catch(() => {});
 };
 
-onMounted(()=>{
-    getGoodsList()
-})
+// 上传前校验
+const beforeUpload = (file) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+        ElMessage.error(`文件 ${file.name} 超过 10MB 限制`);
+        return false;
+    }
+    return true;
+};
+
+onMounted(() => {
+    getGoodsList();
+});
 </script>
 
 <style scoped>
@@ -771,5 +1025,76 @@ onMounted(()=>{
 /* 按钮组样式 */
 :deep(.el-button--link) {
     margin: 0 4px;
+}
+
+/* 库存状态样式 */
+.stock-out {
+    color: #f56c6c;
+    font-weight: bold;
+}
+
+.stock-low {
+    color: #e6a23c;
+    font-weight: bold;
+}
+
+.stock-normal {
+    color: #67c23a;
+    font-weight: bold;
+}
+
+.stock-high {
+    color: #409eff;
+    font-weight: bold;
+}
+
+/* 统计卡片样式 */
+.stat-card {
+    margin-bottom: 0;
+    border-radius: 8px;
+    border: 1px solid #ebeef5;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-title {
+    font-size: 14px;
+    color: #909399;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 8px;
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #909399;
+}
+
+.stat-trend .el-icon {
+    margin-right: 4px;
+}
+
+/* 响应式调整统计卡片 */
+@media (max-width: 1200px) {
+    .el-col-6 {
+        width: 50%;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .el-col-6 {
+        width: 100%;
+    }
 }
 </style>

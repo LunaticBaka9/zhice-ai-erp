@@ -10,8 +10,11 @@ public class Warehouse {
     private Long id;
     private String code;
     private String name;
+    private String kind;
     private String address;
     private String manager;
-    private int status;
+    private String phone;
+    private Integer status;
     private Date createTime;
+    private int delFlag;
 }

@@ -14,7 +14,8 @@ public class JwtInterceptor implements HandlerInterceptor {
     private JwtConfig jwtConfig;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         // 放行OPTIONS请求
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
@@ -33,17 +34,26 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
 
         if (token == null || token.isEmpty()) {
-            throw new CustomerException("请先登录");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"401\",\"msg\":\"请先登录\"}");
+            return false;
         }
 
         // 验证token
         Claims claims = jwtConfig.getClaimsByToken(token);
         if (claims == null) {
-            throw new CustomerException("token无效，请重新登录");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"401\",\"msg\":\"token无效，请重新登录\"}");
+            return false;
         }
 
         if (jwtConfig.isTokenExpired(claims)) {
-            throw new CustomerException("token已过期，请重新登录");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"401\",\"msg\":\"token已过期，请重新登录\"}");
+            return false;
         }
 
         // 将用户ID存入request属性

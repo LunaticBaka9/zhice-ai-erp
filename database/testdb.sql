@@ -11,30 +11,11 @@
  Target Server Version : 50726 (5.7.26)
  File Encoding         : 65001
 
- Date: 13/04/2026 17:56:59
+ Date: 14/04/2026 15:11:20
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for bill
--- ----------------------------
-DROP TABLE IF EXISTS `bill`;
-CREATE TABLE `bill`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `bill_no` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '单据编号（规则如 PO + 日期 + 流水）',
-  `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '关联供应商ID',
-  `warehouse_id` int(11) NULL DEFAULT NULL COMMENT '入库目标仓库',
-  `total_amount` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '含税总金额',
-  `status` tinyint(4) NULL DEFAULT NULL COMMENT '状态：0-草稿，1-待审核，2-已完成，3-已作废',
-  `in_stock_time` datetime NULL DEFAULT NULL COMMENT '实际入库时间（用于成本核算的截止点）',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of bill
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for category
@@ -90,6 +71,7 @@ CREATE TABLE `goods`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '商品ID',
   `sku_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU编码，全局唯一',
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称',
+  `img` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '图片URL',
   `category_id` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '分类ID',
   `brand` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '品牌',
   `spec` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '规格型号',
@@ -113,8 +95,35 @@ CREATE TABLE `goods`  (
 -- ----------------------------
 -- Records of goods
 -- ----------------------------
-INSERT INTO `goods` VALUES (1, 'FR001', '芒果', 2, '我不到啊', 'FR-01', '箱', '690123456789', 30.00, 50.00, 30.00, 10.00, 200.00, '2026-04-13 15:55:11', '2026-04-13 17:46:01', 0);
-INSERT INTO `goods` VALUES (2, 'FR002', 'TEst', 2, 'ste', 'tewst', '箱', '123123123123', 20.00, 20.00, 20.00, 10.00, 100.00, '2026-04-13 17:47:14', '2026-04-13 17:47:14', 0);
+INSERT INTO `goods` VALUES (1, 'FR001', '芒果', NULL, 2, '我不到啊', 'FR-01', '箱', '690123456789', 30.00, 50.00, 30.00, 10.00, 200.00, '2026-04-13 15:55:11', '2026-04-13 17:46:01', 0);
+INSERT INTO `goods` VALUES (2, 'FR002', 'TEst', NULL, 2, 'ste', 'tewst', '箱', '123123123123', 20.00, 20.00, 20.00, 10.00, 100.00, '2026-04-13 17:47:14', '2026-04-13 17:47:14', 0);
+
+-- ----------------------------
+-- Table structure for inventory
+-- ----------------------------
+DROP TABLE IF EXISTS `inventory`;
+CREATE TABLE `inventory`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `goods_id` int(10) UNSIGNED NOT NULL COMMENT '商品ID',
+  `warehouse_id` int(10) UNSIGNED NOT NULL COMMENT '仓库ID',
+  `location` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '默认库位',
+  `batch_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '批次号（非批次商品为空字符串）',
+  `qty_on_hand` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '在手量（实际物理库存）',
+  `qty_available` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '可用量（在手量 - 锁定量）',
+  `locked_qty` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '销售订单锁定数量',
+  `total_cost` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '库存总成本',
+  `last_inbound_time` datetime NULL DEFAULT NULL COMMENT '最后入库时间',
+  `last_outbound_time` datetime NULL DEFAULT NULL COMMENT '最后出库时间',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_inventory`(`goods_id`, `warehouse_id`, `batch_no`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存快照表（实时库存）' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inventory
+-- ----------------------------
+INSERT INTO `inventory` VALUES (1, 1, 1, 'A-1', '1', 100.00, 100.00, 0.00, 200000.00, '2026-04-14 11:17:57', NULL, '2026-04-14 11:17:12', '2026-04-14 11:53:53');
 
 -- ----------------------------
 -- Table structure for message
@@ -239,7 +248,7 @@ CREATE TABLE `operation_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_username`(`username`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 93 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operation_log
@@ -257,6 +266,104 @@ INSERT INTO `operation_log` VALUES (10, '系统', '修改用户状态', 'com.exa
 INSERT INTO `operation_log` VALUES (11, '系统', '修改用户状态', 'com.example.demo.controller.UserController.updateStatus()', '[{\"昵称\":\"芒果\",\"状态\":\"禁用\"}]', 1, '0:0:0:0:0:0:0:1', '2026-04-13 17:15:03', '用户管理', '修改');
 INSERT INTO `operation_log` VALUES (12, '系统', '修改用户', 'com.example.demo.controller.UserController.updateInfo()', '[{\"昵称\":\"芒果\"}]', 27, '0:0:0:0:0:0:0:1', '2026-04-13 17:46:26', '用户管理', '修改');
 INSERT INTO `operation_log` VALUES (13, '系统', '新增商品', 'com.example.demo.controller.GoodsController.insertGoods()', '[{\"SKU编码\":\"FR002\",\"商品名称\":\"TEst\",\"品牌\":\"ste\",\"规格型号\":\"tewst\",\"基础单位\":\"箱\",\"参考采购价\":\"20\",\"标准售价\":20,\"成本价格\":20,\"主条码\":\"123123123123\"}]', 6, '0:0:0:0:0:0:0:1', '2026-04-13 17:47:15', '商品管理', '新增');
+INSERT INTO `operation_log` VALUES (14, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 140, '0:0:0:0:0:0:0:1', '2026-04-14 11:22:34', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (15, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 168, '0:0:0:0:0:0:0:1', '2026-04-14 13:29:29', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (16, '系统', '修改用户状态', 'com.example.demo.controller.UserController.updateStatus()', '[{\"昵称\":\" 一号仓库\",\"状态\":\"2\"}]', 17, '0:0:0:0:0:0:0:1', '2026-04-14 14:10:41', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (17, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":2,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:24:14', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (18, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:24:22', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (19, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":2,\"createTime\":1776068926000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:24:29', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (20, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:24:30', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (21, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":2,\"createTime\":1776068926000,\"delFlag\":0}]', 19, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:02', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (22, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 9, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:04', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (23, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":2,\"createTime\":1776068926000,\"delFlag\":0}]', 17, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:13', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (24, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:15', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (25, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":2,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:15', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (26, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:16', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (27, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":2,\"createTime\":1776068926000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:16', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (28, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:58', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (29, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 21, '0:0:0:0:0:0:0:1', '2026-04-14 14:26:59', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (30, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:27:10', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (31, '系统', '修改仓库信息', 'com.example.demo.controller.WarehouseController.updateWarehouse()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:27:30', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (32, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:27:33', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (33, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:28:07', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (34, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 9, '0:0:0:0:0:0:0:1', '2026-04-14 14:28:47', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (35, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 23, '0:0:0:0:0:0:0:1', '2026-04-14 14:29:16', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (36, '系统', '修改仓库信息', 'com.example.demo.controller.WarehouseController.updateWarehouse()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:29:41', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (37, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:29:44', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (38, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:31:07', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (39, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:32:07', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (40, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:32:13', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (41, '系统', '修改仓库信息', 'com.example.demo.controller.WarehouseController.updateWarehouse()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 10, '0:0:0:0:0:0:0:1', '2026-04-14 14:32:20', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (42, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:32:24', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (43, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 18, '0:0:0:0:0:0:0:1', '2026-04-14 14:33:47', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (44, '系统', '新增仓库', 'com.example.demo.controller.WarehouseController.insertGoods()', '[{\"code\":\"F2\",\"name\":\"Test2\",\"address\":\"2号地址\",\"phone\":\"13242134512\",\"status\":1,\"delFlag\":0}]', 19, '0:0:0:0:0:0:0:1', '2026-04-14 14:35:00', '仓库管理', '新增');
+INSERT INTO `operation_log` VALUES (45, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"address\":\"2号地址\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 17, '0:0:0:0:0:0:0:1', '2026-04-14 14:35:00', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (46, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"address\":\"2号地址\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:35:04', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (47, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:35:04', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (48, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:35:57', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (49, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"address\":\"2号地址\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:35:57', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (50, '系统', '修改仓库信息', 'com.example.demo.controller.WarehouseController.updateWarehouse()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":1,\"createTime\":1776148499000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:07', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (51, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:10', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (52, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 12, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:10', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (53, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:11', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (54, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":1,\"createTime\":1776148499000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:12', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (55, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:16', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (56, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:16', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (57, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 9, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:30', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (58, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:36:30', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (59, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:39:14', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (60, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 17, '0:0:0:0:0:0:0:1', '2026-04-14 14:39:14', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (61, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:39:17', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (62, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:39:17', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (63, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:43:36', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (64, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 10, '0:0:0:0:0:0:0:1', '2026-04-14 14:43:36', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (65, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:28', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (66, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:28', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (67, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:28', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (68, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 12, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:28', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (69, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:28', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (70, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 39, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:28', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (71, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:30', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (72, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:30', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (73, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:31', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (74, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":1,\"createTime\":1776148499000,\"delFlag\":0}]', 9, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:32', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (75, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:34', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (76, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 13, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:34', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (77, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:39', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (78, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:52:39', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (79, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 5, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:03', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (80, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 4, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:03', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (81, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 8, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:06', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (82, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:06', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (83, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:14', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (84, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 9, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:14', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (85, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 6, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:16', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (86, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 11, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:36', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (87, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 13, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:36', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (88, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":0,\"createTime\":1776068926000,\"delFlag\":0}]', 7, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:53', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (89, '系统', '修改仓库状态', 'com.example.demo.controller.WarehouseController.updateStatus()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":0,\"createTime\":1776148499000,\"delFlag\":0}]', 24, '0:0:0:0:0:0:0:1', '2026-04-14 14:53:53', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (90, '系统', '修改仓库信息', 'com.example.demo.controller.WarehouseController.updateWarehouse()', '[{\"id\":1,\"code\":\"F1\",\"name\":\" 一号仓库\",\"kind\":\"原料仓\",\"address\":\"不知道哪的一仓库\",\"manager\":\"管理员\",\"phone\":\"15421312341\",\"status\":1,\"createTime\":1776068926000,\"delFlag\":0}]', 4, '0:0:0:0:0:0:0:1', '2026-04-14 14:58:09', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (91, '系统', '删除商品', 'com.example.demo.controller.WarehouseController.deleteGoods()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":1,\"createTime\":1776148499000,\"delFlag\":0}]', 2, '0:0:0:0:0:0:0:1', '2026-04-14 14:58:41', '商品管理', '删除');
+INSERT INTO `operation_log` VALUES (92, '系统', '删除商品', 'com.example.demo.controller.WarehouseController.deleteGoods()', '[{\"id\":2,\"code\":\"F2\",\"name\":\"Test2\",\"kind\":\"半成品仓\",\"address\":\"2号地址\",\"manager\":\"Test2\",\"phone\":\"13242134512\",\"status\":1,\"createTime\":1776148499000,\"delFlag\":0}]', 2, '0:0:0:0:0:0:0:1', '2026-04-14 14:59:04', '商品管理', '删除');
+
+-- ----------------------------
+-- Table structure for purchase
+-- ----------------------------
+DROP TABLE IF EXISTS `purchase`;
+CREATE TABLE `purchase`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `bill_no` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '单据编号（规则如 PO + 日期 + 流水）',
+  `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '关联供应商ID',
+  `warehouse_id` int(11) NULL DEFAULT NULL COMMENT '入库目标仓库',
+  `total_amount` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '含税总金额',
+  `status` tinyint(4) NULL DEFAULT NULL COMMENT '状态：0-草稿，1-待审核，2-已完成，3-已作废',
+  `in_stock_time` datetime NULL DEFAULT NULL COMMENT '实际入库时间（用于成本核算的截止点）',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of purchase
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for sign_record
@@ -396,18 +503,22 @@ CREATE TABLE `warehouse`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '仓库ID',
   `code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '仓库编码',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '仓库名称',
+  `kind` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '仓库类型',
   `address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '仓库地址',
   `manager` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '负责人',
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '负责人电话',
   `status` tinyint(1) NULL DEFAULT 1 COMMENT '状态 0-停用 1-启用',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `del_flag` int(11) NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '仓库表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '仓库表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of warehouse
 -- ----------------------------
-INSERT INTO `warehouse` VALUES (1, 'F1', ' 一号仓库', '不知道哪的一仓库', '管理员', 1, '2026-04-13 16:28:46');
+INSERT INTO `warehouse` VALUES (1, 'F1', ' 一号仓库', '原料仓', '不知道哪的一仓库', '管理员', '15421312341', 1, '2026-04-13 16:28:46', 0);
+INSERT INTO `warehouse` VALUES (2, 'F2', 'Test2', '半成品仓', '2号地址', 'Test2', '13242134512', 1, '2026-04-14 14:34:59', 0);
 
 -- ----------------------------
 -- Procedure structure for UpdateNoticeStatusByDate

@@ -16,7 +16,15 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/register", "/file/upload", "/file/uploadAvatar");
+                .excludePathPatterns(
+                        "/login",
+                        "/register",
+                        "/file/upload",
+                        "/file/uploadAvatar",
+                        "/error",
+                        "/static/**",
+                        "/favicon.ico",
+                        "/index.html");
     }
 
     @Override

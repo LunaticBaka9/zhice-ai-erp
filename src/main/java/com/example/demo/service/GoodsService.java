@@ -17,45 +17,45 @@ public class GoodsService {
     @Resource
     private GoodsMapper goodsMapper;
 
-    public List<Goods> selectAllGoods(){
+    public List<Goods> selectAllGoods() {
         return goodsMapper.selectAllGoods(null);
     }
 
-    public PageInfo<Goods> selectPage(int pageNum, int pageSize, Goods goods){
+    public PageInfo<Goods> selectPage(int pageNum, int pageSize, Goods goods) {
         PageHelper.startPage(pageNum, pageSize);
         List<Goods> list = goodsMapper.selectAllGoods(goods);
         return PageInfo.of(list);
     }
-    
-    public Goods selectById(Long id){
+
+    public Goods selectById(Long id) {
         return goodsMapper.selectById(id);
     }
 
-    public void insert(Goods goods){
+    public void insert(Goods goods) {
         goodsMapper.insertGoods(goods);
     }
-    
-    public void deleteById(Long id){
+
+    public void deleteById(Long id) {
         Goods dbGoods = goodsMapper.selectById(id);
-        if(dbGoods == null){
+        if (dbGoods == null) {
             throw new CustomerException("找不到商品，无法删除");
         }
         goodsMapper.deleteGoods(id);
     }
-    
-    public void deleteById(Goods goods){
+
+    public void deleteById(Goods goods) {
         this.deleteById(goods.getId());
     }
 
-    public void deleteBatch(List<Goods> list){
-        for(Goods goods: list){
+    public void deleteBatch(List<Goods> list) {
+        for (Goods goods : list) {
             this.deleteById(goods.getId());
         }
     }
-    
-    public void updateGoods(Goods goods){
+
+    public void updateGoods(Goods goods) {
         Goods dbGoods = goodsMapper.selectById(goods.getId());
-        if(dbGoods == null){
+        if (dbGoods == null) {
             throw new CustomerException("找不到商品，无法更新");
         }
         goodsMapper.updateGoods(goods);

@@ -4,15 +4,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.GoodsMapper">
     <select id="selectAllGoods" resultType="com.example.demo.entity.Goods">
-        SELECT * FROM `goods`
+        SELECT
+            g.*,
+            COALESCE(SUM(i.qty_on_hand), 0) as stockQuantity
+        FROM `goods` g
+        LEFT JOIN `inventory` i ON g.id = i.goods_id
         <where>
-            <if test="skuCode != null and skuCode != ''">and sku_code like concat('%', #{skuCode}, '%')</if>
-            <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
-            <if test="brand != null and brand != ''">and brand like concat('%', #{brand}, '%')</if>
-            <if test="barcode != null and barcode != ''">and barcode like concat('%', #{barcode}, '%')</if>
-            <if test="spec != null and spec != ''">and spec like concat('%', #{spec}, '%')</if>
-            and (del_flag IS NULL OR del_flag != 1)
+            <if test="skuCode != null and skuCode != ''">and g.sku_code like concat('%', #{skuCode}, '%')</if>
+            <if test="name != null and name != ''">and g.name like concat('%', #{name}, '%')</if>
+            <if test="brand != null and brand != ''">and g.brand like concat('%', #{brand}, '%')</if>
+            <if test="barcode != null and barcode != ''">and g.barcode like concat('%', #{barcode}, '%')</if>
+            <if test="spec != null and spec != ''">and g.spec like concat('%', #{spec}, '%')</if>
+            and (g.del_flag IS NULL OR g.del_flag != 1)
         </where>
+        GROUP BY g.id
     </select>
 
     <select id="selectById" parameterType="long" resultType="com.example.demo.entity.Goods">

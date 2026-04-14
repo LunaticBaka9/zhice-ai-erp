@@ -14,6 +14,8 @@ public class Goods {
     @Alias("SKU编码")
     private String skuCode;
 
+    private String img;
+
     @Alias("商品名称")
     private String name;
 
@@ -40,16 +42,22 @@ public class Goods {
 
     @Alias("主条码")
     private String barcode;
-    
+
     @Alias("创建时间")
     private Date createTime;
 
     @Alias("更新时间")
     private Date updateTime;
-    @PropIgnore
-    private int stockHigh; //库存预警上限
-    @PropIgnore
-    private int stockLow; //库存预警下限
+
+    @Alias("库存数量")
+    private double stockQuantity; // 实际库存数量（从inventory表计算得出）
+
+    @Alias("库存预警上限")
+    private int stockHigh; // 库存预警上限
+
+    @Alias("库存预警下限")
+    private int stockLow; // 库存预警下限
+
     @PropIgnore
     private int delFlag;
 }
