@@ -1,7 +1,7 @@
 /*
- Navicat Premium Dump SQL
+ Navicat Premium Data Transfer
 
- Source Server         : testdb
+ Source Server         : mysql-5.7.26
  Source Server Type    : MySQL
  Source Server Version : 50726 (5.7.26)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50726 (5.7.26)
  File Encoding         : 65001
 
- Date: 14/04/2026 17:55:40
+ Date: 14/04/2026 23:49:54
 */
 
 SET NAMES utf8mb4;
@@ -30,13 +30,21 @@ CREATE TABLE `category`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_parent_id`(`parent_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category
 -- ----------------------------
 INSERT INTO `category` VALUES (1, 0, '食物', 0, '2026-04-13 15:38:31', '2026-04-13 17:45:51');
 INSERT INTO `category` VALUES (2, 1, '水果', 0, '2026-04-13 17:45:56', '2026-04-13 17:45:56');
+INSERT INTO `category` VALUES (3, 0, '饮料', 1, '2026-04-10 09:00:00', '2026-04-10 09:00:00');
+INSERT INTO `category` VALUES (4, 3, '碳酸饮料', 0, '2026-04-10 09:30:00', '2026-04-10 09:30:00');
+INSERT INTO `category` VALUES (5, 3, '果汁饮料', 1, '2026-04-10 09:30:00', '2026-04-10 09:30:00');
+INSERT INTO `category` VALUES (6, 1, '热带水果', 1, '2026-04-11 10:00:00', '2026-04-11 10:00:00');
+INSERT INTO `category` VALUES (7, 1, '苹果类', 2, '2026-04-11 10:30:00', '2026-04-11 10:30:00');
+INSERT INTO `category` VALUES (8, 0, '零食', 2, '2026-04-12 08:00:00', '2026-04-12 08:00:00');
+INSERT INTO `category` VALUES (9, 8, '坚果类', 0, '2026-04-12 08:30:00', '2026-04-12 08:30:00');
+INSERT INTO `category` VALUES (10, 8, '糖果类', 1, '2026-04-12 08:30:00', '2026-04-12 08:30:00');
 
 -- ----------------------------
 -- Table structure for customer
@@ -57,11 +65,16 @@ CREATE TABLE `customer`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '客户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '客户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of customer
 -- ----------------------------
+INSERT INTO `customer` VALUES (1, 'C001', '鲜丰水果店', '张三', '13800138001', 'zhangsan@fresh.com', '杭州市西湖区文三路123号', 1, 50000.00, 1, '2026-04-10 09:30:00', '2026-04-10 09:30:00');
+INSERT INTO `customer` VALUES (2, 'C002', '百果园', '李四', '13800138002', 'lisi@baiguoyuan.com', '上海市浦东新区世纪大道456号', 2, 100000.00, 1, '2026-04-10 10:00:00', '2026-04-10 10:00:00');
+INSERT INTO `customer` VALUES (3, 'C003', '盒马鲜生', '王五', '13800138003', 'wangwu@hema.com', '北京市朝阳区建国路789号', 3, 200000.00, 1, '2026-04-11 09:00:00', '2026-04-11 09:00:00');
+INSERT INTO `customer` VALUES (4, 'C004', '永辉超市', '赵六', '13800138004', 'zhaoliu@yonghui.com', '深圳市南山区科技园南路999号', 2, 150000.00, 1, '2026-04-11 14:00:00', '2026-04-11 14:00:00');
+INSERT INTO `customer` VALUES (5, 'C005', '大润发', '钱七', '13800138005', 'qianqi@drtmart.com', '广州市天河区天河路1111号', 1, 80000.00, 0, '2026-04-12 11:00:00', '2026-04-12 11:00:00');
 
 -- ----------------------------
 -- Table structure for goods
@@ -90,13 +103,24 @@ CREATE TABLE `goods`  (
   INDEX `idx_category_id`(`category_id`) USING BTREE,
   INDEX `idx_barcode`(`barcode`) USING BTREE,
   CONSTRAINT `fk_product_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of goods
 -- ----------------------------
-INSERT INTO `goods` VALUES (1, 'FR001', '芒果', NULL, 2, '我不到啊', 'FR-01', '箱', '690123456789', 30.00, 50.00, 30.00, 10.00, 200.00, '2026-04-13 15:55:11', '2026-04-13 17:46:01', 0);
-INSERT INTO `goods` VALUES (2, 'FR002', 'TEst', NULL, 2, 'ste', 'tewst', '箱', '123123123123', 20.00, 20.00, 20.00, 10.00, 100.00, '2026-04-13 17:47:14', '2026-04-13 17:47:14', 0);
+INSERT INTO `goods` VALUES (1, 'FR001', '芒果', NULL, 6, '海南农场', 'FR-01', '箱', '690123456789', 30.00, 50.00, 30.00, 10.00, 200.00, '2026-04-13 15:55:11', '2026-04-13 17:46:01', 0);
+INSERT INTO `goods` VALUES (2, 'FR002', '榴莲', NULL, 6, '泰国进口', 'DL-01', '个', '690123456790', 80.00, 150.00, 85.00, 5.00, 50.00, '2026-04-13 17:47:14', '2026-04-13 17:47:14', 0);
+INSERT INTO `goods` VALUES (3, 'FR003', '阿克苏苹果', NULL, 7, '新疆基地', 'AP-01', '箱', '690123456791', 25.00, 45.00, 28.00, 20.00, 300.00, '2026-04-10 09:30:00', '2026-04-10 09:30:00', 0);
+INSERT INTO `goods` VALUES (4, 'FR004', '智利车厘子', NULL, 6, '智利进口', 'CH-01', '箱', '690123456792', 120.00, 200.00, 130.00, 10.00, 100.00, '2026-04-11 10:00:00', '2026-04-11 10:00:00', 0);
+INSERT INTO `goods` VALUES (5, 'FR005', '红心火龙果', NULL, 6, '越南进口', 'DF-01', '箱', '690123456793', 35.00, 60.00, 38.00, 15.00, 150.00, '2026-04-11 11:00:00', '2026-04-11 11:00:00', 0);
+INSERT INTO `goods` VALUES (6, 'FR006', '脐橙', NULL, 7, '赣南农场', 'OC-01', '箱', '690123456794', 18.00, 35.00, 20.00, 30.00, 400.00, '2026-04-12 08:00:00', '2026-04-12 08:00:00', 0);
+INSERT INTO `goods` VALUES (7, 'DR001', '可乐', NULL, 4, '可口可乐', 'CO-330', '瓶', '690123456795', 3.00, 5.00, 3.50, 50.00, 500.00, '2026-04-10 09:00:00', '2026-04-10 09:00:00', 0);
+INSERT INTO `goods` VALUES (8, 'DR002', '雪碧', NULL, 4, '可口可乐', 'SP-330', '瓶', '690123456796', 3.00, 5.00, 3.50, 50.00, 500.00, '2026-04-10 09:00:00', '2026-04-10 09:00:00', 0);
+INSERT INTO `goods` VALUES (9, 'DR003', '橙汁', NULL, 5, '汇源', 'OJ-1L', '盒', '690123456797', 8.00, 15.00, 9.00, 30.00, 200.00, '2026-04-10 10:00:00', '2026-04-10 10:00:00', 0);
+INSERT INTO `goods` VALUES (10, 'DR004', '农夫山泉', NULL, 3, '农夫山泉', 'WS-550', '瓶', '690123456798', 1.00, 2.00, 1.20, 100.00, 1000.00, '2026-04-10 10:00:00', '2026-04-10 10:00:00', 0);
+INSERT INTO `goods` VALUES (11, 'SN001', '开心果', NULL, 9, '加州农场', 'PS-500', '袋', '690123456799', 45.00, 80.00, 50.00, 20.00, 150.00, '2026-04-12 08:30:00', '2026-04-12 08:30:00', 0);
+INSERT INTO `goods` VALUES (12, 'SN002', '腰果', NULL, 9, '越南进口', 'CS-500', '袋', '690123456800', 40.00, 75.00, 45.00, 20.00, 150.00, '2026-04-12 08:30:00', '2026-04-12 08:30:00', 0);
+INSERT INTO `goods` VALUES (13, 'SN003', '大白兔奶糖', NULL, 10, '冠生园', 'DT-500', '袋', '690123456801', 15.00, 25.00, 18.00, 50.00, 400.00, '2026-04-12 09:00:00', '2026-04-12 09:00:00', 0);
 
 -- ----------------------------
 -- Table structure for inventory
@@ -120,12 +144,59 @@ CREATE TABLE `inventory`  (
   `update_by` int(11) NULL DEFAULT NULL COMMENT '更新人 ID',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_inventory`(`goods_id`, `warehouse_id`, `batch_no`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存快照表（实时库存）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存快照表（实时库存）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of inventory
 -- ----------------------------
-INSERT INTO `inventory` VALUES (1, 1, 1, 'A-1', '1', 100.00, 100.00, 0.00, 200000.00, '2026-04-14 11:17:57', NULL, '2026-04-14 11:17:12', '2026-04-14 11:53:53', NULL, NULL);
+INSERT INTO `inventory` VALUES (1, 1, 1, 'A-1', '1', 100.00, 100.00, 0.00, 3000.00, '2026-04-14 11:17:57', NULL, '2026-04-14 11:17:12', '2026-04-14 11:53:53', NULL, NULL);
+INSERT INTO `inventory` VALUES (2, 2, 1, 'A-2', '1', 20.00, 20.00, 0.00, 1700.00, '2026-04-13 14:00:00', NULL, '2026-04-14 09:00:00', '2026-04-14 09:30:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (3, 3, 1, 'B-1', '1', 150.00, 150.00, 10.00, 4200.00, '2026-04-12 10:00:00', NULL, '2026-04-13 16:00:00', '2026-04-14 10:00:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (4, 4, 1, 'A-3', '1', 30.00, 30.00, 0.00, 3900.00, '2026-04-11 11:00:00', NULL, '2026-04-14 08:00:00', '2026-04-14 11:00:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (5, 5, 1, 'A-4', '1', 80.00, 80.00, 0.00, 3040.00, '2026-04-11 12:00:00', NULL, '2026-04-14 10:00:00', '2026-04-14 12:00:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (6, 6, 1, 'B-2', '2', 200.00, 200.00, 0.00, 4000.00, '2026-04-12 09:00:00', NULL, '2026-04-13 15:00:00', '2026-04-14 08:00:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (7, 7, 2, 'C-1', '1', 300.00, 280.00, 20.00, 1050.00, '2026-04-10 10:00:00', NULL, '2026-04-14 11:00:00', '2026-04-14 14:00:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (8, 8, 2, 'C-2', '1', 250.00, 250.00, 0.00, 875.00, '2026-04-10 10:00:00', NULL, '2026-04-14 11:00:00', '2026-04-14 14:00:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (9, 9, 2, 'D-1', '1', 120.00, 120.00, 0.00, 1080.00, '2026-04-10 11:00:00', NULL, '2026-04-13 14:00:00', '2026-04-14 09:00:00', NULL, NULL);
+INSERT INTO `inventory` VALUES (10, 10, 2, 'D-2', '1', 600.00, 600.00, 0.00, 720.00, '2026-04-10 11:00:00', NULL, '2026-04-14 08:00:00', '2026-04-14 10:00:00', NULL, NULL);
+
+-- ----------------------------
+-- Table structure for inventory_alert
+-- ----------------------------
+DROP TABLE IF EXISTS `inventory_alert`;
+CREATE TABLE `inventory_alert`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '预警ID',
+  `goods_id` bigint(20) UNSIGNED NOT NULL COMMENT '商品ID',
+  `goods_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称',
+  `sku_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU编码',
+  `brand` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '品牌',
+  `spec` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '规格型号',
+  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '个' COMMENT '单位',
+  `stock_quantity` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '当前库存数量',
+  `stock_low` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '库存预警下限',
+  `stock_high` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '库存预警上限',
+  `alert_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '预警类型：out_of_stock-缺货，low_stock-库存不足，high_stock-库存过多，expiring_soon-即将到期',
+  `alert_level` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '预警级别：high-高，medium-中，low-低',
+  `acknowledged` tinyint(1) NULL DEFAULT 0 COMMENT '是否已确认：0-未确认，1-已确认',
+  `acknowledged_by` int(11) NULL DEFAULT NULL COMMENT '确认人ID',
+  `acknowledged_time` datetime NULL DEFAULT NULL COMMENT '确认时间',
+  `days_to_expiry` int(11) NULL DEFAULT NULL COMMENT '到期天数',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_goods_id`(`goods_id`) USING BTREE,
+  INDEX `idx_sku_code`(`sku_code`) USING BTREE,
+  INDEX `idx_alert_type`(`alert_type`) USING BTREE,
+  INDEX `idx_alert_level`(`alert_level`) USING BTREE,
+  INDEX `idx_acknowledged`(`acknowledged`) USING BTREE,
+  INDEX `idx_create_time`(`create_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存预警表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of inventory_alert
+-- ----------------------------
+INSERT INTO `inventory_alert` VALUES (1, 1, '芒果', 'FR001', '我不到啊', 'FR-01', '箱', 100.00, 10.00, 200.00, 'low_stock', 'medium', 0, NULL, NULL, NULL, '2026-04-14 12:00:00', '2026-04-14 12:00:00');
+INSERT INTO `inventory_alert` VALUES (2, 2, 'TEst', 'FR002', 'ste', 'tewst', '箱', 8.00, 10.00, 100.00, 'out_of_stock', 'high', 0, NULL, NULL, NULL, '2026-04-14 13:00:00', '2026-04-14 13:00:00');
 
 -- ----------------------------
 -- Table structure for inventory_operation
@@ -186,6 +257,10 @@ CREATE TABLE `message`  (
 -- ----------------------------
 -- Records of message
 -- ----------------------------
+INSERT INTO `message` VALUES (1, 1);
+INSERT INTO `message` VALUES (2, 2);
+INSERT INTO `message` VALUES (3, 1);
+INSERT INTO `message` VALUES (4, 3);
 
 -- ----------------------------
 -- Table structure for notice
@@ -415,11 +490,16 @@ CREATE TABLE `purchase`  (
   `status` tinyint(4) NULL DEFAULT NULL COMMENT '状态：0-草稿，1-待审核，2-已完成，3-已作废',
   `in_stock_time` datetime NULL DEFAULT NULL COMMENT '实际入库时间（用于成本核算的截止点）',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = MyISAM AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of purchase
 -- ----------------------------
+INSERT INTO `purchase` VALUES (1, 'PO20260414001', 1, 1, '15000.00', 2, '2026-04-14 10:00:00');
+INSERT INTO `purchase` VALUES (2, 'PO20260414002', 2, 1, '25000.00', 1, NULL);
+INSERT INTO `purchase` VALUES (3, 'PO20260414003', 3, 2, '8000.00', 0, NULL);
+INSERT INTO `purchase` VALUES (4, 'PO20260414004', 4, 1, '35000.00', 2, '2026-04-13 15:30:00');
+INSERT INTO `purchase` VALUES (5, 'PO20260414005', 5, 2, '12000.00', 2, '2026-04-12 11:00:00');
 
 -- ----------------------------
 -- Table structure for sign_record
@@ -478,11 +558,17 @@ CREATE TABLE `supplier`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '供应商表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '供应商表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of supplier
 -- ----------------------------
+INSERT INTO `supplier` VALUES (1, 'S001', '海南芒果农场', '陈经理', '13912340001', 'chen@mango-farm.com', '海南省三亚市海棠区芒果园1号', '6222021234567890', '91460000MA5TWX1234', 1, '2026-04-10 08:00:00', '2026-04-10 08:00:00');
+INSERT INTO `supplier` VALUES (2, 'S002', '泰国榴莲进口公司', 'Mr.Somchai', '13912340002', 'somchai@thai-durian.com', '泰国曼谷辉煌区榴莲街88号', '6222021234567891', '91410000MA5TWX5678', 1, '2026-04-10 09:00:00', '2026-04-10 09:00:00');
+INSERT INTO `supplier` VALUES (3, 'S003', '新疆阿克苏苹果基地', '李场长', '13912340003', 'li@xj-apple.com', '新疆阿克苏市红富士路200号', '6222021234567892', '91652900MA5TWX9012', 1, '2026-04-11 10:00:00', '2026-04-11 10:00:00');
+INSERT INTO `supplier` VALUES (4, 'S004', '智利车厘子合作社', 'Carlos', '13912340004', 'carlos@chile-cherry.com', '智利圣地亚哥市樱桃谷农场', '6222021234567893', '91765000MA5TWX3456', 1, '2026-04-12 08:30:00', '2026-04-12 08:30:00');
+INSERT INTO `supplier` VALUES (5, 'S005', '越南火龙果供应商', 'Nguyen Thi Lan', '13912340005', 'lan@vietnam-dragon.com', '越南胡志明市火龙果产区', '6222021234567894', '91811000MA5TWX7890', 1, '2026-04-13 09:00:00', '2026-04-13 09:00:00');
+INSERT INTO `supplier` VALUES (6, 'S006', '江西赣南脐橙农场', '刘老板', '13912340006', 'liu@gan-nan-orange.com', '江西省赣州市安远县脐橙基地', '6222021234567895', '91360700MA5TWX2468', 0, '2026-04-14 10:00:00', '2026-04-14 10:00:00');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -503,6 +589,28 @@ CREATE TABLE `sys_menu`  (
 -- ----------------------------
 -- Records of sys_menu
 -- ----------------------------
+INSERT INTO `sys_menu` VALUES (1, '系统管理', '/system', 'setting', '系统基础配置', NULL, '/views/system/index', 1);
+INSERT INTO `sys_menu` VALUES (2, '用户管理', '/system/user', 'user', '用户列表', 1, '/views/system/user', 101);
+INSERT INTO `sys_menu` VALUES (3, '角色管理', '/system/role', 'role', '角色列表', 1, '/views/system/role', 102);
+INSERT INTO `sys_menu` VALUES (4, '菜单管理', '/system/menu', 'menu', '菜单列表', 1, '/views/system/menu', 103);
+INSERT INTO `sys_menu` VALUES (5, '仓库管理', '/warehouse', 'box', '仓库基础配置', NULL, '/views/warehouse/index', 2);
+INSERT INTO `sys_menu` VALUES (6, '仓库列表', '/warehouse/list', 'box', '仓库列表', 5, '/views/warehouse/list', 201);
+INSERT INTO `sys_menu` VALUES (7, '商品管理', '/goods', 'shopping', '商品基础配置', NULL, '/views/goods/index', 3);
+INSERT INTO `sys_menu` VALUES (8, '商品列表', '/goods/list', 'shopping', '商品列表', 7, '/views/goods/list', 301);
+INSERT INTO `sys_menu` VALUES (9, '分类管理', '/goods/category', 'folder', '商品分类', 7, '/views/goods/category', 302);
+INSERT INTO `sys_menu` VALUES (10, '库存管理', '/inventory', 'database', '库存相关操作', NULL, '/views/inventory/index', 4);
+INSERT INTO `sys_menu` VALUES (11, '库存作业', '/inventory/operation', 'file', '出入库作业', 10, '/views/inventory/operation', 401);
+INSERT INTO `sys_menu` VALUES (12, '库存预警', '/inventory/alert', 'warning', '库存预警', 10, '/views/inventory/alert', 402);
+INSERT INTO `sys_menu` VALUES (13, '采购管理', '/purchase', 'shopping-cart', '采购相关操作', NULL, '/views/purchase/index', 5);
+INSERT INTO `sys_menu` VALUES (14, '采购订单', '/purchase/order', 'shopping-cart', '采购订单', 13, '/views/purchase/order', 501);
+INSERT INTO `sys_menu` VALUES (15, '供应商管理', '/purchase/supplier', 'team', '供应商列表', 13, '/views/purchase/supplier', 502);
+INSERT INTO `sys_menu` VALUES (16, '客户管理', '/customer', 'contacts', '客户相关操作', NULL, '/views/customer/index', 6);
+INSERT INTO `sys_menu` VALUES (17, '客户列表', '/customer/list', 'contacts', '客户列表', 16, '/views/customer/list', 601);
+INSERT INTO `sys_menu` VALUES (18, '公告管理', '/notice', 'notification', '公告相关操作', NULL, '/views/notice/index', 7);
+INSERT INTO `sys_menu` VALUES (19, '公告列表', '/notice/list', 'notification', '公告列表', 18, '/views/notice/list', 701);
+INSERT INTO `sys_menu` VALUES (20, '签到管理', '/sign', 'calendar', '员工签到', NULL, '/views/sign/index', 8);
+INSERT INTO `sys_menu` VALUES (21, '日志管理', '/log', 'file-text', '系统日志', NULL, '/views/log/index', 9);
+INSERT INTO `sys_menu` VALUES (22, '操作日志', '/log/operation', 'file-text', '操作日志', 21, '/views/log/operation', 901);
 
 -- ----------------------------
 -- Table structure for user

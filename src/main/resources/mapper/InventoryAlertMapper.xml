@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.InventoryAlertMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.demo.entity.InventoryAlert">
+        <id column="id" property="id"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="sku_code" property="skuCode"/>
+        <result column="brand" property="brand"/>
+        <result column="spec" property="spec"/>
+        <result column="unit" property="unit"/>
+        <result column="stock_quantity" property="stockQuantity"/>
+        <result column="stock_low" property="stockLow"/>
+        <result column="stock_high" property="stockHigh"/>
+        <result column="alert_type" property="alertType"/>
+        <result column="alert_level" property="alertLevel"/>
+        <result column="acknowledged" property="acknowledged"/>
+        <result column="acknowledged_by" property="acknowledgedBy"/>
+        <result column="acknowledged_time" property="acknowledgedTime"/>
+        <result column="days_to_expiry" property="daysToExpiry"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, goods_id, goods_name, sku_code, brand, spec, unit,
+        stock_quantity, stock_low, stock_high, alert_type, alert_level,
+        acknowledged, acknowledged_by, acknowledged_time, days_to_expiry,
+        create_time, update_time
+    </sql>
+
+    <!-- 查询列表 -->
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM inventory_alert
+        <where>
+            <if test="goodsName != null and goodsName != ''">
+                AND goods_name LIKE CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="skuCode != null and skuCode != ''">
+                AND sku_code LIKE CONCAT('%', #{skuCode}, '%')
+            </if>
+            <if test="brand != null and brand != ''">
+                AND brand LIKE CONCAT('%', #{brand}, '%')
+            </if>
+            <if test="alertType != null and alertType != ''">
+                AND alert_type = #{alertType}
+            </if>
+            <if test="alertLevel != null and alertLevel != ''">
+                AND alert_level = #{alertLevel}
+            </if>
+            <if test="acknowledged != null">
+                AND acknowledged = #{acknowledged}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据 ID 查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM inventory_alert
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据商品 ID 查询 -->
+    <select id="selectByGoodsId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM inventory_alert
+        WHERE goods_id = #{goodsId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 插入预警 -->
+    <insert id="insert" parameterType="com.example.demo.entity.InventoryAlert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO inventory_alert (
+            goods_id, goods_name, sku_code, brand, spec, unit,
+            stock_quantity, stock_low, stock_high, alert_type, alert_level,
+            acknowledged, acknowledged_by, acknowledged_time, days_to_expiry,
+            create_time, update_time
+        ) VALUES (
+            #{goodsId}, #{goodsName}, #{skuCode}, #{brand}, #{spec}, #{unit},
+            #{stockQuantity}, #{stockLow}, #{stockHigh}, #{alertType}, #{alertLevel},
+            #{acknowledged, jdbcType=INTEGER}, #{acknowledgedBy, jdbcType=INTEGER}, #{acknowledgedTime, jdbcType=TIMESTAMP},
+            #{daysToExpiry, jdbcType=INTEGER},
+            #{createTime, jdbcType=TIMESTAMP}, #{updateTime, jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 批量插入预警 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO inventory_alert (
+            goods_id, goods_name, sku_code, brand, spec, unit,
+            stock_quantity, stock_low, stock_high, alert_type, alert_level,
+            acknowledged, acknowledged_by, acknowledged_time, days_to_expiry,
+            create_time, update_time
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.goodsId}, #{item.goodsName}, #{item.skuCode}, #{item.brand}, #{item.spec}, #{item.unit},
+                #{item.stockQuantity}, #{item.stockLow}, #{item.stockHigh}, #{item.alertType}, #{item.alertLevel},
+                #{item.acknowledged, jdbcType=INTEGER}, #{item.acknowledgedBy, jdbcType=INTEGER}, #{item.acknowledgedTime, jdbcType=TIMESTAMP},
+                #{item.daysToExpiry, jdbcType=INTEGER},
+                #{item.createTime, jdbcType=TIMESTAMP}, #{item.updateTime, jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 更新预警 -->
+    <update id="update" parameterType="com.example.demo.entity.InventoryAlert">
+        UPDATE inventory_alert
+        <set>
+            <if test="goodsName != null">goods_name = #{goodsName},</if>
+            <if test="skuCode != null">sku_code = #{skuCode},</if>
+            <if test="brand != null">brand = #{brand},</if>
+            <if test="spec != null">spec = #{spec},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="stockQuantity != null">stock_quantity = #{stockQuantity},</if>
+            <if test="stockLow != null">stock_low = #{stockLow},</if>
+            <if test="stockHigh != null">stock_high = #{stockHigh},</if>
+            <if test="alertType != null">alert_type = #{alertType},</if>
+            <if test="alertLevel != null">alert_level = #{alertLevel},</if>
+            <if test="acknowledged != null">acknowledged = #{acknowledged},</if>
+            <if test="acknowledgedBy != null">acknowledged_by = #{acknowledgedBy},</if>
+            <if test="acknowledgedTime != null">acknowledged_time = #{acknowledgedTime},</if>
+            <if test="daysToExpiry != null">days_to_expiry = #{daysToExpiry},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 确认预警 -->
+    <update id="acknowledge">
+        UPDATE inventory_alert
+        SET acknowledged = 1,
+            acknowledged_by = #{acknowledgedBy},
+            acknowledged_time = NOW(),
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除预警 -->
+    <delete id="deleteById">
+        DELETE FROM inventory_alert WHERE id = #{id}
+    </delete>
+
+    <!-- 批量删除预警 -->
+    <delete id="deleteBatch">
+        DELETE FROM inventory_alert WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 统计预警数量 -->
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM inventory_alert
+        <where>
+            <if test="goodsName != null and goodsName != ''">
+                AND goods_name LIKE CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="skuCode != null and skuCode != ''">
+                AND sku_code LIKE CONCAT('%', #{skuCode}, '%')
+            </if>
+            <if test="brand != null and brand != ''">
+                AND brand LIKE CONCAT('%', #{brand}, '%')
+            </if>
+            <if test="alertType != null and alertType != ''">
+                AND alert_type = #{alertType}
+            </if>
+            <if test="alertLevel != null and alertLevel != ''">
+                AND alert_level = #{alertLevel}
+            </if>
+            <if test="acknowledged != null">
+                AND acknowledged = #{acknowledged}
+            </if>
+        </where>
+    </select>
+
+    <!-- 统计各类型预警数量 -->
+    <select id="countByAlertType" resultType="java.util.Map">
+        SELECT alert_type, COUNT(*) as count
+        FROM inventory_alert
+        GROUP BY alert_type
+    </select>
+
+    <!-- 获取所有预警（用于生成预警） -->
+    <select id="selectAllAlerts" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM inventory_alert
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

@@ -14,7 +14,7 @@
                 </el-form-item>
                 <el-form-item label="商品名称">
                     <el-input
-                        v-model="searchForm.name"
+                        v-model="searchForm.goodsName"
                         placeholder="请输入商品名称"
                         clearable
                         @clear="handleSearch"
@@ -31,12 +31,7 @@
                     />
                 </el-form-item>
             </el-form>
-            <el-form
-                :inline="true"
-                :model="searchForm"
-                class="search-form"
-                style="margin-top: 10px"
-            >
+            <el-form :inline="true" :model="searchForm" class="search-form" style="margin-top: 10px">
                 <el-form-item label="分类">
                     <el-select
                         v-model="searchForm.categoryId"
@@ -171,82 +166,43 @@
 
         <!-- 预警商品表格 -->
         <el-card class="table-card" shadow="never">
-            <el-table
-                :data="alertList"
-                v-loading="loading"
-                stripe
-                border
-                style="width: 100%"
-            >
+            <el-table :data="alertList" v-loading="loading" stripe border style="width: 100%">
                 <el-table-column prop="skuCode" label="SKU编码" width="150" />
-                <el-table-column prop="name" label="商品名称" width="180" />
+                <el-table-column prop="goodsName" label="商品名称" width="180" />
                 <el-table-column prop="brand" label="品牌" width="120" />
                 <el-table-column prop="spec" label="规格型号" width="150" />
                 <el-table-column prop="unit" label="单位" width="80" />
-                <el-table-column
-                    prop="stockQuantity"
-                    label="当前库存"
-                    width="100"
-                >
+                <el-table-column prop="stockQuantity" label="当前库存" width="100">
                     <template #default="{ row }">
-                        <span :class="getStockStatusClass(row)">{{
-                            row.stockQuantity || 0
-                        }}</span>
+                        <span :class="getStockStatusClass(row)">{{ row.stockQuantity || 0 }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="stockLow" label="预警下限" width="100" />
-                <el-table-column
-                    prop="stockHigh"
-                    label="预警上限"
-                    width="100"
-                />
+                <el-table-column prop="stockHigh" label="预警上限" width="100" />
                 <el-table-column prop="alertType" label="预警类型" width="120">
                     <template #default="{ row }">
-                        <el-tag
-                            :type="getAlertTypeTagType(row.alertType)"
-                            size="small"
-                        >
+                        <el-tag :type="getAlertTypeTagType(row.alertType)" size="small">
                             {{ getAlertTypeText(row.alertType) }}
                         </el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column prop="alertLevel" label="预警级别" width="100">
                     <template #default="{ row }">
-                        <el-tag
-                            :type="getAlertLevelTagType(row.alertLevel)"
-                            size="small"
-                        >
+                        <el-tag :type="getAlertLevelTagType(row.alertLevel)" size="small">
                             {{ getAlertLevelText(row.alertLevel) }}
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column
-                    prop="lastUpdated"
-                    label="最后更新"
-                    width="150"
-                >
+                <el-table-column prop="lastUpdated" label="最后更新" width="150">
                     <template #default="{ row }">
                         {{ formatDateTime(row.lastUpdated) }}
                     </template>
                 </el-table-column>
-                <el-table-column
-                    prop="daysToExpiry"
-                    label="到期天数"
-                    width="100"
-                >
+                <el-table-column prop="daysToExpiry" label="到期天数" width="100">
                     <template #default="{ row }">
-                        <span
-                            v-if="
-                                row.daysToExpiry !== undefined &&
-                                row.daysToExpiry !== null
-                            "
-                        >
+                        <span v-if="row.daysToExpiry !== undefined && row.daysToExpiry !== null">
                             {{ row.daysToExpiry }}
-                            <el-tag
-                                v-if="row.daysToExpiry <= 7"
-                                type="danger"
-                                size="small"
-                                style="margin-left: 5px"
+                            <el-tag v-if="row.daysToExpiry <= 7" type="danger" size="small" style="margin-left: 5px"
                                 >紧急</el-tag
                             >
                             <el-tag
@@ -262,39 +218,19 @@
                 </el-table-column>
                 <el-table-column label="操作" width="200" fixed="right">
                     <template #default="{ row }">
-                        <el-button
-                            link
-                            type="primary"
-                            size="small"
-                            @click="handleView(row)"
-                        >
+                        <el-button link type="primary" size="small" @click="handleView(row)">
                             <el-icon><View /></el-icon>
                             查看
                         </el-button>
-                        <el-button
-                            link
-                            type="success"
-                            size="small"
-                            @click="handleReplenish(row)"
-                        >
+                        <el-button link type="success" size="small" @click="handleReplenish(row)">
                             <el-icon><ShoppingCart /></el-icon>
                             补货
                         </el-button>
-                        <el-button
-                            link
-                            type="warning"
-                            size="small"
-                            @click="handleAdjust(row)"
-                        >
+                        <el-button link type="warning" size="small" @click="handleAdjust(row)">
                             <el-icon><Edit /></el-icon>
                             调整
                         </el-button>
-                        <el-button
-                            link
-                            type="info"
-                            size="small"
-                            @click="handleAcknowledge(row)"
-                        >
+                        <el-button link type="info" size="small" @click="handleAcknowledge(row)">
                             <el-icon><Check /></el-icon>
                             确认
                         </el-button>
@@ -319,24 +255,12 @@
         <!-- 查看商品详情对话框 -->
         <el-dialog v-model="viewDialog.visible" title="商品详情" width="600px">
             <el-descriptions :column="1" border>
-                <el-descriptions-item label="SKU编码">{{
-                    viewDialog.data.skuCode
-                }}</el-descriptions-item>
-                <el-descriptions-item label="商品名称">{{
-                    viewDialog.data.name
-                }}</el-descriptions-item>
-                <el-descriptions-item label="品牌">{{
-                    viewDialog.data.brand
-                }}</el-descriptions-item>
-                <el-descriptions-item label="规格型号">{{
-                    viewDialog.data.spec
-                }}</el-descriptions-item>
-                <el-descriptions-item label="单位">{{
-                    viewDialog.data.unit
-                }}</el-descriptions-item>
-                <el-descriptions-item label="条码">{{
-                    viewDialog.data.barcode
-                }}</el-descriptions-item>
+                <el-descriptions-item label="SKU编码">{{ viewDialog.data.skuCode }}</el-descriptions-item>
+                <el-descriptions-item label="商品名称">{{ viewDialog.data.name }}</el-descriptions-item>
+                <el-descriptions-item label="品牌">{{ viewDialog.data.brand }}</el-descriptions-item>
+                <el-descriptions-item label="规格型号">{{ viewDialog.data.spec }}</el-descriptions-item>
+                <el-descriptions-item label="单位">{{ viewDialog.data.unit }}</el-descriptions-item>
+                <el-descriptions-item label="条码">{{ viewDialog.data.barcode }}</el-descriptions-item>
                 <el-descriptions-item label="采购价">
                     ¥{{ formatPrice(viewDialog.data.purchasePrice) }}
                 </el-descriptions-item>
@@ -346,26 +270,16 @@
                 <el-descriptions-item label="成本价">
                     ¥{{ formatPrice(viewDialog.data.costPrice) }}
                 </el-descriptions-item>
-                <el-descriptions-item label="库存预警下限">{{
-                    viewDialog.data.stockLow
-                }}</el-descriptions-item>
-                <el-descriptions-item label="库存预警上限">{{
-                    viewDialog.data.stockHigh
-                }}</el-descriptions-item>
-                <el-descriptions-item label="当前库存">{{
-                    viewDialog.data.stockQuantity || 0
-                }}</el-descriptions-item>
+                <el-descriptions-item label="库存预警下限">{{ viewDialog.data.stockLow }}</el-descriptions-item>
+                <el-descriptions-item label="库存预警上限">{{ viewDialog.data.stockHigh }}</el-descriptions-item>
+                <el-descriptions-item label="当前库存">{{ viewDialog.data.stockQuantity || 0 }}</el-descriptions-item>
                 <el-descriptions-item label="预警类型">
-                    <el-tag
-                        :type="getAlertTypeTagType(viewDialog.data.alertType)"
-                    >
+                    <el-tag :type="getAlertTypeTagType(viewDialog.data.alertType)">
                         {{ getAlertTypeText(viewDialog.data.alertType) }}
                     </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="预警级别">
-                    <el-tag
-                        :type="getAlertLevelTagType(viewDialog.data.alertLevel)"
-                    >
+                    <el-tag :type="getAlertLevelTagType(viewDialog.data.alertLevel)">
                         {{ getAlertLevelText(viewDialog.data.alertLevel) }}
                     </el-tag>
                 </el-descriptions-item>
@@ -379,11 +293,7 @@
         </el-dialog>
 
         <!-- 预警设置对话框 -->
-        <el-dialog
-            v-model="settingsDialog.visible"
-            title="预警设置"
-            width="600px"
-        >
+        <el-dialog v-model="settingsDialog.visible" title="预警设置" width="600px">
             <el-form :model="settingsDialog.form" label-width="120px">
                 <el-form-item label="预警下限系数">
                     <el-slider
@@ -393,9 +303,7 @@
                         :step="0.1"
                         show-input
                     />
-                    <div class="setting-description">
-                        库存下限倍数，用于动态计算预警阈值
-                    </div>
+                    <div class="setting-description">库存下限倍数，用于动态计算预警阈值</div>
                 </el-form-item>
                 <el-form-item label="预警上限系数">
                     <el-slider
@@ -405,14 +313,10 @@
                         :step="0.1"
                         show-input
                     />
-                    <div class="setting-description">
-                        库存上限倍数，用于动态计算预警阈值
-                    </div>
+                    <div class="setting-description">库存上限倍数，用于动态计算预警阈值</div>
                 </el-form-item>
                 <el-form-item label="预警通知方式">
-                    <el-checkbox-group
-                        v-model="settingsDialog.form.notificationMethods"
-                    >
+                    <el-checkbox-group v-model="settingsDialog.form.notificationMethods">
                         <el-checkbox label="email">邮件通知</el-checkbox>
                         <el-checkbox label="sms">短信通知</el-checkbox>
                         <el-checkbox label="wechat">微信通知</el-checkbox>
@@ -420,9 +324,7 @@
                     </el-checkbox-group>
                 </el-form-item>
                 <el-form-item label="预警频率">
-                    <el-radio-group
-                        v-model="settingsDialog.form.checkFrequency"
-                    >
+                    <el-radio-group v-model="settingsDialog.form.checkFrequency">
                         <el-radio label="realtime">实时</el-radio>
                         <el-radio label="hourly">每小时</el-radio>
                         <el-radio label="daily">每天</el-radio>
@@ -436,29 +338,19 @@
                         :max="365"
                         controls-position="right"
                     />
-                    <div class="setting-description">
-                        商品到期前多少天开始预警
-                    </div>
+                    <div class="setting-description">商品到期前多少天开始预警</div>
                 </el-form-item>
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
-                    <el-button @click="settingsDialog.visible = false"
-                        >取消</el-button
-                    >
-                    <el-button type="primary" @click="saveSettings"
-                        >保存设置</el-button
-                    >
+                    <el-button @click="settingsDialog.visible = false">取消</el-button>
+                    <el-button type="primary" @click="saveSettings">保存设置</el-button>
                 </span>
             </template>
         </el-dialog>
 
         <!-- 补货对话框 -->
-        <el-dialog
-            v-model="replenishDialog.visible"
-            title="补货申请"
-            width="500px"
-        >
+        <el-dialog v-model="replenishDialog.visible" title="补货申请" width="500px">
             <el-form :model="replenishDialog.form" label-width="100px">
                 <el-form-item label="商品名称">
                     <span>{{ replenishDialog.form.name }}</span>
@@ -496,12 +388,8 @@
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
-                    <el-button @click="replenishDialog.visible = false"
-                        >取消</el-button
-                    >
-                    <el-button type="primary" @click="submitReplenishment"
-                        >提交补货</el-button
-                    >
+                    <el-button @click="replenishDialog.visible = false">取消</el-button>
+                    <el-button type="primary" @click="submitReplenishment">提交补货</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -883,15 +771,11 @@ const submitReplenishment = async () => {
 
 // 调整库存
 const handleAdjust = (row) => {
-    ElMessageBox.confirm(
-        `确定要手动调整 "${row.name}" 的库存预警参数吗？`,
-        "提示",
-        {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
-        },
-    ).then(() => {
+    ElMessageBox.confirm(`确定要手动调整 "${row.name}" 的库存预警参数吗？`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+    }).then(() => {
         // 这里可以跳转到编辑页面或打开编辑对话框
         ElMessage.info("调整功能待实现");
     });
@@ -905,9 +789,7 @@ const handleAcknowledge = (row) => {
         type: "info",
     }).then(async () => {
         try {
-            const res = await request.post(
-                `/inventoryAlert/acknowledge/${row.id}`,
-            );
+            const res = await request.post(`/inventoryAlert/acknowledge/${row.id}`);
             if (res.code === "200") {
                 ElMessage.success("预警已确认");
                 getAlertList(); // 重新加载列表
