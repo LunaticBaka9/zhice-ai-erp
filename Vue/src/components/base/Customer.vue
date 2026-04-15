@@ -9,6 +9,7 @@
                         clearable
                         @clear="handleSearch"
                         @keyup.enter="handleSearch"
+                        style="width: 100px"
                     />
                 </el-form-item>
                 <el-form-item label="客户名称">
@@ -27,6 +28,7 @@
                         clearable
                         @clear="handleSearch"
                         @keyup.enter="handleSearch"
+                        style="width: 120px"
                     />
                 </el-form-item>
                 <el-form-item label="电话">
@@ -76,49 +78,25 @@
         </div>
 
         <el-card class="table-card" shadow="never">
-            <el-table
-                :data="customerList"
-                v-loading="loading"
-                stripe
-                border
-                style="width: 100%"
-            >
-                <el-table-column type="index" label="序号" width="60" />
-                <el-table-column prop="code" label="客户编码" width="120" />
+            <el-table :data="customerList" v-loading="loading" stripe border style="width: 100%">
+                <el-table-column type="selection" width="55" />
+                <el-table-column prop="code" label="客户编码" width="100" />
                 <el-table-column prop="name" label="客户名称" min-width="180" />
-                <el-table-column
-                    prop="contactPerson"
-                    label="联系人"
-                    width="100"
-                />
+                <el-table-column prop="contactPerson" label="联系人" width="80" />
                 <el-table-column prop="phone" label="联系电话" width="130" />
                 <el-table-column prop="email" label="邮箱" min-width="180" />
                 <el-table-column prop="address" label="地址" min-width="200" />
                 <el-table-column prop="priceLevel" label="价格等级" width="100">
                     <template #default="{ row }">
-                        <el-tag v-if="row.priceLevel === 1" type="success"
-                            >零售价</el-tag
-                        >
-                        <el-tag v-else-if="row.priceLevel === 2" type="warning"
-                            >批发价</el-tag
-                        >
-                        <el-tag v-else-if="row.priceLevel === 3" type="danger"
-                            >VIP价</el-tag
-                        >
+                        <el-tag v-if="row.priceLevel === 1" type="success">零售价</el-tag>
+                        <el-tag v-else-if="row.priceLevel === 2" type="warning">批发价</el-tag>
+                        <el-tag v-else-if="row.priceLevel === 3" type="danger">VIP价</el-tag>
                         <span v-else>-</span>
                     </template>
                 </el-table-column>
-                <el-table-column
-                    prop="creditLimit"
-                    label="信用额度"
-                    width="120"
-                >
+                <el-table-column prop="creditLimit" label="信用额度" width="120">
                     <template #default="{ row }">
-                        {{
-                            row.creditLimit
-                                ? row.creditLimit.toLocaleString()
-                                : "0.00"
-                        }}
+                        {{ row.creditLimit ? row.creditLimit.toLocaleString() : "0.00" }}
                     </template>
                 </el-table-column>
                 <el-table-column prop="status" label="状态" width="80">
@@ -130,21 +108,11 @@
                 </el-table-column>
                 <el-table-column label="操作" width="180" fixed="right">
                     <template #default="{ row }">
-                        <el-button
-                            link
-                            type="primary"
-                            size="small"
-                            @click="handleEdit(row)"
-                        >
+                        <el-button link type="primary" size="small" @click="handleEdit(row)">
                             <el-icon><Edit /></el-icon>
                             编辑
                         </el-button>
-                        <el-button
-                            link
-                            type="danger"
-                            size="small"
-                            @click="handleDelete(row)"
-                        >
+                        <el-button link type="danger" size="small" @click="handleDelete(row)">
                             <el-icon><Delete /></el-icon>
                             删除
                         </el-button>
@@ -182,19 +150,12 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="客户编码" prop="code">
-                            <el-input
-                                v-model="dialog.form.code"
-                                placeholder="例如: C001"
-                                :disabled="dialog.isEdit"
-                            />
+                            <el-input v-model="dialog.form.code" placeholder="例如: C001" :disabled="dialog.isEdit" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="客户名称" prop="name">
-                            <el-input
-                                v-model="dialog.form.name"
-                                placeholder="请输入客户名称"
-                            />
+                            <el-input v-model="dialog.form.name" placeholder="请输入客户名称" />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -202,18 +163,12 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="联系人" prop="contactPerson">
-                            <el-input
-                                v-model="dialog.form.contactPerson"
-                                placeholder="请输入联系人"
-                            />
+                            <el-input v-model="dialog.form.contactPerson" placeholder="请输入联系人" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="联系电话" prop="phone">
-                            <el-input
-                                v-model="dialog.form.phone"
-                                placeholder="请输入联系电话"
-                            />
+                            <el-input v-model="dialog.form.phone" placeholder="请输入联系电话" />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -221,10 +176,7 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="邮箱" prop="email">
-                            <el-input
-                                v-model="dialog.form.email"
-                                placeholder="请输入邮箱"
-                            />
+                            <el-input v-model="dialog.form.email" placeholder="请输入邮箱" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -254,12 +206,7 @@
                 </el-form-item>
 
                 <el-form-item label="详细地址" prop="address">
-                    <el-input
-                        v-model="dialog.form.address"
-                        type="textarea"
-                        :rows="2"
-                        placeholder="请输入详细地址"
-                    />
+                    <el-input v-model="dialog.form.address" type="textarea" :rows="2" placeholder="请输入详细地址" />
                 </el-form-item>
 
                 <el-form-item label="状态" prop="status">
@@ -275,13 +222,7 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="dialog.visible = false">取消</el-button>
-                    <el-button
-                        type="primary"
-                        @click="submitForm"
-                        :loading="dialog.loading"
-                    >
-                        确认
-                    </el-button>
+                    <el-button type="primary" @click="submitForm" :loading="dialog.loading"> 确认 </el-button>
                 </span>
             </template>
         </el-dialog>
@@ -291,14 +232,7 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import {
-    Plus,
-    Search,
-    Refresh,
-    Edit,
-    Delete,
-    Download,
-} from "@element-plus/icons-vue";
+import { Plus, Search, Refresh, Edit, Delete, Download } from "@element-plus/icons-vue";
 import request from "../../utils/request.js";
 
 const searchForm = reactive({
@@ -472,9 +406,7 @@ const submitForm = async () => {
             dialog.loading = true;
             try {
                 const submitData = { ...dialog.form };
-                const api = dialog.isEdit
-                    ? "/customer/update"
-                    : "/customer/add";
+                const api = dialog.isEdit ? "/customer/update" : "/customer/add";
                 const method = dialog.isEdit ? "post" : "post";
 
                 const res = await request[method](api, submitData);

@@ -3,14 +3,12 @@ package com.example.demo.controller;
 import com.example.demo.common.OperationLogAnnotation;
 import com.example.demo.common.Result;
 import com.example.demo.entity.InventoryAlert;
-import com.example.demo.entity.User;
 import com.example.demo.service.InventoryAlertService;
 import com.example.demo.service.UserService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

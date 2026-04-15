@@ -1,6 +1,5 @@
 package com.example.demo.common;
 
-import com.example.demo.exception.CustomerException;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.entity.Goods;
 import com.example.demo.entity.Warehouse;
 import com.example.demo.exception.CustomerException;
 import com.example.demo.mapper.WarehouseMapper;

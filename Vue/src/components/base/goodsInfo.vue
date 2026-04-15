@@ -49,11 +49,7 @@
                         @change="handleSearch"
                     />
 
-                    <el-button
-                        icon="Filter"
-                        @click="showFilter = !showFilter"
-                        text
-                    />
+                    <el-button icon="Filter" @click="showFilter = !showFilter" text />
                 </div>
             </div>
 
@@ -61,30 +57,17 @@
                 <el-row :gutter="20">
                     <el-col :span="6">
                         <el-form-item label="品牌">
-                            <el-input
-                                v-model="searchForm.brand"
-                                clearable
-                                @keyup.enter="handleSearch"
-                            />
+                            <el-input v-model="searchForm.brand" clearable @keyup.enter="handleSearch" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="6">
                         <el-form-item label="规格型号">
-                            <el-input
-                                v-model="searchForm.spec"
-                                clearable
-                                @keyup.enter="handleSearch"
-                            />
+                            <el-input v-model="searchForm.spec" clearable @keyup.enter="handleSearch" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="6">
                         <el-form-item label="单位">
-                            <el-select
-                                v-model="searchForm.unit"
-                                clearable
-                                placeholder="请选择"
-                                @change="handleSearch"
-                            >
+                            <el-select v-model="searchForm.unit" clearable placeholder="请选择" @change="handleSearch">
                                 <el-option label="个" value="个" />
                                 <el-option label="台" value="台" />
                                 <el-option label="箱" value="箱" />
@@ -96,9 +79,7 @@
                     </el-col>
                     <el-col :span="6" class="text-right">
                         <el-button @click="resetFilter">重置</el-button>
-                        <el-button type="primary" @click="handleSearch"
-                            >搜索</el-button
-                        >
+                        <el-button type="primary" @click="handleSearch">搜索</el-button>
                     </el-col>
                 </el-row>
             </div>
@@ -108,82 +89,61 @@
             <el-row :gutter="20">
                 <el-col
                     v-for="item in productList"
-                    :key="item.id || item.sku_code"
+                    :key="item.id || item.skuCode"
                     :xs="24"
                     :sm="12"
                     :md="8"
                     :lg="6"
                     :xl="4"
                 >
-                    <el-card
-                        shadow="hover"
-                        class="goods-card"
-                        :body-style="{ padding: '16px' }"
-                    >
-                        <div class="goods-image">
-                            <el-image
-                                :src="item.img"
-                                fit="cover"
-                                :alt="item.name || item.sku_code"
-                                lazy
-                            >
-                                <template #error>
-                                    <div class="image-placeholder">
-                                        <el-icon><Box /></el-icon>
-                                        <span>无图</span>
-                                    </div>
-                                </template>
-                            </el-image>
+                    <el-card shadow="hover" class="goods-card" :body-style="{ padding: '16px' }">
+                        <div class="goods-card-content">
+                            <div class="goods-image">
+                                <el-image :src="item.img" fit="cover" :alt="item.name || item.skuCode" lazy>
+                                    <template #error>
+                                        <div class="image-placeholder">
+                                            <el-icon><Box /></el-icon>
+                                            <span>无图</span>
+                                        </div>
+                                    </template>
+                                </el-image>
+                            </div>
+
+                            <div class="goods-info-content">
+                                <h3 class="goods-name">
+                                    {{ item.name || item.skuCode }}
+                                </h3>
+                                <p class="goods-sku">
+                                    <el-icon><Document /></el-icon>
+                                    SKU：{{ item.skuCode || "-" }}
+                                </p>
+                                <p class="goods-barcode">条码：{{ item.barcode || "-" }}</p>
+                                <p class="goods-brand">
+                                    <el-icon><Shop /></el-icon>
+                                    品牌：{{ item.brand || "-" }}
+                                </p>
+                                <p class="goods-spec">
+                                    <el-icon><Grid /></el-icon>
+                                    规格：{{ item.spec || "-" }}
+                                </p>
+                                <p class="goods-category">
+                                    <el-icon><Folder /></el-icon>
+                                    分类：{{ getCategoryName(item.categoryId) || "-" }}
+                                </p>
+                                <p class="goods-price">
+                                    <el-icon><PriceTag /></el-icon>
+                                    售价：{{ item.salePrice || 0 }}元 /
+                                    {{ item.unit || "个" }}
+                                </p>
+                            </div>
                         </div>
 
-                        <div class="goods-info-content">
-                            <h3 class="goods-name">
-                                {{ item.name || item.sku_code }}
-                            </h3>
-                            <p class="goods-sku">
-                                <el-icon><Document /></el-icon>
-                                SKU：{{ item.skuCode || "-" }}
-                            </p>
-                            <p class="goods-barcode">
-                                条码：{{ item.barcode || "-" }}
-                            </p>
-                            <p class="goods-brand">
-                                <el-icon><Shop /></el-icon>
-                                品牌：{{ item.brand || "-" }}
-                            </p>
-                            <p class="goods-spec">
-                                <el-icon><Grid /></el-icon>
-                                规格：{{ item.spec || "-" }}
-                            </p>
-                            <p class="goods-category">
-                                <el-icon><Folder /></el-icon>
-                                分类：{{
-                                    getCategoryName(item.categoryId) || "-"
-                                }}
-                            </p>
-                            <p class="goods-price">
-                                <el-icon><PriceTag /></el-icon>
-                                售价：{{ item.sale_price || 0 }}元 /
-                                {{ item.unit || "个" }}
-                            </p>
-                        </div>
-
-                        <div class="goods-actions">
-                            <el-button
-                                size="small"
-                                type="primary"
-                                plain
-                                @click="handleEdit(item)"
-                            >
+                        <div class="goods-actions" @click.stop>
+                            <el-button size="small" type="primary" plain @click="handleEdit(item)">
                                 <el-icon><Edit /></el-icon>
                                 编辑
                             </el-button>
-                            <el-button
-                                size="small"
-                                type="danger"
-                                plain
-                                @click="handleDelete(item)"
-                            >
+                            <el-button size="small" type="danger" plain @click="handleDelete(item)">
                                 <el-icon><Delete /></el-icon>
                                 删除
                             </el-button>
@@ -192,10 +152,7 @@
                 </el-col>
             </el-row>
 
-            <div
-                v-if="productList.length === 0 && !loading"
-                class="empty-state"
-            >
+            <div v-if="productList.length === 0 && !loading" class="empty-state">
                 <el-empty description="暂无商品数据，请添加或导入" />
             </div>
 
@@ -212,36 +169,25 @@
         </el-card>
 
         <el-dialog v-model="dialog.visible" :title="dialog.title" width="700px">
-            <el-form
-                :model="dialog.form"
-                ref="goodsFormRef"
-                label-width="100px"
-                :rules="formRules"
-            >
+            <el-form :model="dialog.form" ref="goodsFormRef" label-width="100px" :rules="formRules">
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="SKU编码" prop="sku_code" required>
-                            <el-input
-                                v-model="dialog.form.sku_code"
-                                placeholder="全局唯一编码"
-                            />
+                        <el-form-item label="SKU编码" prop="skuCode" required>
+                            <el-input v-model="dialog.form.skuCode" placeholder="全局唯一编码" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="商品名称" prop="name" required>
-                            <el-input
-                                v-model="dialog.form.name"
-                                placeholder="请输入商品名称"
-                            />
+                            <el-input v-model="dialog.form.name" placeholder="请输入商品名称" />
                         </el-form-item>
                     </el-col>
                 </el-row>
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="商品分类" prop="category_id">
+                        <el-form-item label="商品分类" prop="categoryId">
                             <el-cascader
-                                v-model="dialog.form.category_id"
+                                v-model="dialog.form.categoryId"
                                 :options="categoryTree"
                                 :props="{
                                     value: 'id',
@@ -257,10 +203,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="品牌" prop="brand">
-                            <el-input
-                                v-model="dialog.form.brand"
-                                placeholder="如：农夫山泉"
-                            />
+                            <el-input v-model="dialog.form.brand" placeholder="如：农夫山泉" />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -268,19 +211,12 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="规格型号" prop="spec">
-                            <el-input
-                                v-model="dialog.form.spec"
-                                placeholder="如：550ml/瓶"
-                            />
+                            <el-input v-model="dialog.form.spec" placeholder="如：550ml/瓶" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="单位" prop="unit">
-                            <el-select
-                                v-model="dialog.form.unit"
-                                placeholder="请选择"
-                                style="width: 100%"
-                            >
+                            <el-select v-model="dialog.form.unit" placeholder="请选择" style="width: 100%">
                                 <el-option label="个" value="个" />
                                 <el-option label="台" value="台" />
                                 <el-option label="箱" value="箱" />
@@ -295,29 +231,23 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="主条码" prop="barcode">
-                            <el-input
-                                v-model="dialog.form.barcode"
-                                placeholder="商品条形码"
-                            />
+                            <el-input v-model="dialog.form.barcode" placeholder="商品条形码" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="图片" prop="img">
-                            <el-input
-                                v-model="dialog.form.img"
-                                placeholder="图片URL"
-                            />
+                            <el-input v-model="dialog.form.img" placeholder="图片URL" />
                         </el-form-item>
                     </el-col>
                 </el-row>
 
                 <el-divider content-position="left">价格设置</el-divider>
 
-                <el-row :gutter="20">
+                <el-row :gutter="24">
                     <el-col :span="8">
-                        <el-form-item label="采购价" prop="purchase_price">
+                        <el-form-item label="采购价" prop="purchasePrice">
                             <el-input-number
-                                v-model="dialog.form.purchase_price"
+                                v-model="dialog.form.purchasePrice"
                                 :min="0"
                                 :precision="2"
                                 placeholder="参考采购价"
@@ -326,9 +256,9 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="标准售价" prop="sale_price">
+                        <el-form-item label="标准售价" prop="salePrice">
                             <el-input-number
-                                v-model="dialog.form.sale_price"
+                                v-model="dialog.form.salePrice"
                                 :min="0"
                                 :precision="2"
                                 placeholder="标准售价"
@@ -337,9 +267,9 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="成本价" prop="cost_price">
+                        <el-form-item label="成本价" prop="costPrice">
                             <el-input-number
-                                v-model="dialog.form.cost_price"
+                                v-model="dialog.form.costPrice"
                                 :min="0"
                                 :precision="2"
                                 placeholder="移动加权成本"
@@ -353,9 +283,9 @@
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="库存下限" prop="stock_low">
+                        <el-form-item label="库存下限" prop="stockLow">
                             <el-input-number
-                                v-model="dialog.form.stock_low"
+                                v-model="dialog.form.stockLow"
                                 :min="0"
                                 :precision="2"
                                 placeholder="库存预警下限"
@@ -364,9 +294,9 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="库存上限" prop="stock_high">
+                        <el-form-item label="库存上限" prop="stockHigh">
                             <el-input-number
-                                v-model="dialog.form.stock_high"
+                                v-model="dialog.form.stockHigh"
                                 :min="0"
                                 :precision="2"
                                 placeholder="库存预警上限"
@@ -379,9 +309,7 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="dialog.visible = false">取消</el-button>
-                    <el-button type="primary" @click="submitGoods"
-                        >保存</el-button
-                    >
+                    <el-button type="primary" @click="submitGoods">保存</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -405,6 +333,7 @@ import {
     Edit,
     Delete,
     Shop,
+    View,
 } from "@element-plus/icons-vue";
 import request from "../../utils/request";
 
@@ -432,24 +361,24 @@ const dialog = reactive({
     title: "添加商品",
     form: {
         id: null,
-        sku_code: "",
+        skuCode: "",
         name: "",
         img: "",
-        category_id: null,
+        categoryId: null,
         brand: "",
         spec: "",
         unit: "个",
         barcode: "",
-        purchase_price: 0,
-        sale_price: 0,
-        cost_price: 0,
-        stock_low: 0,
-        stock_high: 0,
+        purchasePrice: 0,
+        salePrice: 0,
+        costPrice: 0,
+        stockLow: 0,
+        stockHigh: 0,
     },
 });
 
 const formRules = {
-    sku_code: [{ required: true, message: "请输入SKU编码", trigger: "blur" }],
+    skuCode: [{ required: true, message: "请输入SKU编码", trigger: "blur" }],
     name: [{ required: true, message: "请输入商品名称", trigger: "blur" }],
 };
 
@@ -539,19 +468,19 @@ const handleAdd = () => {
     dialog.title = "添加商品";
     dialog.form = {
         id: null,
-        sku_code: "",
+        skuCode: "",
         name: "",
         img: "",
-        category_id: null,
+        categoryId: null,
         brand: "",
         spec: "",
         unit: "个",
         barcode: "",
-        purchase_price: 0,
-        sale_price: 0,
-        cost_price: 0,
-        stock_low: 0,
-        stock_high: 0,
+        purchasePrice: 0,
+        salePrice: 0,
+        costPrice: 0,
+        stockLow: 0,
+        stockHigh: 0,
     };
     dialog.visible = true;
 };
@@ -560,11 +489,11 @@ const handleEdit = (item) => {
     dialog.title = "编辑商品";
     let categoryPath = null;
     for (const parent of categoryTree.value) {
-        if (parent.id === item.category_id) {
+        if (parent.id === item.categoryId) {
             categoryPath = [parent.id];
             break;
         }
-        const child = parent.children?.find((c) => c.id === item.category_id);
+        const child = parent.children?.find((c) => c.id === item.categoryId);
         if (child) {
             categoryPath = [parent.id, child.id];
             break;
@@ -572,35 +501,31 @@ const handleEdit = (item) => {
     }
     dialog.form = {
         id: item.id,
-        sku_code: item.sku_code,
+        skuCode: item.skuCode,
         name: item.name,
         img: item.img,
-        category_id: categoryPath,
+        categoryId: categoryPath,
         brand: item.brand,
         spec: item.spec,
         unit: item.unit || "个",
         barcode: item.barcode,
-        purchase_price: Number(item.purchase_price) || 0,
-        sale_price: Number(item.sale_price) || 0,
-        cost_price: Number(item.cost_price) || 0,
-        stock_low: Number(item.stock_low) || 0,
-        stock_high: Number(item.stock_high) || 0,
+        purchasePrice: Number(item.purchasePrice) || 0,
+        salePrice: Number(item.salePrice) || 0,
+        costPrice: Number(item.costPrice) || 0,
+        stockLow: Number(item.stockLow) || 0,
+        stockHigh: Number(item.stockHigh) || 0,
     };
     dialog.visible = true;
 };
 
 const handleDelete = (item) => {
-    ElMessageBox.confirm(
-        `确认删除商品【${item.name || item.sku_code}】？`,
-        "提示",
-        {
-            confirmButtonText: "确认",
-            cancelButtonText: "取消",
-            type: "warning",
-        },
-    ).then(async () => {
+    ElMessageBox.confirm(`确认删除商品【${item.name || item.skuCode}】？`, "提示", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "warning",
+    }).then(async () => {
         try {
-            const res = await request.delete(`/goods/${item.id}`);
+            const res = await request.post(`/goods/delete`);
             if (res.code === "200") {
                 ElMessage.success("删除成功");
                 getProductList();
@@ -614,23 +539,21 @@ const handleDelete = (item) => {
 };
 
 const submitGoods = async () => {
-    if (!dialog.form.name || !dialog.form.sku_code) {
+    if (!dialog.form.name || !dialog.form.skuCode || dialog.form.skuCode.trim() === "") {
         ElMessage.warning("请填写商品名称和SKU编码");
         return;
     }
 
     try {
-        const categoryId = Array.isArray(dialog.form.category_id)
-            ? dialog.form.category_id[dialog.form.category_id.length - 1]
-            : dialog.form.category_id;
+        const categoryId = Array.isArray(dialog.form.categoryId)
+            ? dialog.form.categoryId[dialog.form.categoryId.length - 1]
+            : dialog.form.categoryId;
         const payload = {
             ...dialog.form,
-            category_id: categoryId,
+            categoryId: categoryId,
         };
         const api = dialog.form.id ? "/goods/update" : "/goods/add";
-        const res = dialog.form.id
-            ? await request.put(api, payload)
-            : await request.post(api, payload);
+        const res = await request.post(api, payload);
 
         if (res.code === "200") {
             ElMessage.success(dialog.form.id ? "更新成功" : "添加成功");
@@ -698,7 +621,8 @@ onMounted(() => {
 }
 
 .goods-card {
-    height: 370px;
+    min-height: 370px;
+    height: auto;
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
@@ -708,6 +632,11 @@ onMounted(() => {
 .goods-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.goods-card-content {
+    flex: 1;
+    cursor: pointer;
 }
 
 .goods-image {
@@ -745,6 +674,7 @@ onMounted(() => {
     flex: 1;
     padding: 12px 0;
     overflow: hidden;
+    max-height: 180px;
 }
 
 .goods-name {
