@@ -13,6 +13,8 @@
             <if test="skuCode != null and skuCode != ''">and g.sku_code like concat('%', #{skuCode}, '%')</if>
             <if test="name != null and name != ''">and g.name like concat('%', #{name}, '%')</if>
             <if test="brand != null and brand != ''">and g.brand like concat('%', #{brand}, '%')</if>
+            <if test="unit != null and unit != ''">and g.unit like concat('%', #{unit}, '%')</if>
+            <if test="categoryId != null and categoryId != ''">and g.category_id like concat('%', #{categoryId}, '%')</if>
             <if test="barcode != null and barcode != ''">and g.barcode like concat('%', #{barcode}, '%')</if>
             <if test="spec != null and spec != ''">and g.spec like concat('%', #{spec}, '%')</if>
             and (g.del_flag IS NULL OR g.del_flag != 1)

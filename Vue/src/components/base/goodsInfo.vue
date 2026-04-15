@@ -50,7 +50,11 @@
                         />
                     </el-select>
 
-                    <el-button icon="Filter" @click="showFilter = !showFilter" text />
+                    <el-button
+                        icon="Filter"
+                        @click="showFilter = !showFilter"
+                        text
+                    />
                 </div>
             </div>
 
@@ -58,17 +62,30 @@
                 <el-row :gutter="20">
                     <el-col :span="6">
                         <el-form-item label="品牌">
-                            <el-input v-model="searchForm.brand" clearable @keyup.enter="handleSearch" />
+                            <el-input
+                                v-model="searchForm.brand"
+                                clearable
+                                @keyup.enter="handleSearch"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="6">
                         <el-form-item label="规格型号">
-                            <el-input v-model="searchForm.spec" clearable @keyup.enter="handleSearch" />
+                            <el-input
+                                v-model="searchForm.spec"
+                                clearable
+                                @keyup.enter="handleSearch"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="6">
                         <el-form-item label="单位">
-                            <el-select v-model="searchForm.unit" clearable placeholder="请选择" @change="handleSearch">
+                            <el-select
+                                v-model="searchForm.unit"
+                                clearable
+                                placeholder="请选择"
+                                @change="handleSearch"
+                            >
                                 <el-option label="个" value="个" />
                                 <el-option label="台" value="台" />
                                 <el-option label="箱" value="箱" />
@@ -80,7 +97,9 @@
                     </el-col>
                     <el-col :span="6" class="text-right">
                         <el-button @click="resetFilter">重置</el-button>
-                        <el-button type="primary" @click="handleSearch">搜索</el-button>
+                        <el-button type="primary" @click="handleSearch"
+                            >搜索</el-button
+                        >
                     </el-col>
                 </el-row>
             </div>
@@ -97,10 +116,14 @@
                     :lg="6"
                     :xl="4"
                 >
-                    <el-card shadow="hover" class="goods-card" :body-style="{ padding: '16px' }">
+                    <el-card
+                        shadow="hover"
+                        class="goods-card"
+                        :body-style="{ padding: '16px' }"
+                    >
                         <div class="goods-image">
                             <el-image
-                                :src="item.img || require('@/assets/images/default-product.png')"
+                                :src="item.img"
                                 fit="cover"
                                 :alt="item.name || item.sku_code"
                                 lazy
@@ -115,13 +138,14 @@
                         </div>
 
                         <div class="goods-info-content">
-                            <h3 class="goods-name">{{ item.name || item.sku_code }}</h3>
+                            <h3 class="goods-name">
+                                {{ item.name || item.sku_code }}
+                            </h3>
                             <p class="goods-sku">
                                 <el-icon><Document /></el-icon>
-                                SKU：{{ item.sku_code || "-" }}
+                                SKU：{{ item.skuCode || "-" }}
                             </p>
                             <p class="goods-barcode">
-                                <el-icon><Barcode /></el-icon>
                                 条码：{{ item.barcode || "-" }}
                             </p>
                             <p class="goods-brand">
@@ -134,20 +158,33 @@
                             </p>
                             <p class="goods-category">
                                 <el-icon><Folder /></el-icon>
-                                分类：{{ getCategoryName(item.category_id) || "-" }}
+                                分类：{{
+                                    getCategoryName(item.categoryId) || "-"
+                                }}
                             </p>
                             <p class="goods-price">
                                 <el-icon><PriceTag /></el-icon>
-                                售价：{{ item.sale_price || 0 }}元 / {{ item.unit || "个" }}
+                                售价：{{ item.sale_price || 0 }}元 /
+                                {{ item.unit || "个" }}
                             </p>
                         </div>
 
                         <div class="goods-actions">
-                            <el-button size="small" type="primary" plain @click="handleEdit(item)">
+                            <el-button
+                                size="small"
+                                type="primary"
+                                plain
+                                @click="handleEdit(item)"
+                            >
                                 <el-icon><Edit /></el-icon>
                                 编辑
                             </el-button>
-                            <el-button size="small" type="danger" plain @click="handleDelete(item)">
+                            <el-button
+                                size="small"
+                                type="danger"
+                                plain
+                                @click="handleDelete(item)"
+                            >
                                 <el-icon><Delete /></el-icon>
                                 删除
                             </el-button>
@@ -156,7 +193,10 @@
                 </el-col>
             </el-row>
 
-            <div v-if="productList.length === 0 && !loading" class="empty-state">
+            <div
+                v-if="productList.length === 0 && !loading"
+                class="empty-state"
+            >
                 <el-empty description="暂无商品数据，请添加或导入" />
             </div>
 
@@ -173,16 +213,27 @@
         </el-card>
 
         <el-dialog v-model="dialog.visible" :title="dialog.title" width="700px">
-            <el-form :model="dialog.form" ref="goodsFormRef" label-width="100px" :rules="formRules">
+            <el-form
+                :model="dialog.form"
+                ref="goodsFormRef"
+                label-width="100px"
+                :rules="formRules"
+            >
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="SKU编码" prop="sku_code" required>
-                            <el-input v-model="dialog.form.sku_code" placeholder="全局唯一编码" />
+                            <el-input
+                                v-model="dialog.form.sku_code"
+                                placeholder="全局唯一编码"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="商品名称" prop="name" required>
-                            <el-input v-model="dialog.form.name" placeholder="请输入商品名称" />
+                            <el-input
+                                v-model="dialog.form.name"
+                                placeholder="请输入商品名称"
+                            />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -190,7 +241,12 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="商品分类" prop="category_id">
-                            <el-select v-model="dialog.form.category_id" placeholder="请选择分类" clearable style="width: 100%">
+                            <el-select
+                                v-model="dialog.form.category_id"
+                                placeholder="请选择分类"
+                                clearable
+                                style="width: 100%"
+                            >
                                 <el-option
                                     v-for="cat in categoryList"
                                     :key="cat.id"
@@ -202,7 +258,10 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="品牌" prop="brand">
-                            <el-input v-model="dialog.form.brand" placeholder="如：农夫山泉" />
+                            <el-input
+                                v-model="dialog.form.brand"
+                                placeholder="如：农夫山泉"
+                            />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -210,12 +269,19 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="规格型号" prop="spec">
-                            <el-input v-model="dialog.form.spec" placeholder="如：550ml/瓶" />
+                            <el-input
+                                v-model="dialog.form.spec"
+                                placeholder="如：550ml/瓶"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="单位" prop="unit">
-                            <el-select v-model="dialog.form.unit" placeholder="请选择" style="width: 100%">
+                            <el-select
+                                v-model="dialog.form.unit"
+                                placeholder="请选择"
+                                style="width: 100%"
+                            >
                                 <el-option label="个" value="个" />
                                 <el-option label="台" value="台" />
                                 <el-option label="箱" value="箱" />
@@ -230,12 +296,18 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="主条码" prop="barcode">
-                            <el-input v-model="dialog.form.barcode" placeholder="商品条形码" />
+                            <el-input
+                                v-model="dialog.form.barcode"
+                                placeholder="商品条形码"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="图片" prop="img">
-                            <el-input v-model="dialog.form.img" placeholder="图片URL" />
+                            <el-input
+                                v-model="dialog.form.img"
+                                placeholder="图片URL"
+                            />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -245,17 +317,35 @@
                 <el-row :gutter="20">
                     <el-col :span="8">
                         <el-form-item label="采购价" prop="purchase_price">
-                            <el-input-number v-model="dialog.form.purchase_price" :min="0" :precision="2" placeholder="参考采购价" style="width: 100%" />
+                            <el-input-number
+                                v-model="dialog.form.purchase_price"
+                                :min="0"
+                                :precision="2"
+                                placeholder="参考采购价"
+                                style="width: 100%"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="标准售价" prop="sale_price">
-                            <el-input-number v-model="dialog.form.sale_price" :min="0" :precision="2" placeholder="标准售价" style="width: 100%" />
+                            <el-input-number
+                                v-model="dialog.form.sale_price"
+                                :min="0"
+                                :precision="2"
+                                placeholder="标准售价"
+                                style="width: 100%"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="成本价" prop="cost_price">
-                            <el-input-number v-model="dialog.form.cost_price" :min="0" :precision="2" placeholder="移动加权成本" style="width: 100%" />
+                            <el-input-number
+                                v-model="dialog.form.cost_price"
+                                :min="0"
+                                :precision="2"
+                                placeholder="移动加权成本"
+                                style="width: 100%"
+                            />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -265,12 +355,24 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="库存下限" prop="stock_low">
-                            <el-input-number v-model="dialog.form.stock_low" :min="0" :precision="2" placeholder="库存预警下限" style="width: 100%" />
+                            <el-input-number
+                                v-model="dialog.form.stock_low"
+                                :min="0"
+                                :precision="2"
+                                placeholder="库存预警下限"
+                                style="width: 100%"
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="库存上限" prop="stock_high">
-                            <el-input-number v-model="dialog.form.stock_high" :min="0" :precision="2" placeholder="库存预警上限" style="width: 100%" />
+                            <el-input-number
+                                v-model="dialog.form.stock_high"
+                                :min="0"
+                                :precision="2"
+                                placeholder="库存预警上限"
+                                style="width: 100%"
+                            />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -278,7 +380,9 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="dialog.visible = false">取消</el-button>
-                    <el-button type="primary" @click="submitGoods">保存</el-button>
+                    <el-button type="primary" @click="submitGoods"
+                        >保存</el-button
+                    >
                 </span>
             </template>
         </el-dialog>
@@ -301,10 +405,9 @@ import {
     PriceTag,
     Edit,
     Delete,
-    Barcode,
     Shop,
 } from "@element-plus/icons-vue";
-import request from "@/utils/request.js";
+import request from "../../utils/request";
 
 const searchForm = reactive({
     keyword: "",
@@ -355,7 +458,8 @@ const getCategoryList = async () => {
     try {
         const res = await request.get("/category/list");
         if (res.code === "200") {
-            categoryList.value = res.data.records || res.data.list || res.data || [];
+            categoryList.value =
+                res.data.records || res.data.list || res.data || [];
         }
     } catch (error) {
         console.error("获取分类列表失败:", error);
@@ -469,11 +573,15 @@ const handleEdit = (item) => {
 };
 
 const handleDelete = (item) => {
-    ElMessageBox.confirm(`确认删除商品【${item.name || item.sku_code}】？`, "提示", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
-        type: "warning",
-    }).then(async () => {
+    ElMessageBox.confirm(
+        `确认删除商品【${item.name || item.sku_code}】？`,
+        "提示",
+        {
+            confirmButtonText: "确认",
+            cancelButtonText: "取消",
+            type: "warning",
+        },
+    ).then(async () => {
         try {
             const res = await request.delete(`/goods/${item.id}`);
             if (res.code === "200") {
@@ -567,10 +675,11 @@ onMounted(() => {
 }
 
 .goods-card {
-    height: 360px;
+    height: 370px;
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
+    margin: 5px;
 }
 
 .goods-card:hover {
