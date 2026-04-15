@@ -287,27 +287,21 @@ const dialog = reactive({
 const getCustomerList = async () => {
     loading.value = true;
     try {
-        const params = {};
+        const params = {
+            pageNum: pagination.pageNum,
+            pageSize: pagination.pageSize,
+            ...searchForm,
+        };
 
-        Object.keys(searchForm).forEach((key) => {
-            const value = searchForm[key];
-            if (value !== "" && value !== null && value !== undefined) {
-                if (key === "status") {
-                    params[key] = parseInt(value);
-                } else {
-                    params[key] = value;
-                }
-            }
-        });
+        // 处理状态字段
+        if (params.status === "") {
+            delete params.status;
+        }
 
         const res = await request.get("/customer/list", { params });
         if (res.code === "200") {
-            if (Array.isArray(res.data)) {
-                customerList.value = res.data;
-            } else {
-                customerList.value = res.data?.records || res.data?.list || [];
-            }
-            pagination.total = customerList.value.length;
+            customerList.value = res.data?.records || res.data?.list || [];
+            pagination.total = res.data?.total || 0;
         } else {
             ElMessage.error(res.msg || "获取客户列表失败");
         }

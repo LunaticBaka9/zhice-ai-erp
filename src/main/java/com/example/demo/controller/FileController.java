@@ -23,16 +23,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/file")
 public class FileController {
-
-    private final GoodsService goodsService;
-    private final GoodsController goodsController;
     @Resource
     UserService userService;
-
-    FileController(GoodsController goodsController, GoodsService goodsService) {
-        this.goodsController = goodsController;
-        this.goodsService = goodsService;
-    }
 
     @PostMapping("/uploadAvatar")
     public Result uploadAvatar(@RequestParam(required = false) Long uid, @RequestParam("photo") MultipartFile photo,

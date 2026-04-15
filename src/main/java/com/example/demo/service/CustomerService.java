@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.example.demo.entity.Customer;
 import com.example.demo.exception.CustomerException;
 import com.example.demo.mapper.CustomerMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 
 import jakarta.annotation.Resource;
 
@@ -14,9 +16,15 @@ import jakarta.annotation.Resource;
 public class CustomerService {
     @Resource
     private CustomerMapper customerMapper;
+    
+    public List<Customer> selectAll(){
+        return customerMapper.selectAll(null);
+    }
 
-    public List<Customer> selectAll(String code, String name, String contactPerson, String phone, Integer status) {
-        return customerMapper.selectAll(code, name, contactPerson, phone, status);
+    public PageInfo<Customer> selectPage(int pageNum, int pageSize, Customer customer){
+        PageHelper.startPage(pageNum, pageSize);
+        List<Customer> list = customerMapper.selectAll(customer);
+        return PageInfo.of(list);
     }
 
     public Customer selectById(Integer id) {

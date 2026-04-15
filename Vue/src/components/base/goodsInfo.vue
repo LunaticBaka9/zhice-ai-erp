@@ -97,7 +97,7 @@
                     :xl="4"
                 >
                     <el-card shadow="hover" class="goods-card" :body-style="{ padding: '16px' }">
-                        <div class="goods-card-content">
+                        <div class="goods-card-content" @click="handleView(item)">
                             <div class="goods-image">
                                 <el-image :src="item.img" fit="cover" :alt="item.name || item.skuCode" lazy>
                                     <template #error>
@@ -168,6 +168,74 @@
             </div>
         </el-card>
 
+        <!-- 查看商品详情对话框 -->
+        <el-dialog v-model="viewDialog.visible" title="商品详情" width="700px">
+            <el-descriptions :column="2" border>
+                <el-descriptions-item label="商品图片" :span="2">
+                    <el-image
+                        :src="viewDialog.data.img"
+                        style="width: 200px; height: 200px"
+                        fit="cover"
+                        :preview-src-list="[viewDialog.data.img]"
+                        preview-teleported
+                    >
+                        <template #error>
+                            <div class="image-placeholder">
+                                <el-icon><Box /></el-icon>
+                                <span>无图</span>
+                            </div>
+                        </template>
+                    </el-image>
+                </el-descriptions-item>
+
+                <el-descriptions-item label="商品名称">
+                    {{ viewDialog.data.name }}
+                </el-descriptions-item>
+                <el-descriptions-item label="SKU编码">
+                    {{ viewDialog.data.skuCode }}
+                </el-descriptions-item>
+                <el-descriptions-item label="商品分类">
+                    {{ getCategoryName(viewDialog.data.categoryId) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="品牌">
+                    {{ viewDialog.data.brand }}
+                </el-descriptions-item>
+                <el-descriptions-item label="规格型号">
+                    {{ viewDialog.data.spec }}
+                </el-descriptions-item>
+                <el-descriptions-item label="单位">
+                    {{ viewDialog.data.unit }}
+                </el-descriptions-item>
+                <el-descriptions-item label="主条码">
+                    {{ viewDialog.data.barcode }}
+                </el-descriptions-item>
+
+                <el-descriptions-item label="采购价" :span="1">
+                    <el-tag type="warning">{{ viewDialog.data.purchasePrice }}元</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="标准售价" :span="1">
+                    <el-tag type="danger">{{ viewDialog.data.salePrice }}元</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="成本价" :span="1">
+                    <el-tag type="info">{{ viewDialog.data.costPrice }}元</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="库存下限" :span="1">
+                    <el-tag type="warning">{{ viewDialog.data.stockLow }}</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="库存上限" :span="1">
+                    <el-tag type="warning">{{ viewDialog.data.stockHigh }}</el-tag>
+                </el-descriptions-item>
+            </el-descriptions>
+
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="viewDialog.visible = false">关闭</el-button>
+                    <el-button type="primary" @click="handleEdit(viewDialog.data)">编辑</el-button>
+                </span>
+            </template>
+        </el-dialog>
+
+        <!-- 编辑/新增商品对话框 -->
         <el-dialog v-model="dialog.visible" :title="dialog.title" width="700px">
             <el-form :model="dialog.form" ref="goodsFormRef" label-width="100px" :rules="formRules">
                 <el-row :gutter="20">
@@ -377,6 +445,12 @@ const dialog = reactive({
     },
 });
 
+// 查看详情对话框
+const viewDialog = reactive({
+    visible: false,
+    data: {},
+});
+
 const formRules = {
     skuCode: [{ required: true, message: "请输入SKU编码", trigger: "blur" }],
     name: [{ required: true, message: "请输入商品名称", trigger: "blur" }],
@@ -516,6 +590,11 @@ const handleEdit = (item) => {
         stockHigh: Number(item.stockHigh) || 0,
     };
     dialog.visible = true;
+};
+
+const handleView = (item) => {
+    viewDialog.data = { ...item };
+    viewDialog.visible = true;
 };
 
 const handleDelete = (item) => {
@@ -731,6 +810,13 @@ onMounted(() => {
     padding: 60px 0;
 }
 
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* 响应式调整 */
 @media (max-width: 768px) {
     .goods-card {
         height: auto;

@@ -8,12 +8,7 @@ import java.util.List;
 @Mapper
 public interface CustomerMapper {
 
-    List<Customer> selectAll(
-            @Param("code") String code,
-            @Param("name") String name,
-            @Param("contactPerson") String contactPerson,
-            @Param("phone") String phone,
-            @Param("status") Integer status);
+    List<Customer> selectAll(Customer customer);
 
     Customer selectById(@Param("id") Integer id);
 
