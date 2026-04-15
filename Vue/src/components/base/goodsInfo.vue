@@ -34,21 +34,20 @@
                         </template>
                     </el-input>
 
-                    <el-select
+                    <el-cascader
                         v-model="searchForm.categoryId"
+                        :options="categoryTree"
+                        :props="{
+                            value: 'id',
+                            label: 'name',
+                            children: 'children',
+                            checkStrictly: true,
+                        }"
                         placeholder="商品分类"
                         clearable
-                        style="width: 140px; margin-left: 10px"
+                        style="width: 200px; margin-left: 10px"
                         @change="handleSearch"
-                    >
-                        <el-option label="全部" value="" />
-                        <el-option
-                            v-for="cat in categoryList"
-                            :key="cat.id"
-                            :label="cat.name"
-                            :value="cat.id"
-                        />
-                    </el-select>
+                    />
 
                     <el-button
                         icon="Filter"
@@ -241,19 +240,19 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="商品分类" prop="category_id">
-                            <el-select
+                            <el-cascader
                                 v-model="dialog.form.category_id"
+                                :options="categoryTree"
+                                :props="{
+                                    value: 'id',
+                                    label: 'name',
+                                    children: 'children',
+                                    checkStrictly: true,
+                                }"
                                 placeholder="请选择分类"
-                                clearable
                                 style="width: 100%"
-                            >
-                                <el-option
-                                    v-for="cat in categoryList"
-                                    :key="cat.id"
-                                    :label="cat.name"
-                                    :value="cat.id"
-                                />
-                            </el-select>
+                                clearable
+                            />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -424,7 +423,7 @@ const pagination = reactive({
 });
 
 const productList = ref([]);
-const categoryList = ref([]);
+const categoryTree = ref([]);
 const loading = ref(false);
 const showFilter = ref(false);
 
@@ -456,10 +455,9 @@ const formRules = {
 
 const getCategoryList = async () => {
     try {
-        const res = await request.get("/category/list");
+        const res = await request.get("/category/tree");
         if (res.code === "200") {
-            categoryList.value =
-                res.data.records || res.data.list || res.data || [];
+            categoryTree.value = res.data || [];
         }
     } catch (error) {
         console.error("获取分类列表失败:", error);
@@ -468,18 +466,25 @@ const getCategoryList = async () => {
 
 const getCategoryName = (categoryId) => {
     if (!categoryId) return "-";
-    const cat = categoryList.value.find((c) => c.id === categoryId);
-    return cat ? cat.name : "-";
+    for (const parent of categoryTree.value) {
+        if (parent.id === categoryId) return parent.name;
+        const child = parent.children?.find((c) => c.id === categoryId);
+        if (child) return `${parent.name} / ${child.name}`;
+    }
+    return "-";
 };
 
 const getProductList = async () => {
     loading.value = true;
     try {
+        const categoryId = Array.isArray(searchForm.categoryId)
+            ? searchForm.categoryId[searchForm.categoryId.length - 1]
+            : searchForm.categoryId;
         const params = {
             pageNum: pagination.pageNum,
             pageSize: pagination.pageSize,
             keyword: searchForm.keyword,
-            categoryId: searchForm.categoryId,
+            categoryId: categoryId,
             brand: searchForm.brand,
             spec: searchForm.spec,
             unit: searchForm.unit,
@@ -505,9 +510,9 @@ const handleSearch = () => {
 };
 
 const resetFilter = () => {
+    searchForm.categoryId = "";
     Object.assign(searchForm, {
         keyword: "",
-        categoryId: "",
         brand: "",
         spec: "",
         unit: "",
@@ -553,12 +558,24 @@ const handleAdd = () => {
 
 const handleEdit = (item) => {
     dialog.title = "编辑商品";
+    let categoryPath = null;
+    for (const parent of categoryTree.value) {
+        if (parent.id === item.category_id) {
+            categoryPath = [parent.id];
+            break;
+        }
+        const child = parent.children?.find((c) => c.id === item.category_id);
+        if (child) {
+            categoryPath = [parent.id, child.id];
+            break;
+        }
+    }
     dialog.form = {
         id: item.id,
         sku_code: item.sku_code,
         name: item.name,
         img: item.img,
-        category_id: item.category_id,
+        category_id: categoryPath,
         brand: item.brand,
         spec: item.spec,
         unit: item.unit || "个",
@@ -603,7 +620,13 @@ const submitGoods = async () => {
     }
 
     try {
-        const payload = { ...dialog.form };
+        const categoryId = Array.isArray(dialog.form.category_id)
+            ? dialog.form.category_id[dialog.form.category_id.length - 1]
+            : dialog.form.category_id;
+        const payload = {
+            ...dialog.form,
+            category_id: categoryId,
+        };
         const api = dialog.form.id ? "/goods/update" : "/goods/add";
         const res = dialog.form.id
             ? await request.put(api, payload)
