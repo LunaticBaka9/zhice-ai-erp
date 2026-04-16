@@ -25,7 +25,6 @@
                 AND status = #{status}
             </if>
         </where>
-        ORDER BY id DESC
     </select>
 
     <select id="selectById" resultType="com.example.demo.entity.Customer">

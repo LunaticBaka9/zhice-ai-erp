@@ -11,7 +11,7 @@ public class Supplier {
     private Integer id;
 
     @Alias("供应商编码")
-    private String supplierCode;
+    private String code;
 
     @Alias("供应商名称")
     private String name;
@@ -31,15 +31,6 @@ public class Supplier {
     @Alias("地址")
     private String address;
 
-    @Alias("邮政编码")
-    private String postalCode;
-
-    @Alias("信用等级")
-    private Integer creditRating;
-
-    @Alias("合作年限")
-    private Integer cooperationYears;
-
     @Alias("银行账户")
     private String bankAccount;
 
@@ -47,13 +38,10 @@ public class Supplier {
     private String bankName;
 
     @Alias("纳税人识别号")
-    private String taxId;
+    private String taxNumber;
 
     @Alias("状态")
-    private String status;
-
-    @Alias("备注")
-    private String remarks;
+    private int status;
 
     @Alias("创建时间")
     private Date createDate;
