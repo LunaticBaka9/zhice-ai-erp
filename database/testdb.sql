@@ -1,7 +1,7 @@
 /*
- Navicat Premium Data Transfer
+ Navicat Premium Dump SQL
 
- Source Server         : mysql-5.7.26
+ Source Server         : testdb
  Source Server Type    : MySQL
  Source Server Version : 50726 (5.7.26)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50726 (5.7.26)
  File Encoding         : 65001
 
- Date: 15/04/2026 22:50:55
+ Date: 16/04/2026 16:31:08
 */
 
 SET NAMES utf8mb4;
@@ -118,7 +118,7 @@ CREATE TABLE `goods`  (
   INDEX `idx_goods_category_status_time`(`category_id`, `del_flag`, `create_time`) USING BTREE,
   INDEX `idx_goods_spec`(`spec`) USING BTREE,
   CONSTRAINT `fk_product_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of goods
@@ -159,8 +159,8 @@ CREATE TABLE `inventory`  (
   `create_by` int(11) NULL DEFAULT NULL COMMENT '创建人 ID',
   `update_by` int(11) NULL DEFAULT NULL COMMENT '更新人 ID',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_inventory`(`goods_id`, `warehouse_id`, `batch_no`) USING BTREE,
   UNIQUE INDEX `uk_inventory_goods_warehouse`(`goods_id`, `warehouse_id`) USING BTREE,
+  UNIQUE INDEX `uk_inventory`(`goods_id`, `warehouse_id`, `batch_no`) USING BTREE,
   INDEX `idx_inventory_goods_id`(`goods_id`) USING BTREE,
   INDEX `idx_inventory_warehouse_id`(`warehouse_id`) USING BTREE,
   INDEX `idx_inventory_qty_on_hand`(`qty_on_hand`) USING BTREE
@@ -398,7 +398,7 @@ CREATE TABLE `operation_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_username`(`username`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 107 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 109 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operation_log
@@ -509,6 +509,8 @@ INSERT INTO `operation_log` VALUES (103, '系统', '用户登录', 'com.example.
 INSERT INTO `operation_log` VALUES (104, '系统', '新增商品', 'com.example.demo.controller.GoodsController.insertGoods()', '[{\"SKU编码\":\"\",\"img\":\"\",\"商品名称\":\"007\",\"品牌\":\"\",\"规格型号\":\"\",\"基础单位\":\"个\",\"参考采购价\":\"0\",\"标准售价\":0,\"成本价格\":0,\"主条码\":\"\",\"库存数量\":0,\"库存预警上限\":0,\"库存预警下限\":0}]', 47, '0:0:0:0:0:0:0:1', '2026-04-15 16:53:22', '商品管理', '新增');
 INSERT INTO `operation_log` VALUES (105, '系统', '新增商品', 'com.example.demo.controller.GoodsController.insertGoods()', '[{\"SKU编码\":\"\",\"img\":\"\",\"商品名称\":\"007\",\"品牌\":\"\",\"规格型号\":\"500ml/瓶\",\"基础单位\":\"瓶\",\"参考采购价\":\"0\",\"标准售价\":0,\"成本价格\":0,\"主条码\":\"\",\"库存数量\":0,\"库存预警上限\":0,\"库存预警下限\":0}]', 53, '0:0:0:0:0:0:0:1', '2026-04-15 16:59:12', '商品管理', '新增');
 INSERT INTO `operation_log` VALUES (106, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 117, '0:0:0:0:0:0:0:1', '2026-04-15 22:40:31', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (107, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 530, '0:0:0:0:0:0:0:1', '2026-04-16 15:03:24', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (108, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 180, '0:0:0:0:0:0:0:1', '2026-04-16 15:47:54', '用户管理', '登录');
 
 -- ----------------------------
 -- Table structure for purchase
@@ -580,12 +582,14 @@ CREATE TABLE `supplier`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '供应商ID',
   `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商编码',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商名称',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '供应商类型',
   `contact_person` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '联系人',
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '联系电话',
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
   `address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '地址',
   `bank_account` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '银行账号',
-  `tax_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '税号',
+  `bank_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '开户银行',
+  `tax_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '税人识别号',
   `status` tinyint(1) NULL DEFAULT 1 COMMENT '状态',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -601,12 +605,12 @@ CREATE TABLE `supplier`  (
 -- ----------------------------
 -- Records of supplier
 -- ----------------------------
-INSERT INTO `supplier` VALUES (1, 'S001', '海南芒果农场', '陈经理', '13912340001', 'chen@mango-farm.com', '海南省三亚市海棠区芒果园1号', '6222021234567890', '91460000MA5TWX1234', 1, '2026-04-10 08:00:00', '2026-04-10 08:00:00');
-INSERT INTO `supplier` VALUES (2, 'S002', '泰国榴莲进口公司', 'Mr.Somchai', '13912340002', 'somchai@thai-durian.com', '泰国曼谷辉煌区榴莲街88号', '6222021234567891', '91410000MA5TWX5678', 1, '2026-04-10 09:00:00', '2026-04-10 09:00:00');
-INSERT INTO `supplier` VALUES (3, 'S003', '新疆阿克苏苹果基地', '李场长', '13912340003', 'li@xj-apple.com', '新疆阿克苏市红富士路200号', '6222021234567892', '91652900MA5TWX9012', 1, '2026-04-11 10:00:00', '2026-04-11 10:00:00');
-INSERT INTO `supplier` VALUES (4, 'S004', '智利车厘子合作社', 'Carlos', '13912340004', 'carlos@chile-cherry.com', '智利圣地亚哥市樱桃谷农场', '6222021234567893', '91765000MA5TWX3456', 1, '2026-04-12 08:30:00', '2026-04-12 08:30:00');
-INSERT INTO `supplier` VALUES (5, 'S005', '越南火龙果供应商', 'Nguyen Thi Lan', '13912340005', 'lan@vietnam-dragon.com', '越南胡志明市火龙果产区', '6222021234567894', '91811000MA5TWX7890', 1, '2026-04-13 09:00:00', '2026-04-13 09:00:00');
-INSERT INTO `supplier` VALUES (6, 'S006', '江西赣南脐橙农场', '刘老板', '13912340006', 'liu@gan-nan-orange.com', '江西省赣州市安远县脐橙基地', '6222021234567895', '91360700MA5TWX2468', 0, '2026-04-14 10:00:00', '2026-04-14 10:00:00');
+INSERT INTO `supplier` VALUES (1, 'S001', '海南芒果农场', NULL, '陈经理', '13912340001', 'chen@mango-farm.com', '海南省三亚市海棠区芒果园1号', '6222021234567890', NULL, '91460000MA5TWX1234', 1, '2026-04-10 08:00:00', '2026-04-10 08:00:00');
+INSERT INTO `supplier` VALUES (2, 'S002', '泰国榴莲进口公司', NULL, 'Mr.Somchai', '13912340002', 'somchai@thai-durian.com', '泰国曼谷辉煌区榴莲街88号', '6222021234567891', NULL, '91410000MA5TWX5678', 1, '2026-04-10 09:00:00', '2026-04-10 09:00:00');
+INSERT INTO `supplier` VALUES (3, 'S003', '新疆阿克苏苹果基地', NULL, '李场长', '13912340003', 'li@xj-apple.com', '新疆阿克苏市红富士路200号', '6222021234567892', NULL, '91652900MA5TWX9012', 1, '2026-04-11 10:00:00', '2026-04-11 10:00:00');
+INSERT INTO `supplier` VALUES (4, 'S004', '智利车厘子合作社', NULL, 'Carlos', '13912340004', 'carlos@chile-cherry.com', '智利圣地亚哥市樱桃谷农场', '6222021234567893', NULL, '91765000MA5TWX3456', 1, '2026-04-12 08:30:00', '2026-04-12 08:30:00');
+INSERT INTO `supplier` VALUES (5, 'S005', '越南火龙果供应商', NULL, 'Nguyen Thi Lan', '13912340005', 'lan@vietnam-dragon.com', '越南胡志明市火龙果产区', '6222021234567894', NULL, '91811000MA5TWX7890', 1, '2026-04-13 09:00:00', '2026-04-13 09:00:00');
+INSERT INTO `supplier` VALUES (6, 'S006', '江西赣南脐橙农场', NULL, '刘老板', '13912340006', 'liu@gan-nan-orange.com', '江西省赣州市安远县脐橙基地', '6222021234567895', NULL, '91360700MA5TWX2468', 0, '2026-04-14 10:00:00', '2026-04-14 10:00:00');
 
 -- ----------------------------
 -- Table structure for sys_menu
