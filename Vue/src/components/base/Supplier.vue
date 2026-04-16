@@ -78,39 +78,17 @@
         </div>
 
         <el-card class="table-card" shadow="never">
-            <el-table
-                :data="supplierList"
-                v-loading="loading"
-                stripe
-                border
-                style="width: 100%"
-            >
+            <el-table :data="supplierList" v-loading="loading" stripe border style="width: 100%">
                 <el-table-column type="selection" width="55" />
                 <el-table-column prop="code" label="供应商编码" width="100" />
-                <el-table-column
-                    prop="name"
-                    label="供应商名称"
-                    min-width="180"
-                />
-                <el-table-column
-                    prop="contactPerson"
-                    label="联系人"
-                    width="80"
-                />
+                <el-table-column prop="name" label="供应商名称" min-width="180" />
+                <el-table-column prop="contactPerson" label="联系人" width="80" />
                 <el-table-column prop="phone" label="联系电话" width="130" />
                 <el-table-column prop="email" label="邮箱" min-width="180" />
                 <el-table-column prop="address" label="地址" min-width="200" />
-                <el-table-column
-                    prop="bankAccount"
-                    label="银行账户"
-                    min-width="200"
-                />
+                <el-table-column prop="bankAccount" label="银行账户" min-width="200" />
                 <el-table-column prop="bankName" label="开户银行" width="100" />
-                <el-table-column
-                    prop="tax_number"
-                    label="税人识别号"
-                    width="120"
-                />
+                <el-table-column prop="tax_number" label="税人识别号" width="120" />
                 <el-table-column prop="status" label="状态" width="80">
                     <template #default="{ row }">
                         <el-tag :type="row.status === 1 ? 'success' : 'danger'">
@@ -120,21 +98,11 @@
                 </el-table-column>
                 <el-table-column label="操作" width="180" fixed="right">
                     <template #default="{ row }">
-                        <el-button
-                            link
-                            type="primary"
-                            size="small"
-                            @click="handleEdit(row)"
-                        >
+                        <el-button link type="primary" size="small" @click="handleEdit(row)">
                             <el-icon><Edit /></el-icon>
                             编辑
                         </el-button>
-                        <el-button
-                            link
-                            type="danger"
-                            size="small"
-                            @click="handleDelete(row)"
-                        >
+                        <el-button link type="danger" size="small" @click="handleDelete(row)">
                             <el-icon><Delete /></el-icon>
                             删除
                         </el-button>
@@ -172,19 +140,12 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="供应商编码" prop="code">
-                            <el-input
-                                v-model="dialog.form.code"
-                                placeholder="例如: C001"
-                                :disabled="dialog.isEdit"
-                            />
+                            <el-input v-model="dialog.form.code" placeholder="例如: C001" :disabled="dialog.isEdit" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="供应商名称" prop="name">
-                            <el-input
-                                v-model="dialog.form.name"
-                                placeholder="请输入供应商名称"
-                            />
+                            <el-input v-model="dialog.form.name" placeholder="请输入供应商名称" />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -192,18 +153,12 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="联系人" prop="contactPerson">
-                            <el-input
-                                v-model="dialog.form.contactPerson"
-                                placeholder="请输入联系人"
-                            />
+                            <el-input v-model="dialog.form.contactPerson" placeholder="请输入联系人" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="联系电话" prop="phone">
-                            <el-input
-                                v-model="dialog.form.phone"
-                                placeholder="请输入联系电话"
-                            />
+                            <el-input v-model="dialog.form.phone" placeholder="请输入联系电话" />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -211,10 +166,7 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="邮箱" prop="email">
-                            <el-input
-                                v-model="dialog.form.email"
-                                placeholder="请输入邮箱"
-                            />
+                            <el-input v-model="dialog.form.email" placeholder="请输入邮箱" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -244,12 +196,7 @@
                 </el-form-item>
 
                 <el-form-item label="详细地址" prop="address">
-                    <el-input
-                        v-model="dialog.form.address"
-                        type="textarea"
-                        :rows="2"
-                        placeholder="请输入详细地址"
-                    />
+                    <el-input v-model="dialog.form.address" type="textarea" :rows="2" placeholder="请输入详细地址" />
                 </el-form-item>
 
                 <el-form-item label="状态" prop="status">
@@ -265,13 +212,7 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="dialog.visible = false">取消</el-button>
-                    <el-button
-                        type="primary"
-                        @click="submitForm"
-                        :loading="dialog.loading"
-                    >
-                        确认
-                    </el-button>
+                    <el-button type="primary" @click="submitForm" :loading="dialog.loading"> 确认 </el-button>
                 </span>
             </template>
         </el-dialog>
@@ -281,14 +222,7 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import {
-    Plus,
-    Search,
-    Refresh,
-    Edit,
-    Delete,
-    Download,
-} from "@element-plus/icons-vue";
+import { Plus, Search, Refresh, Edit, Delete, Download } from "@element-plus/icons-vue";
 import request from "../../utils/request.js";
 
 const searchForm = reactive({
@@ -327,12 +261,8 @@ const dialog = reactive({
         status: 1,
     },
     rules: {
-        code: [
-            { required: true, message: "请输入供应商编码", trigger: "blur" },
-        ],
-        name: [
-            { required: true, message: "请输入供应商名称", trigger: "blur" },
-        ],
+        code: [{ required: true, message: "请输入供应商编码", trigger: "blur" }],
+        name: [{ required: true, message: "请输入供应商名称", trigger: "blur" }],
         phone: [
             {
                 pattern: /^1[3-9]\d{9}$|^0\d{2,3}-?\d{7,8}$/,
@@ -473,9 +403,7 @@ const submitForm = async () => {
             dialog.loading = true;
             try {
                 const submitData = { ...dialog.form };
-                const api = dialog.isEdit
-                    ? "/supplier/update"
-                    : "/supplier/add";
+                const api = dialog.isEdit ? "/supplier/update" : "/supplier/add";
                 const method = dialog.isEdit ? "post" : "post";
 
                 const res = await request[method](api, submitData);
