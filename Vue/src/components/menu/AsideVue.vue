@@ -2,11 +2,7 @@
     <el-aside :width="isCollapse ? '64px' : '240px'">
         <!-- Logo区域 -->
         <div class="logo-container">
-            <img
-                src="https://element-plus.org/images/element-plus-logo.svg"
-                alt="logo"
-                class="logo"
-            />
+            <img src="https://element-plus.org/images/element-plus-logo.svg" alt="logo" class="logo" />
             <span v-show="!isCollapse" class="logo-text">进销存系统</span>
         </div>
 
@@ -98,9 +94,6 @@
                 </el-menu-item>
                 <el-menu-item index="/purchase/query">
                     <span>采购单据查询</span>
-                </el-menu-item>
-                <el-menu-item index="/purchase/supplier">
-                    <span>供应商管理</span>
                 </el-menu-item>
             </el-sub-menu>
 
@@ -234,9 +227,7 @@ console.log(data.user?.role);
 
 const isTech = computed(() => {
     return (
-        data.user?.department === "研发组" ||
-        data.user?.department === "测试组" ||
-        data.user?.department === "运维组"
+        data.user?.department === "研发组" || data.user?.department === "测试组" || data.user?.department === "运维组"
     );
 });
 const isAdmin = computed(() => {
@@ -245,27 +236,15 @@ const isAdmin = computed(() => {
 
 // 菜单权限控制
 const showPurchaseMenu = computed(() => {
-    return (
-        isAdmin.value ||
-        data.user?.department === "采购组" ||
-        data.user?.department === "供应链组"
-    );
+    return isAdmin.value || data.user?.department === "采购组" || data.user?.department === "供应链组";
 });
 
 const showSaleMenu = computed(() => {
-    return (
-        isAdmin.value ||
-        data.user?.department === "销售组" ||
-        data.user?.department === "运营组"
-    );
+    return isAdmin.value || data.user?.department === "销售组" || data.user?.department === "运营组";
 });
 
 const showInventoryMenu = computed(() => {
-    return (
-        isAdmin.value ||
-        data.user?.department === "仓库组" ||
-        data.user?.department === "物流组"
-    );
+    return isAdmin.value || data.user?.department === "仓库组" || data.user?.department === "物流组";
 });
 
 const showFinanceMenu = computed(() => {

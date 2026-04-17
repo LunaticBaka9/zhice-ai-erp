@@ -1,7 +1,7 @@
 /*
- Navicat Premium Dump SQL
+ Navicat Premium Data Transfer
 
- Source Server         : testdb
+ Source Server         : mysql-5.7.26
  Source Server Type    : MySQL
  Source Server Version : 50726 (5.7.26)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50726 (5.7.26)
  File Encoding         : 65001
 
- Date: 16/04/2026 16:31:08
+ Date: 17/04/2026 16:01:21
 */
 
 SET NAMES utf8mb4;
@@ -398,7 +398,7 @@ CREATE TABLE `operation_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_username`(`username`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 109 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 111 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operation_log
@@ -511,6 +511,8 @@ INSERT INTO `operation_log` VALUES (105, '系统', '新增商品', 'com.example.
 INSERT INTO `operation_log` VALUES (106, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 117, '0:0:0:0:0:0:0:1', '2026-04-15 22:40:31', '用户管理', '登录');
 INSERT INTO `operation_log` VALUES (107, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 530, '0:0:0:0:0:0:0:1', '2026-04-16 15:03:24', '用户管理', '登录');
 INSERT INTO `operation_log` VALUES (108, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 180, '0:0:0:0:0:0:0:1', '2026-04-16 15:47:54', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (109, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 130, '0:0:0:0:0:0:0:1', '2026-04-16 17:48:06', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (110, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 73, '0:0:0:0:0:0:0:1', '2026-04-16 17:48:30', '用户管理', '登录');
 
 -- ----------------------------
 -- Table structure for purchase
@@ -535,6 +537,57 @@ INSERT INTO `purchase` VALUES (2, 'PO20260414002', 2, 1, '25000.00', 1, NULL);
 INSERT INTO `purchase` VALUES (3, 'PO20260414003', 3, 2, '8000.00', 0, NULL);
 INSERT INTO `purchase` VALUES (4, 'PO20260414004', 4, 1, '35000.00', 2, '2026-04-13 15:30:00');
 INSERT INTO `purchase` VALUES (5, 'PO20260414005', 5, 2, '12000.00', 2, '2026-04-12 11:00:00');
+
+-- ----------------------------
+-- Table structure for sal_order
+-- ----------------------------
+DROP TABLE IF EXISTS `sal_order`;
+CREATE TABLE `sal_order`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `order_no` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '订单编号 (业务主键)',
+  `customer_id` bigint(20) NOT NULL COMMENT '关联客户ID',
+  `order_date` date NOT NULL COMMENT '下单日期',
+  `total_amount` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '订单总金额',
+  `discount_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '优惠金额',
+  `final_amount` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '实收金额',
+  `status` tinyint(4) NOT NULL DEFAULT 10 COMMENT '订单状态: 10-待发货, 20-部分发货, 30-已发货, 40-已完成, 50-已取消',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `created_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '创建人',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_order_no`(`order_no`) USING BTREE,
+  INDEX `idx_customer_id`(`customer_id`) USING BTREE,
+  INDEX `idx_order_date`(`order_date`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单主表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sal_order
+-- ----------------------------
+INSERT INTO `sal_order` VALUES (1, 'ORFR01', 1, '2026-04-17', 5000.00, 0.00, 0.00, 10, NULL, 'admin', '2026-04-17 15:59:47', '2026-04-17 15:59:47');
+
+-- ----------------------------
+-- Table structure for sal_order_item
+-- ----------------------------
+DROP TABLE IF EXISTS `sal_order_item`;
+CREATE TABLE `sal_order_item`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `order_id` bigint(20) NOT NULL COMMENT '关联订单ID',
+  `product_id` bigint(20) NOT NULL COMMENT '关联商品ID',
+  `product_name_snapshot` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称快照 (防止商品改名影响历史订单)',
+  `price` decimal(12, 2) NOT NULL COMMENT '成交单价',
+  `quantity` int(11) NOT NULL COMMENT '销售数量',
+  `subtotal` decimal(12, 2) NOT NULL COMMENT '小计金额 (单价*数量)',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_order_id`(`order_id`) USING BTREE,
+  INDEX `idx_product_id`(`product_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单明细表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sal_order_item
+-- ----------------------------
+INSERT INTO `sal_order_item` VALUES (1, 1, 1, '芒果', 50.00, 100, 5000.00, '2026-04-17 16:00:23');
 
 -- ----------------------------
 -- Table structure for sign_record

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SaleItemMapper">
+
+    <resultMap id="SaleItemResultMap" type="com.example.demo.entity.SaleItem">
+        <id     property="id"                  column="id"/>
+        <result property="orderId"             column="order_id"/>
+        <result property="productId"           column="product_id"/>
+        <result property="productNameSnapshot" column="product_name_snapshot"/>
+        <result property="price"               column="price"/>
+        <result property="quantity"            column="quantity"/>
+        <result property="subtotal"            column="subtotal"/>
+        <result property="createdAt"           column="created_at"/>
+        <result property="skuCode"             column="sku_code"/>
+        <result property="unit"                column="unit"/>
+    </resultMap>
+
+    <select id="selectByOrderId" resultMap="SaleItemResultMap">
+        SELECT
+            i.id, i.order_id, i.product_id, i.product_name_snapshot,
+            i.price, i.quantity, i.subtotal, i.created_at,
+            g.sku_code, g.unit
+        FROM sal_order_item i
+        LEFT JOIN goods g ON i.product_id = g.id
+        WHERE i.order_id = #{orderId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.SaleItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sal_order_item (
+            order_id, product_id, product_name_snapshot,
+            price, quantity, subtotal, created_at
+        ) VALUES (
+            #{orderId}, #{productId}, #{productNameSnapshot},
+            #{price}, #{quantity}, #{subtotal}, NOW()
+        )
+    </insert>
+
+    <insert id="insertBatch">
+        INSERT INTO sal_order_item (
+            order_id, product_id, product_name_snapshot,
+            price, quantity, subtotal, created_at
+        ) VALUES
+        <foreach collection="items" item="item" separator=",">
+            (
+                #{orderId}, #{item.productId}, #{item.productNameSnapshot},
+                #{item.price}, #{item.quantity}, #{item.subtotal}, NOW()
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByOrderId">
+        DELETE FROM sal_order_item WHERE order_id = #{orderId}
+    </delete>
+
+    <delete id="deleteById">
+        DELETE FROM sal_order_item WHERE id = #{id}
+    </delete>
+
+</mapper>
