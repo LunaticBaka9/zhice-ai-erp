@@ -60,4 +60,8 @@ public class WarehouseService {
             this.deleteById(warehouse);
         }
     }
+
+    public long count() {
+        return warehouseMapper.count();
+    }
 }

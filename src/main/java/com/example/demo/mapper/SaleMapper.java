@@ -20,4 +20,8 @@ public interface SaleMapper {
     void deleteById(@Param("id") Long id);
 
     long count();
+
+    long countByStatus(@Param("status") Integer status);
+
+    List<Sale> selectEligibleForOutbound();
 }

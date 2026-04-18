@@ -40,4 +40,8 @@
     <update id="deleteById" parameterType="com.example.demo.entity.Warehouse">
         update `warehouse` set del_flag = 1 where id = #{id}
     </update>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM `warehouse` WHERE del_flag != 1
+    </select>
 </mapper>

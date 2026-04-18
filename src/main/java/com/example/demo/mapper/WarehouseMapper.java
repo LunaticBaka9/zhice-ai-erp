@@ -19,4 +19,6 @@ public interface WarehouseMapper {
     void deleteById(Warehouse warehouse);
 
     void updateById(Warehouse warehouse);
+
+    long count();
 }

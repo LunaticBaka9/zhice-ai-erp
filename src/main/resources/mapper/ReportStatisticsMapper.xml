@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.ReportStatisticsMapper">
+
+    <!-- 销售订单（非作废）：按商品汇总数量、金额 -->
+    <select id="selectSaleOrderStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+        SELECT
+            i.product_id AS goodsId,
+            COALESCE(MAX(g.name), MAX(i.product_name_snapshot), CONCAT('ID:', i.product_id)) AS goodsName,
+            SUM(i.quantity) AS qty,
+            SUM(i.subtotal) AS amount
+        FROM sal_order_item i
+        INNER JOIN sal_order o ON o.id = i.order_id
+        LEFT JOIN goods g ON g.id = i.product_id
+        WHERE o.status NOT IN (3, 50)
+        GROUP BY i.product_id
+        ORDER BY SUM(i.quantity) DESC
+    </select>
+
+    <!-- 已确认销售出库：按商品汇总数量 -->
+    <select id="selectSaleOutboundStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+        SELECT
+            i.product_id AS goodsId,
+            COALESCE(MAX(g.name), MAX(si.product_name_snapshot), CONCAT('ID:', i.product_id)) AS goodsName,
+            SUM(i.quantity) AS qty,
+            NULL AS amount
+        FROM sale_outbound_item i
+        INNER JOIN sale_outbound ob ON ob.id = i.outbound_id
+        LEFT JOIN goods g ON g.id = i.product_id
+        LEFT JOIN sal_order_item si ON si.id = i.sale_order_item_id
+        WHERE ob.status = 1
+        GROUP BY i.product_id
+        ORDER BY SUM(i.quantity) DESC
+    </select>
+
+    <!-- 采购订单明细：按商品汇总 -->
+    <select id="selectPurchaseOrderStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+        SELECT
+            pi.goods_id AS goodsId,
+            COALESCE(MAX(g.name), CONCAT('ID:', pi.goods_id)) AS goodsName,
+            SUM(pi.quantity) AS qty,
+            SUM(pi.amount) AS amount
+        FROM purchase_item pi
+        LEFT JOIN goods g ON g.id = pi.goods_id
+        GROUP BY pi.goods_id
+        ORDER BY SUM(pi.quantity) DESC
+    </select>
+
+    <!-- 已确认采购入库：按商品汇总数量 -->
+    <select id="selectPurchaseInboundStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+        SELECT
+            ii.goods_id AS goodsId,
+            COALESCE(MAX(g.name), CONCAT('ID:', ii.goods_id)) AS goodsName,
+            SUM(ii.quantity) AS qty,
+            NULL AS amount
+        FROM purchase_inbound_item ii
+        INNER JOIN purchase_inbound ib ON ib.id = ii.inbound_id
+        LEFT JOIN goods g ON g.id = ii.goods_id
+        WHERE ib.status = 1
+        GROUP BY ii.goods_id
+        ORDER BY SUM(ii.quantity) DESC
+    </select>
+
+    <!-- 当前在手库存：按商品汇总 -->
+    <select id="selectStockStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+        SELECT
+            inv.goods_id AS goodsId,
+            COALESCE(MAX(g.name), CONCAT('ID:', inv.goods_id)) AS goodsName,
+            SUM(inv.qty_on_hand) AS qty,
+            NULL AS amount
+        FROM inventory inv
+        LEFT JOIN goods g ON g.id = inv.goods_id
+        GROUP BY inv.goods_id
+        ORDER BY SUM(inv.qty_on_hand) DESC
+    </select>
+</mapper>

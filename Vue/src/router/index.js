@@ -5,6 +5,9 @@ import routeUser from "./routeUser.js";
 import routeNotice from "./routeNotice.js";
 import routeInventory from "./routeInventory.js";
 import routeBase from "./routeBase.js";
+import routePurchase from "./routePurchase.js";
+import routeSale from "./routeSale.js";
+import routeReport from "./routeReport.js";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -27,6 +30,9 @@ const router = createRouter({
         ...routeNotice,
         ...routeInventory,
         ...routeBase,
+        ...routePurchase,
+        ...routeSale,
+        ...routeReport,
     ],
 });
 

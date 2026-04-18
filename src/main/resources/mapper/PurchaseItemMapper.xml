@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.PurchaseItemMapper">
+
+    <resultMap id="itemMap" type="com.example.demo.entity.PurchaseItem">
+        <id column="id" property="id"/>
+        <result column="purchase_id" property="purchaseId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit_price" property="unitPrice"/>
+        <result column="amount" property="amount"/>
+        <result column="sort_no" property="sortNo"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="sku_code" property="skuCode"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `purchase_item` (purchase_id, goods_id, quantity, unit_price, amount, sort_no)
+        VALUES (#{purchaseId}, #{goodsId}, #{quantity}, #{unitPrice}, #{amount}, #{sortNo})
+    </insert>
+
+    <delete id="deleteByPurchaseId">
+        DELETE FROM `purchase_item` WHERE purchase_id = #{purchaseId}
+    </delete>
+
+    <select id="selectByPurchaseId" resultMap="itemMap">
+        SELECT pi.*, g.name AS goods_name, g.sku_code AS sku_code
+        FROM `purchase_item` pi
+        LEFT JOIN goods g ON pi.goods_id = g.id
+        WHERE pi.purchase_id = #{purchaseId}
+        ORDER BY pi.sort_no ASC, pi.id ASC
+    </select>
+</mapper>

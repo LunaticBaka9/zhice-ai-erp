@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.GoodsService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

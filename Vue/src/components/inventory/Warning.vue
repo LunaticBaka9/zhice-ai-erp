@@ -393,11 +393,45 @@
                 </span>
             </template>
         </el-dialog>
+
+        <!-- 调整预警参数对话框 -->
+        <el-dialog v-model="adjustDialog.visible" title="调整预警参数" width="500px">
+            <el-form :model="adjustDialog.form" label-width="100px">
+                <el-form-item label="商品名称">
+                    <span>{{ adjustDialog.form.name }}</span>
+                </el-form-item>
+                <el-form-item label="SKU编码">
+                    <span>{{ adjustDialog.form.skuCode }}</span>
+                </el-form-item>
+                <el-form-item label="预警下限">
+                    <el-input-number
+                        v-model="adjustDialog.form.stockLow"
+                        :min="0"
+                        :max="999999"
+                        controls-position="right"
+                    />
+                </el-form-item>
+                <el-form-item label="预警上限">
+                    <el-input-number
+                        v-model="adjustDialog.form.stockHigh"
+                        :min="0"
+                        :max="999999"
+                        controls-position="right"
+                    />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="adjustDialog.visible = false">取消</el-button>
+                    <el-button type="primary" @click="submitAdjust">保存</el-button>
+                </span>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
     Plus,
@@ -442,31 +476,11 @@ const pagination = reactive({
 });
 
 // 统计信息
-const statistics = computed(() => {
-    let outOfStock = 0;
-    let lowStock = 0;
-    let highStock = 0;
-
-    alertList.value.forEach((item) => {
-        const stock = item.stockQuantity || 0;
-        const low = item.stockLow || 0;
-        const high = item.stockHigh || 999999;
-
-        if (stock <= 0) {
-            outOfStock++;
-        } else if (stock < low) {
-            lowStock++;
-        } else if (stock > high) {
-            highStock++;
-        }
-    });
-
-    return {
-        outOfStock,
-        lowStock,
-        highStock,
-        totalAlerts: outOfStock + lowStock + highStock,
-    };
+const statistics = ref({
+    outOfStock: 0,
+    lowStock: 0,
+    highStock: 0,
+    totalAlerts: 0,
 });
 
 // 查看详情对话框
@@ -705,9 +719,12 @@ const handleCurrentChange = (val) => {
 };
 
 // 刷新预警
-const refreshAlerts = () => {
-    ElMessage.success("预警刷新成功");
-    getAlertList();
+const refreshAlerts = async () => {
+    try {
+        await generateAlerts();
+    } finally {
+        getAlertList();
+    }
 };
 
 // 导出预警
@@ -749,17 +766,15 @@ const handleReplenish = (row) => {
 // 提交补货
 const submitReplenishment = async () => {
     try {
-        // 这里应该调用后端的补货接口
-        const res = await request.post("/inventory/replenish", {
-            ...replenishDialog.form,
-            operationType: "inbound",
-            reason: "inventory_alert",
+        const res = await request.post("/inventoryAlert/replenish", {
+            alertId: replenishDialog.form.id,
+            actualQty: replenishDialog.form.actualQty,
+            remarks: replenishDialog.form.remarks,
         });
 
         if (res.code === "200") {
             ElMessage.success("补货申请提交成功");
             replenishDialog.visible = false;
-            // 重新加载数据
             getAlertList();
         } else {
             ElMessage.error(res.msg || "补货申请提交失败");
@@ -769,16 +784,74 @@ const submitReplenishment = async () => {
     }
 };
 
+// 生成预警
+const generateAlerts = async () => {
+    try {
+        const res = await request.post("/inventoryAlert/generate");
+        if (res.code === "200") {
+            ElMessage.success("预警生成成功");
+            getAlertList();
+        } else {
+            ElMessage.error(res.msg || "预警生成失败");
+        }
+    } catch (error) {
+        ElMessage.error("预警生成失败");
+    }
+};
+
+// 获取统计信息
+const getStatistics = async () => {
+    try {
+        const res = await request.get("/inventoryAlert/statistics");
+        if (res.code === "200") {
+            return res.data;
+        }
+    } catch (error) {
+        console.error("获取统计失败:", error);
+    }
+    return null;
+};
+
 // 调整库存
+const adjustDialog = reactive({
+    visible: false,
+    form: {
+        id: null,
+        name: "",
+        skuCode: "",
+        stockLow: 0,
+        stockHigh: 0,
+    },
+});
+
 const handleAdjust = (row) => {
-    ElMessageBox.confirm(`确定要手动调整 "${row.name}" 的库存预警参数吗？`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-    }).then(() => {
-        // 这里可以跳转到编辑页面或打开编辑对话框
-        ElMessage.info("调整功能待实现");
-    });
+    adjustDialog.form = {
+        id: row.id,
+        name: row.goodsName || row.name,
+        skuCode: row.skuCode,
+        stockLow: row.stockLow || 0,
+        stockHigh: row.stockHigh || 0,
+    };
+    adjustDialog.visible = true;
+};
+
+const submitAdjust = async () => {
+    try {
+        const res = await request.post("/goods/update", {
+            id: adjustDialog.form.id,
+            stockLow: adjustDialog.form.stockLow,
+            stockHigh: adjustDialog.form.stockHigh,
+        });
+        if (res.code === "200") {
+            ElMessage.success("预警参数更新成功");
+            adjustDialog.visible = false;
+            getAlertList();
+        } else {
+            ElMessage.error(res.msg || "更新失败");
+        }
+    } catch (error) {
+        ElMessage.error("更新失败");
+    }
 };
 
 // 确认预警
@@ -802,8 +875,17 @@ const handleAcknowledge = (row) => {
     });
 };
 
-onMounted(() => {
+onMounted(async () => {
     getAlertList();
+    const stats = await getStatistics();
+    if (stats) {
+        statistics.value = {
+            outOfStock: stats.outOfStock || 0,
+            lowStock: stats.lowStock || 0,
+            highStock: stats.highStock || 0,
+            totalAlerts: stats.totalAlerts || 0,
+        };
+    }
 });
 </script>
 

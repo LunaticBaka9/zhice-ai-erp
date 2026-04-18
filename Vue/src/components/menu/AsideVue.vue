@@ -72,12 +72,6 @@
                 <el-menu-item index="/sale/delivery">
                     <span>销售发货</span>
                 </el-menu-item>
-                <el-menu-item index="/sale/pos">
-                    <span>零售收银 (POS)</span>
-                </el-menu-item>
-                <el-menu-item index="/sale/customer">
-                    <span>客户管理</span>
-                </el-menu-item>
             </el-sub-menu>
 
             <!-- 采购管理 -->
@@ -114,26 +108,6 @@
                 </el-menu-item>
             </el-sub-menu>
 
-            <!-- 财务管理 -->
-            <el-sub-menu v-if="showFinanceMenu" index="finance">
-                <template #title>
-                    <el-icon><Money /></el-icon>
-                    <span>财务管理</span>
-                </template>
-                <el-menu-item index="/finance/account">
-                    <span>往来账款</span>
-                </el-menu-item>
-                <el-menu-item index="/finance/cost">
-                    <span>成本核算</span>
-                </el-menu-item>
-                <el-menu-item index="/finance/expense">
-                    <span>费用管理</span>
-                </el-menu-item>
-                <el-menu-item index="/finance/report">
-                    <span>财务报表</span>
-                </el-menu-item>
-            </el-sub-menu>
-
             <!-- 报表分析 -->
             <el-sub-menu v-if="showReportMenu" index="report">
                 <template #title>
@@ -149,9 +123,6 @@
                 <el-menu-item index="/report/inventory">
                     <span>库存分析</span>
                 </el-menu-item>
-                <el-menu-item index="/report/finance">
-                    <span>财务分析</span>
-                </el-menu-item>
             </el-sub-menu>
 
             <!-- 系统管理 -->
@@ -163,20 +134,6 @@
                 <el-menu-item index="/system/user">
                     <span>用户管理</span>
                 </el-menu-item>
-                <el-menu-item index="/system/role">
-                    <span>角色管理</span>
-                </el-menu-item>
-                <el-menu-item index="/system/sysMenu">
-                    <span>菜单管理</span>
-                </el-menu-item>
-            </el-sub-menu>
-
-            <!-- 系统监控 -->
-            <el-sub-menu v-if="isTech || isAdmin" index="/monitor">
-                <template #title>
-                    <el-icon><Monitor /></el-icon>
-                    <span>系统监控</span>
-                </template>
                 <el-menu-item index="/monitor/operationLog">
                     <span>操作日志</span>
                 </el-menu-item>

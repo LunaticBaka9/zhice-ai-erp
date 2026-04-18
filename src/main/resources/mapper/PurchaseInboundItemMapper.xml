@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.PurchaseInboundItemMapper">
+
+    <resultMap id="rowMap" type="com.example.demo.entity.PurchaseInboundItem">
+        <id column="id" property="id"/>
+        <result column="inbound_id" property="inboundId"/>
+        <result column="purchase_item_id" property="purchaseItemId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit_price" property="unitPrice"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="sku_code" property="skuCode"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `purchase_inbound_item` (inbound_id, purchase_item_id, goods_id, quantity, unit_price)
+        VALUES (#{inboundId}, #{purchaseItemId}, #{goodsId}, #{quantity}, #{unitPrice})
+    </insert>
+
+    <delete id="deleteByInboundId">
+        DELETE FROM `purchase_inbound_item` WHERE inbound_id = #{inboundId}
+    </delete>
+
+    <select id="selectByInboundId" resultMap="rowMap">
+        SELECT ii.*, g.name AS goods_name, g.sku_code AS sku_code
+        FROM `purchase_inbound_item` ii
+        LEFT JOIN goods g ON ii.goods_id = g.id
+        WHERE ii.inbound_id = #{inboundId}
+        ORDER BY ii.id ASC
+    </select>
+</mapper>

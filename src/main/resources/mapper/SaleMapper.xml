@@ -8,6 +8,7 @@
         <id     property="id"             column="id"/>
         <result property="orderNo"        column="order_no"/>
         <result property="customerId"     column="customer_id"/>
+        <result property="warehouseId"    column="warehouse_id"/>
         <result property="customerName"   column="customer_name"/>
         <result property="orderDate"      column="order_date"/>
         <result property="totalAmount"    column="total_amount"/>
@@ -18,13 +19,16 @@
         <result property="createdBy"      column="created_by"/>
         <result property="createdAt"      column="created_at"/>
         <result property="updatedAt"      column="updated_at"/>
+        <result property="confirmTime"    column="confirm_time"/>
+        <result property="deliverTime"    column="deliver_time"/>
     </resultMap>
 
     <select id="selectAll" resultMap="SaleResultMap">
         SELECT
-            o.id, o.order_no, o.customer_id, c.name AS customer_name,
+            o.id, o.order_no, o.customer_id, o.warehouse_id, c.name AS customer_name,
             o.order_date, o.total_amount, o.discount_amount, o.final_amount,
-            o.status, o.remark, o.created_by, o.created_at, o.updated_at
+            o.status, o.remark, o.created_by, o.created_at, o.updated_at,
+            o.confirm_time, o.deliver_time
         FROM sal_order o
         LEFT JOIN customer c ON o.customer_id = c.id
         <where>
@@ -46,9 +50,10 @@
 
     <select id="selectById" resultMap="SaleResultMap">
         SELECT
-            o.id, o.order_no, o.customer_id, c.name AS customer_name,
+            o.id, o.order_no, o.customer_id, o.warehouse_id, c.name AS customer_name,
             o.order_date, o.total_amount, o.discount_amount, o.final_amount,
-            o.status, o.remark, o.created_by, o.created_at, o.updated_at
+            o.status, o.remark, o.created_by, o.created_at, o.updated_at,
+            o.confirm_time, o.deliver_time
         FROM sal_order o
         LEFT JOIN customer c ON o.customer_id = c.id
         WHERE o.id = #{id}
@@ -56,11 +61,11 @@
 
     <insert id="insert" parameterType="com.example.demo.entity.Sale" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sal_order (
-            order_no, customer_id, order_date,
+            order_no, customer_id, warehouse_id, order_date,
             total_amount, discount_amount, final_amount,
             status, remark, created_by, created_at, updated_at
         ) VALUES (
-            #{orderNo}, #{customerId}, #{orderDate},
+            #{orderNo}, #{customerId}, #{warehouseId}, #{orderDate},
             #{totalAmount}, #{discountAmount}, #{finalAmount},
             #{status}, #{remark}, #{createdBy}, NOW(), NOW()
         )
@@ -70,12 +75,15 @@
         UPDATE sal_order
         <set>
             <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="warehouseId != null">warehouse_id = #{warehouseId},</if>
             <if test="orderDate != null">order_date = #{orderDate},</if>
             <if test="totalAmount != null">total_amount = #{totalAmount},</if>
             <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
             <if test="finalAmount != null">final_amount = #{finalAmount},</if>
             <if test="status != null">status = #{status},</if>
             <if test="remark != null">remark = #{remark},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+            <if test="deliverTime != null">deliver_time = #{deliverTime},</if>
             updated_at = NOW()
         </set>
         WHERE id = #{id}
@@ -89,4 +97,20 @@
         SELECT COUNT(*) FROM sal_order
     </select>
 
+    <select id="countByStatus" resultType="long">
+        SELECT COUNT(*) FROM sal_order WHERE status = #{status}
+    </select>
+
+    <select id="selectEligibleForOutbound" resultMap="SaleResultMap">
+        SELECT
+            o.id, o.order_no, o.customer_id, o.warehouse_id, c.name AS customer_name,
+            o.order_date, o.total_amount, o.discount_amount, o.final_amount,
+            o.status, o.remark, o.created_by, o.created_at, o.updated_at,
+            o.confirm_time, o.deliver_time
+        FROM sal_order o
+        LEFT JOIN customer c ON o.customer_id = c.id
+        WHERE o.status = 1
+          AND NOT EXISTS (SELECT 1 FROM sale_outbound s WHERE s.sale_order_id = o.id)
+        ORDER BY o.id DESC
+    </select>
 </mapper>

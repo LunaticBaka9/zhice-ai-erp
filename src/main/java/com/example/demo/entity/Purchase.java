@@ -1,8 +1,9 @@
 package com.example.demo.entity;
 
-import java.util.Date;
-
 import lombok.Data;
+
+import java.util.Date;
+import java.util.List;
 
 @Data
 public class Purchase {
@@ -10,8 +11,15 @@ public class Purchase {
     private Long id;
     private String billNo;
     private Long supplierId;
-    private Long warehouseId;
+    private Integer warehouseId;
     private String totalAmount;
-    private int status;
+    private Integer status;
     private Date inStockTime;
+    private String remark;
+    private Date createTime;
+    private Date updateTime;
+    private Date confirmTime;
+
+    private List<PurchaseItem> items;
+    private String supplierName;
 }

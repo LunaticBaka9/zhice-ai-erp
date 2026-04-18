@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.InventoryMapper">
+
+    <resultMap id="invMap" type="com.example.demo.entity.Inventory">
+        <id column="id" property="id"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="warehouse_id" property="warehouseId"/>
+        <result column="location" property="location"/>
+        <result column="batch_no" property="batchNo"/>
+        <result column="qty_on_hand" property="qtyOnHand"/>
+        <result column="qty_available" property="qtyAvailable"/>
+        <result column="locked_qty" property="lockedQty"/>
+        <result column="total_cost" property="totalCost"/>
+        <result column="last_inbound_time" property="lastInboundTime"/>
+        <result column="last_outbound_time" property="lastOutboundTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+    </resultMap>
+
+    <select id="selectByGoodsWarehouseBatch" resultMap="invMap">
+        SELECT *
+        FROM `inventory`
+        WHERE goods_id = #{goodsId}
+          AND warehouse_id = #{warehouseId}
+          AND IFNULL(batch_no, '') = IFNULL(#{batchNo}, '')
+        LIMIT 1
+    </select>
+
+    <select id="selectByGoodsAndWarehouse" resultMap="invMap">
+        SELECT *
+        FROM `inventory`
+        WHERE goods_id = #{goodsId}
+          AND warehouse_id = #{warehouseId}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `inventory` (
+            goods_id, warehouse_id, location, batch_no,
+            qty_on_hand, qty_available, locked_qty, total_cost,
+            last_inbound_time, create_time, update_time
+        ) VALUES (
+            #{goodsId}, #{warehouseId}, #{location}, IFNULL(#{batchNo}, ''),
+            #{qtyOnHand}, #{qtyAvailable}, IFNULL(#{lockedQty}, 0), #{totalCost},
+            #{lastInboundTime}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="addQty">
+        UPDATE `inventory`
+        SET qty_on_hand = qty_on_hand + #{qty},
+            qty_available = qty_available + #{qty},
+            total_cost = total_cost + #{costDelta},
+            last_inbound_time = NOW(),
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="subtractQty">
+        UPDATE `inventory`
+        SET qty_on_hand = qty_on_hand - #{qty},
+            qty_available = qty_available - #{qty},
+            total_cost = GREATEST(0, total_cost - #{costDelta}),
+            last_outbound_time = NOW(),
+            update_time = NOW()
+        WHERE id = #{id}
+          AND qty_available <![CDATA[ >= ]]> #{qty}
+    </update>
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SaleOutboundMapper">
+
+    <resultMap id="rowMap" type="com.example.demo.entity.SaleOutbound">
+        <id column="id" property="id"/>
+        <result column="sale_order_id" property="saleOrderId"/>
+        <result column="bill_no" property="billNo"/>
+        <result column="warehouse_id" property="warehouseId"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="confirm_time" property="confirmTime"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="customer_id" property="customerId"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `sale_outbound` (sale_order_id, bill_no, warehouse_id, status, remark, create_time)
+        VALUES (#{saleOrderId}, #{billNo}, #{warehouseId}, #{status}, #{remark}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE `sale_outbound`
+        <set>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="rowMap">
+        SELECT s.*, o.order_no, o.customer_id
+        FROM `sale_outbound` s
+        JOIN `sal_order` o ON s.sale_order_id = o.id
+        WHERE s.id = #{id}
+    </select>
+
+    <select id="selectBySaleOrderId" resultMap="rowMap">
+        SELECT s.*, o.order_no, o.customer_id
+        FROM `sale_outbound` s
+        JOIN `sal_order` o ON s.sale_order_id = o.id
+        WHERE s.sale_order_id = #{saleOrderId}
+    </select>
+
+    <select id="countBySaleOrderId" resultType="int">
+        SELECT COUNT(*) FROM `sale_outbound` WHERE sale_order_id = #{saleOrderId}
+    </select>
+
+    <select id="selectList" resultMap="rowMap">
+        SELECT s.*, o.order_no, o.customer_id
+        FROM `sale_outbound` s
+        JOIN `sal_order` o ON s.sale_order_id = o.id
+        <where>
+            <if test="billNo != null and billNo != ''">AND s.bill_no LIKE CONCAT('%', #{billNo}, '%')</if>
+            <if test="status != null">AND s.status = #{status}</if>
+            <if test="orderNo != null and orderNo != ''">AND o.order_no LIKE CONCAT('%', #{orderNo}, '%')</if>
+        </where>
+        ORDER BY s.id DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM `sale_outbound` WHERE id = #{id}
+    </delete>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM `sale_outbound`
+    </select>
+
+    <select id="countByStatus" resultType="long">
+        SELECT COUNT(*) FROM `sale_outbound` WHERE status = #{status}
+    </select>
+</mapper>

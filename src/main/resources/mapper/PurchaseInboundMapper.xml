@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.PurchaseInboundMapper">
+
+    <resultMap id="inboundMap" type="com.example.demo.entity.PurchaseInbound">
+        <id column="id" property="id"/>
+        <result column="purchase_id" property="purchaseId"/>
+        <result column="bill_no" property="billNo"/>
+        <result column="warehouse_id" property="warehouseId"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="confirm_time" property="confirmTime"/>
+        <result column="purchase_bill_no" property="purchaseBillNo"/>
+        <result column="supplier_id" property="supplierId"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `purchase_inbound` (purchase_id, bill_no, warehouse_id, status, remark, create_time)
+        VALUES (#{purchaseId}, #{billNo}, #{warehouseId}, #{status}, #{remark}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE `purchase_inbound`
+        <set>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="inboundMap">
+        SELECT i.*, p.bill_no AS purchase_bill_no, p.supplier_id
+        FROM `purchase_inbound` i
+        JOIN `purchase` p ON i.purchase_id = p.id
+        WHERE i.id = #{id}
+    </select>
+
+    <select id="selectByPurchaseId" resultMap="inboundMap">
+        SELECT i.*, p.bill_no AS purchase_bill_no, p.supplier_id
+        FROM `purchase_inbound` i
+        JOIN `purchase` p ON i.purchase_id = p.id
+        WHERE i.purchase_id = #{purchaseId}
+    </select>
+
+    <select id="countByPurchaseId" resultType="int">
+        SELECT COUNT(*) FROM `purchase_inbound` WHERE purchase_id = #{purchaseId}
+    </select>
+
+    <select id="selectList" resultMap="inboundMap">
+        SELECT i.*, p.bill_no AS purchase_bill_no, p.supplier_id
+        FROM `purchase_inbound` i
+        JOIN `purchase` p ON i.purchase_id = p.id
+        <where>
+            <if test="billNo != null and billNo != ''">AND i.bill_no LIKE CONCAT('%', #{billNo}, '%')</if>
+            <if test="status != null">AND i.status = #{status}</if>
+            <if test="purchaseBillNo != null and purchaseBillNo != ''">AND p.bill_no LIKE CONCAT('%', #{purchaseBillNo}, '%')</if>
+        </where>
+        ORDER BY i.id DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM `purchase_inbound` WHERE id = #{id}
+    </delete>
+</mapper>

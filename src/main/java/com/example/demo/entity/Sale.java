@@ -11,6 +11,8 @@ public class Sale {
     private Long id;
     private String orderNo;
     private Long customerId;
+    /** 出库仓库（确认出库时从该仓扣库存） */
+    private Integer warehouseId;
     private Date orderDate;
     private BigDecimal totalAmount;
     private BigDecimal discountAmount;
@@ -20,6 +22,8 @@ public class Sale {
     private String createdBy;
     private Date createdAt;
     private Date updatedAt;
+    private Date confirmTime;
+    private Date deliverTime;
 
     // 关联字段（非数据库列）
     private String customerName;
