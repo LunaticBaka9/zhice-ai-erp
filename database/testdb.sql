@@ -11,7 +11,7 @@
  Target Server Version : 50726 (5.7.26)
  File Encoding         : 65001
 
- Date: 18/04/2026 14:34:10
+ Date: 18/04/2026 15:49:31
 */
 
 SET NAMES utf8mb4;
@@ -383,7 +383,7 @@ CREATE TABLE `operation_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_username`(`username`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 122 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 123 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operation_log
@@ -509,6 +509,7 @@ INSERT INTO `operation_log` VALUES (118, '系统', '生成销售出库单', 'com
 INSERT INTO `operation_log` VALUES (119, '系统', '确认销售出库', 'com.example.demo.controller.SaleOutboundController.confirm()', '[1]', 547, '0:0:0:0:0:0:0:1', '2026-04-18 13:43:13', '销售管理', '确认');
 INSERT INTO `operation_log` VALUES (120, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 94, '0:0:0:0:0:0:0:1', '2026-04-18 13:51:17', '用户管理', '登录');
 INSERT INTO `operation_log` VALUES (121, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"test\",\"密码\":\"test\"}]', 111, '0:0:0:0:0:0:0:1', '2026-04-18 14:33:14', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (122, '系统', '用户登录', 'com.example.demo.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 72, '0:0:0:0:0:0:0:1', '2026-04-18 14:35:01', '用户管理', '登录');
 
 -- ----------------------------
 -- Table structure for purchase
@@ -856,16 +857,6 @@ INSERT INTO `user` VALUES (6, 'A_User_For_TEST', '$2a$10$ZHA7d7A02dEbJqfhMLx6GO.
 INSERT INTO `user` VALUES (7, 'serser', '$2a$10$NbEcx02Ca8ouQcy0lwsRc.BrQ2k7S9IGilWcmVZARSiodFpt1R5QO', 'serser', '123@123.com', '超级管理员', '研发组', '14325345231', '123', '2026-03-21 00:00:00', '启用', '2026-03-22 15:35:13', '2026-04-13 15:40:42', NULL, 0);
 INSERT INTO `user` VALUES (8, '1231231', '$2a$10$IOwvt1PuvUO64U6SH.6q.ulW/vQhNvIG1XL6rZP/Mm/uO5YS/5Xxm', '1231231', 'test@test.test', '开发工程师', '研发组', '15432432413', NULL, NULL, '启用', '2026-03-22 15:35:13', '2026-04-13 15:40:44', NULL, 0);
 INSERT INTO `user` VALUES (9, 'tetetetetet', '$2a$10$AD.fqE07e/wcnM2Eg/uKc.nPd7tRGGk6YQivcTkqEmGpAATuwG2.i', 'tetetetetet', 'test@test.test', '开发工程师', '研发组', '15432432413', NULL, NULL, '启用', '2026-03-23 15:35:31', '2026-04-13 15:40:44', NULL, 0);
-INSERT INTO `user` VALUES (10, 'tetoteto', '$2a$10$CCwRZmkRGXs2AuWOnG/3T.NyqNDv8D5Lefqozrw6F5hddpiOvQ7RK', 'tetoteto', 'teto@teto.com', '开发工程师', '研发组', '15432432413', NULL, NULL, '启用', '2026-03-23 15:35:34', '2026-04-13 15:40:45', NULL, 0);
-INSERT INTO `user` VALUES (13, '4141414', '$2a$10$QNyZ1gB.fDgxsRMfuNX9DOCZZI5JdR2c3UUyooi8QUv.6UiZikI7m', '4141414', 'Test@test.com', '开发工程师', '研发组', '15432432413', NULL, NULL, '启用', '2026-03-23 17:43:07', '2026-04-13 15:40:46', NULL, 0);
-INSERT INTO `user` VALUES (24, '42', '$2a$10$K.dsblSk5bD4T33UEhMd6O/3.Xe3E7EndKV24RiS9SB4.QWiauIK.', '42', 'test@test.com', '开发工程师', '研发组', '14323453213', '42', '2026-03-19 22:30:00', '启用', '2026-03-30 12:19:43', '2026-04-13 15:40:47', NULL, 0);
-INSERT INTO `user` VALUES (31, '123', '$2a$10$PVJwGbD.na2jtwp4A/eIqerkgyBjZb29C9CK3XALk8eSfKzwp9kRe', '123', 'test@test.com', '开发工程师', '研发组', '14323453214', '43', '2026-03-20 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:47', NULL, 0);
-INSERT INTO `user` VALUES (32, '124', '$2a$10$y0PhlevZzEgIrVZ5FHB1ge5bX43vDuXh1egNJGsUuFA55zbmzZ56y', '124', 'test@test.com', '开发工程师', '研发组', '14323453215', '44', '2026-03-21 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:48', NULL, 0);
-INSERT INTO `user` VALUES (33, '125', '$2a$10$C1mV3qLobTFVbM87VM1TLuYJPDWpv38vyxb3BoKjwzLaABoP3XZF6', '125', 'test@test.com', '开发工程师', '研发组', '14323453216', '45', '2026-03-22 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:50', NULL, 0);
-INSERT INTO `user` VALUES (34, '126', '$2a$10$P9kkQ0/sLcEQ3tk9AlMJkOvfIbmUm5hy8hj/wdCQ68nqzzBYvs2Dy', '126', 'test@test.com', '开发工程师', '研发组', '14323453217', '46', '2026-03-23 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:49', NULL, 0);
-INSERT INTO `user` VALUES (35, '127', '$2a$10$yV41NqzlSI9ViTKXGOi5UOAjwvhHeaWx2sjJAHPxQJ9IcuEktUnaO', '127', 'test@test.com', '开发工程师', '研发组', '14323453218', '47', '2026-03-24 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:51', NULL, 0);
-INSERT INTO `user` VALUES (36, '128', '$2a$10$zRuP.d4C4E2FoCsznNo/VOSKNREe/4mXZgBycgnBkRu8ucjuXMO9S', '128', 'test@test.com', '开发工程师', '研发组', '14323453219', '48', '2026-03-25 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:52', NULL, 0);
-INSERT INTO `user` VALUES (40, 'admin1', '$2a$10$K1Cqk46hTkm663sDkShDhOfRogbrsJeMxYjiRunbGdFIC55V9XFlu', 'admin1', 'test@test.com', NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-07 15:37:16', '2026-04-13 15:40:52', NULL, 0);
 
 -- ----------------------------
 -- Table structure for warehouse

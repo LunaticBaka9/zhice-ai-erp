@@ -2,7 +2,7 @@
     <el-aside :width="isCollapse ? '64px' : '240px'">
         <!-- Logo区域 -->
         <div class="logo-container">
-            <img src="https://element-plus.org/images/element-plus-logo.svg" alt="logo" class="logo" />
+            <img src="/xianglian_logo.png" alt="logo" class="logo" />
             <span v-show="!isCollapse" class="logo-text">进销存系统</span>
         </div>
 
