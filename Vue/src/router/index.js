@@ -51,7 +51,7 @@ router.beforeEach((to, from, next) => {
         // 白名单路径
         if (isAuthenticated) {
             // 如果已登录，重定向到首页
-            next({ path: "/login" });
+            next({ path: "/" });
         } else {
             // 如果未登录，允许访问
             next();

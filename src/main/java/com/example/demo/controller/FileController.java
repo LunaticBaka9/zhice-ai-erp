@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,28 +26,59 @@ public class FileController {
     @Resource
     UserService userService;
 
+    @Value("${app.upload.base-url:}")
+    private String baseUrl;
+
+    private File getUploadDir(String subDir) throws IOException {
+        File uploadDir;
+        try {
+            File staticDir = ResourceUtils.getFile("classpath:static");
+            if (staticDir.exists()) {
+                uploadDir = new File(staticDir, subDir);
+            } else {
+                throw new IOException("static目录不存在");
+            }
+        } catch (Exception e) {
+            File appDir;
+            try {
+                java.net.URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
+                if (url != null) {
+                    File jarFile = new File(url.toURI().getPath());
+                    appDir = jarFile.getParentFile();
+                } else {
+                    appDir = null;
+                }
+            } catch (Exception ex) {
+                appDir = null;
+            }
+            if (appDir == null) {
+                appDir = new File(System.getProperty("user.dir"));
+            }
+            uploadDir = new File(appDir, "static/" + subDir);
+        }
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+        return uploadDir;
+    }
+
     @PostMapping("/uploadAvatar")
     public Result uploadAvatar(@RequestParam(required = false) Long uid, @RequestParam("photo") MultipartFile photo,
             HttpServletRequest request) throws IOException {
         if (photo == null || photo.isEmpty()) {
             return Result.error("上传文件为空");
         }
-        // 使用 ResourceUtils 获取 classpath 下的 static 目录，避免手动拼接路径导致的非法字符
-        File staticDir = ResourceUtils.getFile("classpath:static");
-        File uploadDirFile = new File(staticDir, "upload/avatars");
-        if (!uploadDirFile.exists()) {
-            uploadDirFile.mkdirs();
-        }
+        File uploadDirFile = getUploadDir("upload/avatars");
 
         String original = photo.getOriginalFilename();
         String fileName = System.currentTimeMillis() + "_" + (original != null ? original : "avatar.jpg");
         Path target = uploadDirFile.toPath().resolve(fileName);
         Files.copy(photo.getInputStream(), target);
 
-        // 返回前端可访问的静态资源路径
-        String publicPath = "api/static/upload/avatars/" + fileName; // 前端访问地址: /static/upload 映射到 /upload/
-        userService.updateAvatar(uid, publicPath);
-        return Result.success(publicPath);
+        String publicPath = "/static/upload/avatars/" + fileName;
+        String fullUrl = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl + publicPath : publicPath;
+        userService.updateAvatar(uid, fullUrl);
+        return Result.success(fullUrl);
     }
 
     @PostMapping("/upload")
@@ -56,63 +88,32 @@ public class FileController {
         }
 
         String original = file.getOriginalFilename();
-        // 获取文件后缀
         String suffix = FilenameUtils.getExtension(original).toLowerCase();
 
-        // 使用 ResourceUtils 获取 classpath 下的 static 目录
-        File staticDir = ResourceUtils.getFile("classpath:static");
-        File uploadDirFile;
-        String fileName;
-        String publicPath;
-
-        // 根据文件类型分类存储
-        // 注意：返回的路径需要加上 /api 前缀，以便前端通过代理访问
-        if (suffix.matches(".*(jpg|jpeg|png|gif|bmp|webp|svg|ico).*")) {
-            // 图片文件
-            uploadDirFile = new File(staticDir, "upload/picture");
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
-            }
-            fileName = System.currentTimeMillis() + "_" + (original != null ? original : "picture.jpg");
-            publicPath = "/api/static/upload/picture/" + fileName;
-        } else if (suffix.matches(".*(txt|doc|docx|xls|xlsx|pdf|ppt|pptx|csv).*")) {
-            // 文档文件
-            uploadDirFile = new File(staticDir, "upload/file");
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
-            }
-            fileName = System.currentTimeMillis() + "_" + (original != null ? original : "file");
-            publicPath = "/api/static/upload/file/" + fileName;
-        } else if (suffix.matches(".*(zip|rar|7z|tar|gz).*")) {
-            // 压缩包文件
-            uploadDirFile = new File(staticDir, "upload/archive");
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
-            }
-            fileName = System.currentTimeMillis() + "_" + (original != null ? original : "archive");
-            publicPath = "/api/static/upload/archive/" + fileName;
+        String subDir;
+        if (suffix.matches("jpg|jpeg|png|gif|bmp|webp|svg|ico")) {
+            subDir = "upload/picture";
+        } else if (suffix.matches("txt|doc|docx|xls|xlsx|pdf|ppt|pptx|csv")) {
+            subDir = "upload/file";
+        } else if (suffix.matches("zip|rar|7z|tar|gz")) {
+            subDir = "upload/archive";
         } else {
-            // 其他文件类型，存储到通用目录
-            uploadDirFile = new File(staticDir, "upload/other");
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
-            }
-            fileName = System.currentTimeMillis() + "_" + (original != null ? original : "file");
-            publicPath = "/api/static/upload/other/" + fileName;
+            subDir = "upload/other";
         }
 
-        // 保存文件
+        File uploadDirFile = getUploadDir(subDir);
+        String fileName = System.currentTimeMillis() + "_" + (original != null ? original : "file");
         Path target = uploadDirFile.toPath().resolve(fileName);
         Files.copy(file.getInputStream(), target);
 
-        // 返回文件信息
+        String publicPath = "/static/" + subDir + "/" + fileName;
+        String fullUrl = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl + publicPath : publicPath;
+
         java.util.Map<String, Object> fileInfo = new java.util.HashMap<>();
-        fileInfo.put("url", publicPath);
+        fileInfo.put("url", fullUrl);
         fileInfo.put("name", original);
         fileInfo.put("size", file.getSize());
         fileInfo.put("type", suffix);
-
-        System.out.println(fileInfo);
 
         return Result.success(fileInfo);
     }

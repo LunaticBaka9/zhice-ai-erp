@@ -179,8 +179,6 @@ const data = reactive({
     user: JSON.parse(localStorage.getItem("local_user")),
     userInfo: [],
 });
-console.log(data.user?.department);
-console.log(data.user?.role);
 
 const isTech = computed(() => {
     return (

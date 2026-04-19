@@ -99,7 +99,7 @@
                     <el-card shadow="hover" class="goods-card" :body-style="{ padding: '16px' }">
                         <div class="goods-card-content" @click="handleView(item)">
                             <div class="goods-image">
-                                <el-image :src="item.img" fit="cover" :alt="item.name || item.skuCode" lazy>
+                                <el-image :src="getImageUrl(item.img)" fit="cover" :alt="item.name || item.skuCode" lazy>
                                     <template #error>
                                         <div class="image-placeholder">
                                             <el-icon><Box /></el-icon>
@@ -173,10 +173,10 @@
             <el-descriptions :column="2" border>
                 <el-descriptions-item label="商品图片" :span="2">
                     <el-image
-                        :src="viewDialog.data.img"
-                        style="width: 200px; height: 200px"
-                        fit="cover"
-                        :preview-src-list="[viewDialog.data.img]"
+                        :src="getImageUrl(viewDialog.data.img)"
+                        style="width: 300px; height: 300px"
+                        fit="contain"
+                        :preview-src-list="[getImageUrl(viewDialog.data.img)]"
                         preview-teleported
                     >
                         <template #error>
@@ -238,6 +238,19 @@
         <!-- 编辑/新增商品对话框 -->
         <el-dialog v-model="dialog.visible" :title="dialog.title" width="700px">
             <el-form :model="dialog.form" ref="goodsFormRef" label-width="100px" :rules="formRules">
+              <el-form-item label="商品图片" prop="img">
+                <el-upload
+                    class="goods-uploader"
+                    :show-file-list="false"
+                    :before-upload="beforeUpload"
+                    action="#"
+                >
+                  <img v-if="dialog.form.img" :src="getImageUrl(dialog.form.img)" class="goods-img-preview" />
+                  <el-icon v-else class="uploader-icon"><Plus /></el-icon>
+                </el-upload>
+                <div class="upload-tip">点击上传商品图片，支持jpg、png格式</div>
+              </el-form-item>
+
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="SKU编码" prop="skuCode" required>
@@ -300,11 +313,6 @@
                     <el-col :span="12">
                         <el-form-item label="主条码" prop="barcode">
                             <el-input v-model="dialog.form.barcode" placeholder="商品条形码" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="图片" prop="img">
-                            <el-input v-model="dialog.form.img" placeholder="图片URL" />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -413,6 +421,17 @@ const searchForm = reactive({
     unit: "",
 });
 
+const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("//")) {
+        return url;
+    }
+    if (url.startsWith("/")) {
+        return window.location.origin + url;
+    }
+    return url;
+};
+
 const pagination = reactive({
     pageNum: 1,
     pageSize: 12,
@@ -454,6 +473,47 @@ const viewDialog = reactive({
 const formRules = {
     skuCode: [{ required: true, message: "请输入SKU编码", trigger: "blur" }],
     name: [{ required: true, message: "请输入商品名称", trigger: "blur" }],
+};
+
+const uploadLoading = ref(false);
+
+const beforeUpload = async (file) => {
+    const isImage = file.type.startsWith("image/");
+    const isLt5M = file.size / 1024 / 1024 < 5;
+
+    if (!isImage) {
+        ElMessage.error("只能上传图片文件!");
+        return false;
+    }
+    if (!isLt5M) {
+        ElMessage.error("图片大小不能超过5MB!");
+        return false;
+    }
+
+    uploadLoading.value = true;
+
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await request.post("/file/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        if (res.code === "200") {
+            dialog.form.img = res.data.url;
+            ElMessage.success("图片上传成功");
+        } else {
+            ElMessage.error(res.msg || "上传失败");
+        }
+    } catch (error) {
+        console.error("上传图片失败:", error);
+        ElMessage.error("图片上传失败");
+    } finally {
+        uploadLoading.value = false;
+    }
+
+    return false;
 };
 
 const getCategoryList = async () => {
@@ -700,7 +760,7 @@ onMounted(() => {
 }
 
 .goods-card {
-    min-height: 370px;
+    min-height: 430px;
     height: auto;
     display: flex;
     flex-direction: column;
@@ -719,7 +779,7 @@ onMounted(() => {
 }
 
 .goods-image {
-    height: 120px;
+    height: 180px;
     overflow: hidden;
     border-radius: 6px;
     background-color: #f5f7fa;
@@ -814,6 +874,41 @@ onMounted(() => {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+}
+
+.goods-uploader {
+    width: 120px;
+    height: 120px;
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.goods-uploader:hover {
+    border-color: #409eff;
+}
+
+.goods-img-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+}
+
+.upload-tip {
+    margin-left: 10px;
+    color: #909399;
+    font-size: 12px;
 }
 
 /* 响应式调整 */

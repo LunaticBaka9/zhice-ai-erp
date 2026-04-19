@@ -32,7 +32,7 @@
         UPDATE `user`
         SET name = #{name},role = #{role},department = #{department},
             bio = #{bio},joinDate = #{joinDate},avatar = #{avatar},
-            status=#{status},updateTime=NOW()
+            updateTime=NOW()
         WHERE uid = #{uid}
     </update>
 

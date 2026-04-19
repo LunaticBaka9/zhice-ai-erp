@@ -47,6 +47,7 @@
         <set>
             <if test="skuCode != null">sku_code = #{skuCode},</if>
             <if test="name != null">name = #{name},</if>
+            <if test="img != null">img = #{img},</if>
             <if test="categoryId != null">category_id = #{categoryId},</if>
             <if test="brand != null">brand = #{brand},</if>
             <if test="spec != null">spec = #{spec},</if>
