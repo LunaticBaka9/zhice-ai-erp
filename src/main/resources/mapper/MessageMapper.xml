@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.MessageMapper">
+    <select id="selectAllMessage" resultType="com.example.demo.entity.Message">
+        SELECT *
+        FROM `message`
+        WHERE receiver_id = #{userID} and del_flage = 0
+        ORDER BY publishDate DESC
+    </select>
+
+    <select id="selectByMsgId" parameterType="long" resultType="com.example.demo.entity.Message">
+        SELECT *
+        FROM `message`
+        WHERE msg_id = #{msgId}
+    </select>
+
+    <insert id="insertMessage" parameterType="com.example.demo.entity.Message">
+        INSERT into Message(sender_id,receiver_id,type,content,attachments,publish_date,is_read)
+        values (#{senderId},#{receiverId},#{type},#{content},#{attachments},#{publishDate},#{isRead})
+    </insert>
+
+    <update id="updateMessage">
+        UPDATE `message`
+        <set>
+            <if test="type != null and type != ''">type=#{type}, </if>
+            <if test="content != null and content != ''"> content=#{content}, </if>
+            <if test="publishDate != null"> publish_date=#{publishDate},</if>
+            <if test="attachments != null and attachments != ''">attachments=#{attachments}</if>
+        </set>
+        WHERE msg_id=#{msgId}
+    </update>
+
+    <update id="deleteMessage" parameterType="com.example.demo.entity.Message">
+        UPDATE `message`
+        SET del_flag = 1
+        WHERE msg_id = #{msgId}
+    </update>
+</mapper>
