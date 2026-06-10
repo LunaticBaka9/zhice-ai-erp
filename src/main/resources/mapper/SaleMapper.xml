@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.SaleMapper">
+<mapper namespace="com.lunabaka.mapper.SaleMapper">
 
-    <resultMap id="SaleResultMap" type="com.example.demo.entity.Sale">
+    <resultMap id="SaleResultMap" type="com.lunabaka.entity.Sale">
         <id     property="id"             column="id"/>
         <result property="orderNo"        column="order_no"/>
         <result property="customerId"     column="customer_id"/>
@@ -59,7 +59,7 @@
         WHERE o.id = #{id}
     </select>
 
-    <insert id="insert" parameterType="com.example.demo.entity.Sale" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.lunabaka.entity.Sale" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sal_order (
             order_no, customer_id, warehouse_id, order_date,
             total_amount, discount_amount, final_amount,
@@ -71,7 +71,7 @@
         )
     </insert>
 
-    <update id="update" parameterType="com.example.demo.entity.Sale">
+    <update id="update" parameterType="com.lunabaka.entity.Sale">
         UPDATE sal_order
         <set>
             <if test="customerId != null">customer_id = #{customerId},</if>

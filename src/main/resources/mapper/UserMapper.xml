@@ -2,16 +2,16 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.UserMapper">
-    <select id="selectByUsername" resultType="com.example.demo.entity.User">
+<mapper namespace="com.lunabaka.mapper.UserMapper">
+    <select id="selectByUsername" resultType="com.lunabaka.entity.User">
         SELECT * FROM `user` WHERE username=#{username}
     </select>
 
-    <select id="selectById"  resultType="com.example.demo.entity.User">
+    <select id="selectById"  resultType="com.lunabaka.entity.User">
         SELECT * FROM `user` WHERE uid=#{uid}
     </select>
 
-    <select id="selectAllUsers" resultType="com.example.demo.entity.User">
+    <select id="selectAllUsers" resultType="com.lunabaka.entity.User">
         select * from `user`
         <where>
             <if test="username != null">username like concat('%', #{username}, '%')</if>
@@ -22,13 +22,13 @@
         </where>
     </select>
 
-    <update id="updateStatusById" parameterType="com.example.demo.entity.User">
+    <update id="updateStatusById" parameterType="com.lunabaka.entity.User">
         UPDATE `user`
         SET status=#{status},updateTime=NOW()
         WHERE uid=#{uid}
     </update>
 
-    <update id="updateInfoById" parameterType="com.example.demo.entity.User">
+    <update id="updateInfoById" parameterType="com.lunabaka.entity.User">
         UPDATE `user`
         SET name = #{name},role = #{role},department = #{department},
             bio = #{bio},joinDate = #{joinDate},avatar = #{avatar},
@@ -36,17 +36,17 @@
         WHERE uid = #{uid}
     </update>
 
-    <update id="updatePasswordById" parameterType="com.example.demo.entity.User">
+    <update id="updatePasswordById" parameterType="com.lunabaka.entity.User">
         UPDATE `user`
         SET password = #{password}, updateTime=NOW()
         WHERE uid = #{uid}
     </update>
 
-    <update id="updateAvatarById" parameterType="com.example.demo.entity.User">
+    <update id="updateAvatarById" parameterType="com.lunabaka.entity.User">
         UPDATE `user` SET avatar = #{path}, updateTime = NOW() WHERE uid = #{uid}
     </update>
 
-    <insert id="insertUser" parameterType="com.example.demo.entity.User">
+    <insert id="insertUser" parameterType="com.lunabaka.entity.User">
         insert into `user` (username,name,password,email,role,department,phone,bio,joinDate,status,createTime)
         values(#{username},#{name}, #{password},#{email},#{role},#{department},#{phone},#{bio},#{joinDate},#{status},NOW())
     </insert>

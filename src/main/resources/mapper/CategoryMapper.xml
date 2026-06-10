@@ -2,8 +2,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.CategoryMapper">
-    <select id="selectAll" resultType="com.example.demo.entity.Category">
+<mapper namespace="com.lunabaka.mapper.CategoryMapper">
+    <select id="selectAll" resultType="com.lunabaka.entity.Category">
         SELECT id, parent_id as parentId, name, sort_order as sortOrder,
                create_time as createTime, update_time as updateTime
         FROM `category`
@@ -15,19 +15,19 @@
         ORDER BY sort_order ASC, id ASC
     </select>
 
-    <select id="selectById" resultType="com.example.demo.entity.Category">
+    <select id="selectById" resultType="com.lunabaka.entity.Category">
         SELECT id, parent_id as parentId, name, sort_order as sortOrder,
                create_time as createTime, update_time as updateTime
         FROM `category`
         WHERE id = #{id}
     </select>
 
-    <insert id="insert" parameterType="com.example.demo.entity.Category" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.lunabaka.entity.Category" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `category` (parent_id, name, sort_order, create_time, update_time)
         VALUES (#{parentId}, #{name}, #{sortOrder}, NOW(), NOW())
     </insert>
 
-    <update id="update" parameterType="com.example.demo.entity.Category">
+    <update id="update" parameterType="com.lunabaka.entity.Category">
         UPDATE `category`
         <set>
             <if test="parentId != null">parent_id = #{parentId},</if>

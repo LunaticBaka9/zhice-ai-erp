@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.PurchaseInboundMapper">
+<mapper namespace="com.lunabaka.mapper.PurchaseInboundMapper">
 
-    <resultMap id="inboundMap" type="com.example.demo.entity.PurchaseInbound">
+    <resultMap id="inboundMap" type="com.lunabaka.entity.PurchaseInbound">
         <id column="id" property="id"/>
         <result column="purchase_id" property="purchaseId"/>
         <result column="bill_no" property="billNo"/>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.ReportStatisticsMapper">
+<mapper namespace="com.lunabaka.mapper.ReportStatisticsMapper">
 
     <!-- 销售订单（非作废）：按商品汇总数量、金额 -->
-    <select id="selectSaleOrderStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+    <select id="selectSaleOrderStatByProduct" resultType="com.lunabaka.dto.ProductStatVO">
         SELECT
             i.product_id AS goodsId,
             COALESCE(MAX(g.name), MAX(i.product_name_snapshot), CONCAT('ID:', i.product_id)) AS goodsName,
@@ -18,7 +18,7 @@
     </select>
 
     <!-- 已确认销售出库：按商品汇总数量 -->
-    <select id="selectSaleOutboundStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+    <select id="selectSaleOutboundStatByProduct" resultType="com.lunabaka.dto.ProductStatVO">
         SELECT
             i.product_id AS goodsId,
             COALESCE(MAX(g.name), MAX(si.product_name_snapshot), CONCAT('ID:', i.product_id)) AS goodsName,
@@ -34,7 +34,7 @@
     </select>
 
     <!-- 采购订单明细：按商品汇总 -->
-    <select id="selectPurchaseOrderStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+    <select id="selectPurchaseOrderStatByProduct" resultType="com.lunabaka.dto.ProductStatVO">
         SELECT
             pi.goods_id AS goodsId,
             COALESCE(MAX(g.name), CONCAT('ID:', pi.goods_id)) AS goodsName,
@@ -47,7 +47,7 @@
     </select>
 
     <!-- 已确认采购入库：按商品汇总数量 -->
-    <select id="selectPurchaseInboundStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+    <select id="selectPurchaseInboundStatByProduct" resultType="com.lunabaka.dto.ProductStatVO">
         SELECT
             ii.goods_id AS goodsId,
             COALESCE(MAX(g.name), CONCAT('ID:', ii.goods_id)) AS goodsName,
@@ -62,7 +62,7 @@
     </select>
 
     <!-- 当前在手库存：按商品汇总 -->
-    <select id="selectStockStatByProduct" resultType="com.example.demo.dto.ProductStatVO">
+    <select id="selectStockStatByProduct" resultType="com.lunabaka.dto.ProductStatVO">
         SELECT
             inv.goods_id AS goodsId,
             COALESCE(MAX(g.name), CONCAT('ID:', inv.goods_id)) AS goodsName,

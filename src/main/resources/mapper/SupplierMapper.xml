@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.SupplierMapper">
+<mapper namespace="com.lunabaka.mapper.SupplierMapper">
 
-    <select id="selectAll" resultType="com.example.demo.entity.Supplier">
+    <select id="selectAll" resultType="com.lunabaka.entity.Supplier">
         select * from `supplier`
         <where>
             <if test="code != null and code != ''">
@@ -25,13 +25,13 @@
         </where>
     </select>
 
-    <select id="selectById" resultType="com.example.demo.entity.Supplier">
+    <select id="selectById" resultType="com.lunabaka.entity.Supplier">
         SELECT *
         FROM `supplier`
         WHERE id = #{id}
     </select>
 
-    <update id="update" parameterType="com.example.demo.entity.Supplier">
+    <update id="update" parameterType="com.lunabaka.entity.Supplier">
         UPDATE `customer`
         <set>
             <if test="code != null">code = #{code},</if>

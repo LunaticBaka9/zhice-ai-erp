@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.InventoryAlertMapper">
+<mapper namespace="com.lunabaka.mapper.InventoryAlertMapper">
 
     <!-- 结果映射 -->
-    <resultMap id="BaseResultMap" type="com.example.demo.entity.InventoryAlert">
+    <resultMap id="BaseResultMap" type="com.lunabaka.entity.InventoryAlert">
         <id column="id" property="id"/>
         <result column="goods_id" property="goodsId"/>
         <result column="goods_name" property="goodsName"/>
@@ -78,7 +78,7 @@
     </select>
 
     <!-- 插入预警 -->
-    <insert id="insert" parameterType="com.example.demo.entity.InventoryAlert" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.lunabaka.entity.InventoryAlert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO inventory_alert (
             goods_id, goods_name, sku_code, brand, spec, unit,
             stock_quantity, stock_low, stock_high, alert_type, alert_level,
@@ -113,7 +113,7 @@
     </insert>
 
     <!-- 更新预警 -->
-    <update id="update" parameterType="com.example.demo.entity.InventoryAlert">
+    <update id="update" parameterType="com.lunabaka.entity.InventoryAlert">
         UPDATE inventory_alert
         <set>
             <if test="goodsName != null">goods_name = #{goodsName},</if>

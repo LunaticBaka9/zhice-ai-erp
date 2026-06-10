@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.SaleItemMapper">
+<mapper namespace="com.lunabaka.mapper.SaleItemMapper">
 
-    <resultMap id="SaleItemResultMap" type="com.example.demo.entity.SaleItem">
+    <resultMap id="SaleItemResultMap" type="com.lunabaka.entity.SaleItem">
         <id     property="id"                  column="id"/>
         <result property="orderId"             column="order_id"/>
         <result property="productId"           column="product_id"/>
@@ -27,7 +27,7 @@
         WHERE i.order_id = #{orderId}
     </select>
 
-    <insert id="insert" parameterType="com.example.demo.entity.SaleItem" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.lunabaka.entity.SaleItem" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sal_order_item (
             order_id, product_id, product_name_snapshot,
             price, quantity, subtotal, created_at

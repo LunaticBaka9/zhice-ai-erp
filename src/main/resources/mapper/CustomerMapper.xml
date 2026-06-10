@@ -2,8 +2,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.CustomerMapper">
-    <select id="selectAll" resultType="com.example.demo.entity.Customer">
+<mapper namespace="com.lunabaka.mapper.CustomerMapper">
+    <select id="selectAll" resultType="com.lunabaka.entity.Customer">
         SELECT id, code, name, contact_person as contactPerson, phone, email, address,
                price_level as priceLevel, credit_limit as creditLimit, status,
                create_time as createTime, update_time as updateTime
@@ -27,7 +27,7 @@
         </where>
     </select>
 
-    <select id="selectById" resultType="com.example.demo.entity.Customer">
+    <select id="selectById" resultType="com.lunabaka.entity.Customer">
         SELECT id, code, name, contact_person as contactPerson, phone, email, address,
                price_level as priceLevel, credit_limit as creditLimit, status,
                create_time as createTime, update_time as updateTime
@@ -35,14 +35,14 @@
         WHERE id = #{id}
     </select>
 
-    <insert id="insert" parameterType="com.example.demo.entity.Customer" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.lunabaka.entity.Customer" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `customer` (code, name, contact_person, phone, email, address,
                                 price_level, credit_limit, status, create_time, update_time)
         VALUES (#{code}, #{name}, #{contactPerson}, #{phone}, #{email}, #{address},
                 #{priceLevel}, #{creditLimit}, #{status}, NOW(), NOW())
     </insert>
 
-    <update id="update" parameterType="com.example.demo.entity.Customer">
+    <update id="update" parameterType="com.lunabaka.entity.Customer">
         UPDATE `customer`
         <set>
             <if test="code != null">code = #{code},</if>

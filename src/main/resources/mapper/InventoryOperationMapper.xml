@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.InventoryOperationMapper">
+<mapper namespace="com.lunabaka.mapper.InventoryOperationMapper">
 
-    <resultMap id="inventoryOperationMap" type="com.example.demo.entity.InventoryOperation">
+    <resultMap id="inventoryOperationMap" type="com.lunabaka.entity.InventoryOperation">
         <id property="id" column="id"/>
         <result property="operationNo" column="operation_no"/>
         <result property="operationType" column="operation_type"/>
@@ -29,7 +29,7 @@
         <result property="updateBy" column="update_by"/>
     </resultMap>
 
-    <insert id="insert" parameterType="com.example.demo.entity.InventoryOperation" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.lunabaka.entity.InventoryOperation" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `inventory_operation` (
             operation_no,operation_type,from_warehouse_id,from_warehouse_name,to_warehouse_id,to_warehouse_name,
             goods_id,goods_name,sku_code,quantity,unit,operator,status,remark,
@@ -55,7 +55,7 @@
         WHERE operation_no = #{operationNo} AND del_flag != 1
     </select>
 
-    <select id="selectList" parameterType="com.example.demo.entity.InventoryOperation" resultMap="inventoryOperationMap">
+    <select id="selectList" parameterType="com.lunabaka.entity.InventoryOperation" resultMap="inventoryOperationMap">
         SELECT *
         FROM `inventory_operation`
         <where>
@@ -82,7 +82,7 @@
         ORDER BY create_time DESC
     </select>
 
-    <update id="update" parameterType="com.example.demo.entity.InventoryOperation">
+    <update id="update" parameterType="com.lunabaka.entity.InventoryOperation">
         UPDATE `inventory_operation`
         <set>
             <if test="operationNo != null">operation_no = #{operationNo},</if>
@@ -127,7 +127,7 @@
         WHERE id = #{id} AND del_flag != 1
     </update>
 
-    <select id="count" parameterType="com.example.demo.entity.InventoryOperation" resultType="int">
+    <select id="count" parameterType="com.lunabaka.entity.InventoryOperation" resultType="int">
         SELECT COUNT(*)
         FROM `inventory_operation`
         <where>

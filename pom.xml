@@ -9,10 +9,10 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.example</groupId>
-    <artifactId>demo</artifactId>
+    <groupId>com.lunabaka</groupId>
+    <artifactId>zhice-ai-erp</artifactId>
     <version>0.0.1</version>
-    <name>demo</name>
+    <name>zhice-ai-erp</name>
     <description>demo</description>
 
     <properties>

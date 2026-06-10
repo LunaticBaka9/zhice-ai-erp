@@ -2,8 +2,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.WarehouseMapper">
-    <select id="selectAllWarehouse" resultType="com.example.demo.entity.Warehouse">
+<mapper namespace="com.lunabaka.mapper.WarehouseMapper">
+    <select id="selectAllWarehouse" resultType="com.lunabaka.entity.Warehouse">
         SELECT * FROM `warehouse`
         <where>
             <if test="code != null and code != ''">and code like concat('%', #{code}, '%')</if>
@@ -12,18 +12,18 @@
         </where>
     </select>
 
-    <select id="selectById" parameterType="long" resultType="com.example.demo.entity.Warehouse">
+    <select id="selectById" parameterType="long" resultType="com.lunabaka.entity.Warehouse">
         SELECT *
         FROM `warehouse`
         WHERE id = #{id}
     </select>
 
-    <insert id="insert" parameterType="com.example.demo.entity.Warehouse">
+    <insert id="insert" parameterType="com.lunabaka.entity.Warehouse">
         insert into `warehouse`(code,name,kind,address,manager,phone,status,create_time) 
         values (#{code},#{name},#{kind},#{address},#{manager},#{phone},#{status},NOW())
     </insert>
 
-    <update id="updateById" parameterType="com.example.demo.entity.Warehouse">
+    <update id="updateById" parameterType="com.lunabaka.entity.Warehouse">
         UPDATE `warehouse`
         <set>
             <if test="code != null">code = #{code},</if>
@@ -37,7 +37,7 @@
         WHERE id = #{id} AND (del_flag IS NULL OR del_flag != 1)
     </update>
 
-    <update id="deleteById" parameterType="com.example.demo.entity.Warehouse">
+    <update id="deleteById" parameterType="com.lunabaka.entity.Warehouse">
         update `warehouse` set del_flag = 1 where id = #{id}
     </update>
 

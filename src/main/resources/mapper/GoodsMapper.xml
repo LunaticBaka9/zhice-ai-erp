@@ -2,8 +2,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.GoodsMapper">
-    <select id="selectAllGoods" resultType="com.example.demo.entity.Goods">
+<mapper namespace="com.lunabaka.mapper.GoodsMapper">
+    <select id="selectAllGoods" resultType="com.lunabaka.entity.Goods">
         SELECT
             g.*,
             COALESCE(SUM(i.qty_on_hand), 0) as stockQuantity
@@ -22,13 +22,13 @@
         GROUP BY g.id
     </select>
 
-    <select id="selectById" parameterType="long" resultType="com.example.demo.entity.Goods">
+    <select id="selectById" parameterType="long" resultType="com.lunabaka.entity.Goods">
         SELECT *
         FROM `goods`
         WHERE id = #{id} AND (del_flag IS NULL OR del_flag != 1)
     </select>
 
-    <insert id="insertGoods" parameterType="com.example.demo.entity.Goods" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertGoods" parameterType="com.lunabaka.entity.Goods" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `goods`(
             sku_code,name,category_id,brand,spec,unit,barcode,
             purchase_price,sale_price,cost_price,stock_low,stock_high,
@@ -42,7 +42,7 @@
         )
     </insert>
 
-    <update id="updateGoods" parameterType="com.example.demo.entity.Goods">
+    <update id="updateGoods" parameterType="com.lunabaka.entity.Goods">
         UPDATE `goods`
         <set>
             <if test="skuCode != null">sku_code = #{skuCode},</if>
