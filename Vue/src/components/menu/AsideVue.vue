@@ -1,9 +1,11 @@
 <template>
-    <el-aside :width="isCollapse ? '64px' : '240px'">
+    <el-aside :width="isCollapse ? '64px' : '240px'" class="aside-transition">
         <!-- Logo区域 -->
         <div class="logo-container">
             <img src="/xianglian_logo.png" alt="logo" class="logo" />
-            <span v-show="!isCollapse" class="logo-text">进销存系统</span>
+            <transition name="logo-fade">
+                <span v-show="!isCollapse" class="logo-text">进销存系统</span>
+            </transition>
         </div>
 
         <!-- 菜单区域 -->
@@ -242,6 +244,10 @@ const handleMenuClick = (path) => {
 * {
     overflow: hidden;
 }
+.aside-transition {
+    transition: width 0.3s ease-in-out;
+    overflow: hidden;
+}
 .aside-container {
     overflow-y: auto;
     overflow-x: hidden;
@@ -283,8 +289,16 @@ const handleMenuClick = (path) => {
     color: #fff;
     font-size: 16px;
     font-weight: 600;
-    transition: opacity 0.3s ease;
     letter-spacing: 1px;
+}
+
+.logo-fade-enter-active,
+.logo-fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+.logo-fade-enter-from,
+.logo-fade-leave-to {
+    opacity: 0;
 }
 
 .aside-container .el-menu-item,

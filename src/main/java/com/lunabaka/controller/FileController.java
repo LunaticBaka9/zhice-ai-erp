@@ -7,7 +7,6 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,32 +29,22 @@ public class FileController {
     private String baseUrl;
 
     private File getUploadDir(String subDir) throws IOException {
-        File uploadDir;
+        File appDir;
         try {
-            File staticDir = ResourceUtils.getFile("classpath:static");
-            if (staticDir.exists()) {
-                uploadDir = new File(staticDir, subDir);
+            java.net.URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
+            if (url != null) {
+                File jarFile = new File(url.toURI().getPath());
+                appDir = jarFile.getParentFile();
             } else {
-                throw new IOException("static目录不存在");
-            }
-        } catch (Exception e) {
-            File appDir;
-            try {
-                java.net.URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
-                if (url != null) {
-                    File jarFile = new File(url.toURI().getPath());
-                    appDir = jarFile.getParentFile();
-                } else {
-                    appDir = null;
-                }
-            } catch (Exception ex) {
                 appDir = null;
             }
-            if (appDir == null) {
-                appDir = new File(System.getProperty("user.dir"));
-            }
-            uploadDir = new File(appDir, "static/" + subDir);
+        } catch (Exception ex) {
+            appDir = null;
         }
+        if (appDir == null) {
+            appDir = new File(System.getProperty("user.dir"));
+        }
+        File uploadDir = new File(appDir, "static/" + subDir);
         if (!uploadDir.exists()) {
             uploadDir.mkdirs();
         }

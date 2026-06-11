@@ -6,15 +6,17 @@
     <select id="selectAllGoods" resultType="com.lunabaka.entity.Goods">
         SELECT
             g.*,
+            c.name as categoryName,
             COALESCE(SUM(i.qty_on_hand), 0) as stockQuantity
         FROM `goods` g
         LEFT JOIN `inventory` i ON g.id = i.goods_id
+        LEFT JOIN `category` c ON g.category_id = c.id
         <where>
             <if test="skuCode != null and skuCode != ''">and g.sku_code like concat('%', #{skuCode}, '%')</if>
             <if test="name != null and name != ''">and g.name like concat('%', #{name}, '%')</if>
             <if test="brand != null and brand != ''">and g.brand like concat('%', #{brand}, '%')</if>
             <if test="unit != null and unit != ''">and g.unit like concat('%', #{unit}, '%')</if>
-            <if test="categoryId != null and categoryId != ''">and g.category_id like concat('%', #{categoryId}, '%')</if>
+            <if test="categoryId != null and categoryId != ''">and g.category_id = #{categoryId}</if>
             <if test="barcode != null and barcode != ''">and g.barcode like concat('%', #{barcode}, '%')</if>
             <if test="spec != null and spec != ''">and g.spec like concat('%', #{spec}, '%')</if>
             and (g.del_flag IS NULL OR g.del_flag != 1)
@@ -35,7 +37,7 @@
             create_time,update_time,del_flag
         )
         VALUES (
-            #{skuCode},#{name},#{categoryId},#{brand},#{spec},#{unit},#{barcode},
+            #{skuCode},#{name},<choose><when test="categoryId != null and categoryId != 0">#{categoryId}</when><otherwise>NULL</otherwise></choose>,#{brand},#{spec},#{unit},#{barcode},
             #{purchasePrice},#{salePrice},#{costPrice},
             #{stockLow},#{stockHigh},
             NOW(),NOW(),0
@@ -48,7 +50,10 @@
             <if test="skuCode != null">sku_code = #{skuCode},</if>
             <if test="name != null">name = #{name},</if>
             <if test="img != null">img = #{img},</if>
-            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <choose>
+                <when test="categoryId != null and categoryId != 0">category_id = #{categoryId},</when>
+                <otherwise>category_id = NULL,</otherwise>
+            </choose>
             <if test="brand != null">brand = #{brand},</if>
             <if test="spec != null">spec = #{spec},</if>
             <if test="unit != null">unit = #{unit},</if>

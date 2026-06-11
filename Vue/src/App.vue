@@ -31,6 +31,7 @@ const isAuthPage = computed(() => {
 .el-aside {
     overflow: hidden;
     padding: 0;
+    transition: width 0.3s ease-in-out;
 }
 .el-header {
     padding: 0;

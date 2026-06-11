@@ -38,19 +38,20 @@
                 style="margin-top: 10px"
             >
                 <el-form-item label="分类">
-                    <el-select
+                    <el-cascader
                         v-model="searchForm.categoryId"
-                        placeholder="请选择分类"
+                        :options="categoryTree"
+                        :props="{
+                            value: 'id',
+                            label: 'name',
+                            children: 'children',
+                            checkStrictly: true,
+                        }"
+                        placeholder="商品分类"
                         clearable
+                        style="width: 200px; margin-left: 10px"
                         @change="handleSearch"
-                        style="width: 120px"
-                    >
-                        <el-option label="全部" value="" />
-                        <el-option label="水果" value="2" />
-                        <el-option label="蔬菜" value="3" />
-                        <el-option label="饮料" value="4" />
-                        <el-option label="零食" value="5" />
-                    </el-select>
+                    />
                 </el-form-item>
                 <el-form-item label="条码">
                     <el-input
@@ -191,8 +192,9 @@
                 <el-table-column prop="skuCode" label="SKU编码" width="150" />
                 <el-table-column prop="name" label="商品名称" width="180" />
                 <el-table-column prop="brand" label="品牌" width="120" />
-                <el-table-column prop="spec" label="规格型号" width="150" />
-                <el-table-column prop="unit" label="单位" width="80" />
+                <el-table-column prop="categoryName" label="商品种类" width="100" />
+                <el-table-column prop="spec" label="规格型号" width="100" />
+                <el-table-column prop="unit" label="单位" width="60" />
                 <el-table-column prop="barcode" label="条码" width="150" />
                 <el-table-column
                     prop="stockQuantity"
@@ -246,7 +248,7 @@
                         {{ formatDateTime(row.createTime) }}
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="280" fixed="right">
+                <el-table-column label="操作" width="240" fixed="right">
                     <template #default="{ row }">
                         <el-button
                             link
@@ -352,15 +354,20 @@
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="商品种类" prop="categoryId">
-                            <el-select
+                        <el-form-item label="商品分类" prop="categoryId">
+                            <el-cascader
                                 v-model="dialog.form.categoryId"
-                                placeholder="请选择角色"
+                                :options="categoryTree"
+                                :props="{
+                                    value: 'id',
+                                    label: 'name',
+                                    children: 'children',
+                                    checkStrictly: true,
+                                }"
+                                placeholder="请选择分类"
                                 style="width: 100%"
-                                :disabled="dialog.isView"
-                            >
-                                <el-option label="水果" value="2" />
-                            </el-select>
+                                clearable
+                            />
                         </el-form-item>
 
                         <el-form-item label="品牌" prop="brand">
@@ -493,6 +500,9 @@
                 <el-descriptions-item label="规格型号">{{
                     viewDialog.data.spec
                 }}</el-descriptions-item>
+                <el-descriptions-item label="商品分类">
+                    {{ getCategoryName(viewDialog.data.categoryId) }}
+                </el-descriptions-item>
                 <el-descriptions-item label="单位">{{
                     viewDialog.data.unit
                 }}</el-descriptions-item>
@@ -640,6 +650,30 @@ const searchForm = reactive({
 // 商品列表数据
 const goodsList = ref([]);
 const loading = ref(false);
+// 商品分类树
+const categoryTree = ref([]);
+
+// 获取分类列表
+const getCategoryList = async () => {
+    try {
+        const res = await request.get("/category/tree");
+        if (res.code === "200") {
+            categoryTree.value = res.data || [];
+        }
+    } catch (error) {
+        console.error("获取分类列表失败:", error);
+    }
+};
+// 获取分类名称
+const getCategoryName = (categoryId) => {
+    if (!categoryId) return "-";
+    for (const parent of categoryTree.value) {
+        if (parent.id === categoryId) return parent.name;
+        const child = parent.children?.find((c) => c.id === categoryId);
+        if (child) return `${parent.name} / ${child.name}`;
+    }
+    return "-";
+};
 
 // 分页参数
 const pagination = reactive({
@@ -888,6 +922,11 @@ const getGoodsList = async () => {
             pageSize: pagination.pageSize,
             ...otherParams,
         };
+        if (Array.isArray(params.categoryId) && params.categoryId.length > 0) {
+            params.categoryId = params.categoryId[params.categoryId.length - 1];
+        } else if (Array.isArray(params.categoryId)) {
+            delete params.categoryId;
+        }
 
         const res = await request.get("/goods/list", { params });
         if (res.code === "200") {
@@ -1157,6 +1196,7 @@ const handleDialogClose = () => {
 
 onMounted(() => {
     getGoodsList();
+    getCategoryList();
 });
 </script>
 

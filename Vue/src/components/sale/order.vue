@@ -3,14 +3,21 @@
         <el-card shadow="never" class="search-card">
             <el-form :inline="true" :model="searchForm">
                 <el-form-item label="订单号">
-                    <el-input v-model="searchForm.orderNo" clearable style="width: 150px" />
+                    <el-input v-model="searchForm.orderNo"
+                              clearable
+                              @clear="loadList"
+                              @keyup.enter="loadList"
+                              style="width: 150px"
+                    />
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-select v-model="searchForm.status" clearable placeholder="全部" style="width: 150px">
-                        <el-option label="草稿" :value="0" />
-                        <el-option label="已确认待出库" :value="1" />
-                        <el-option label="已出库完成" :value="2" />
-                        <el-option label="已作废" :value="3" />
+                    <el-select v-model="searchForm.status"
+                               clearable
+                               @change="handleSearch" placeholder="全部" style="width: 150px">
+                        <el-option label="草稿" :value="0"/>
+                        <el-option label="已确认待出库" :value="1"/>
+                        <el-option label="已出库完成" :value="2"/>
+                        <el-option label="已作废" :value="3"/>
                     </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -26,7 +33,9 @@
                 <el-card shadow="hover" class="stat-card">
                     <div class="stat-content">
                         <div class="stat-icon" style="background-color: #409eff">
-                            <el-icon><Document /></el-icon>
+                            <el-icon>
+                                <Document/>
+                            </el-icon>
                         </div>
                         <div class="stat-info">
                             <div class="stat-label">订单总数</div>
@@ -39,7 +48,9 @@
                 <el-card shadow="hover" class="stat-card">
                     <div class="stat-content">
                         <div class="stat-icon" style="background-color: #67c23a">
-                            <el-icon><Clock /></el-icon>
+                            <el-icon>
+                                <Clock/>
+                            </el-icon>
                         </div>
                         <div class="stat-info">
                             <div class="stat-label">待出库订单</div>
@@ -52,7 +63,9 @@
                 <el-card shadow="hover" class="stat-card">
                     <div class="stat-content">
                         <div class="stat-icon" style="background-color: #e6a23c">
-                            <el-icon><Check /></el-icon>
+                            <el-icon>
+                                <Check/>
+                            </el-icon>
                         </div>
                         <div class="stat-info">
                             <div class="stat-label">已完成订单</div>
@@ -65,7 +78,9 @@
                 <el-card shadow="hover" class="stat-card">
                     <div class="stat-content">
                         <div class="stat-icon" style="background-color: #f56c6c">
-                            <el-icon><Close /></el-icon>
+                            <el-icon>
+                                <Close/>
+                            </el-icon>
                         </div>
                         <div class="stat-info">
                             <div class="stat-label">已作废订单</div>
@@ -78,31 +93,35 @@
 
         <div class="toolbar">
             <el-button type="primary" @click="openAdd">
-                <el-icon><Plus /></el-icon>
+                <el-icon>
+                    <Plus/>
+                </el-icon>
                 新建销售订单
             </el-button>
         </div>
 
         <el-card shadow="never">
             <el-table v-loading="loading" :data="tableData" border stripe>
-                <el-table-column prop="orderNo" label="订单号" width="160" />
-                <el-table-column prop="customerName" label="客户" min-width="120" />
-                <el-table-column prop="warehouseId" label="仓库ID" width="88" />
-                <el-table-column prop="finalAmount" label="应收" width="100" />
+                <el-table-column prop="orderNo" label="订单号" width="160"/>
+                <el-table-column prop="customerName" label="客户" min-width="120"/>
+                <el-table-column prop="warehouseId" label="仓库ID" width="88"/>
+                <el-table-column prop="finalAmount" label="应收" width="100"/>
                 <el-table-column label="状态" width="120">
                     <template #default="{ row }">
                         <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="orderDate" label="下单日期" width="120" />
+                <el-table-column prop="orderDate" label="下单日期" width="120"/>
                 <el-table-column label="操作" width="260" fixed="right">
                     <template #default="{ row }">
                         <el-button link type="primary" size="small" @click="openDetail(row)">详情</el-button>
                         <el-button v-if="row.status === 0" link type="primary" size="small" @click="openEdit(row)"
-                            >编辑</el-button
+                        >编辑
+                        </el-button
                         >
                         <el-button v-if="row.status === 0" link type="success" size="small" @click="handleConfirm(row)"
-                            >确认</el-button
+                        >确认
+                        </el-button
                         >
                         <el-button
                             v-if="row.status !== 2 && row.status !== 3"
@@ -110,7 +129,8 @@
                             type="danger"
                             size="small"
                             @click="handleCancel(row)"
-                            >作废</el-button
+                        >作废
+                        </el-button
                         >
                     </template>
                 </el-table-column>
@@ -139,7 +159,7 @@
                                 placeholder="选择客户"
                                 style="width: 100%"
                             >
-                                <el-option v-for="c in customers" :key="c.id" :label="c.name" :value="c.id" />
+                                <el-option v-for="c in customers" :key="c.id" :label="c.name" :value="c.id"/>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -151,7 +171,7 @@
                                 placeholder="选择仓库"
                                 style="width: 100%"
                             >
-                                <el-option v-for="w in warehouses" :key="w.id" :label="w.name" :value="Number(w.id)" />
+                                <el-option v-for="w in warehouses" :key="w.id" :label="w.name" :value="Number(w.id)"/>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -167,10 +187,10 @@
                     </el-col>
                 </el-row>
                 <el-form-item label="订单号">
-                    <el-input v-model="dialog.form.orderNo" placeholder="留空自动生成" clearable />
+                    <el-input v-model="dialog.form.orderNo" placeholder="留空自动生成" clearable/>
                 </el-form-item>
                 <el-form-item label="备注">
-                    <el-input v-model="dialog.form.remark" type="textarea" :rows="2" />
+                    <el-input v-model="dialog.form.remark" type="textarea" :rows="2"/>
                 </el-form-item>
             </el-form>
             <div class="sub-head">
@@ -192,18 +212,19 @@
                 </el-table-column>
                 <el-table-column label="单价" width="120">
                     <template #default="{ row }">
-                        <el-input-number v-model="row.price" :min="0" :precision="2" style="width: 100%" />
+                        <el-input-number v-model="row.price" :min="0" :precision="2" style="width: 100%"/>
                     </template>
                 </el-table-column>
                 <el-table-column label="数量" width="110">
                     <template #default="{ row }">
-                        <el-input-number v-model="row.quantity" :min="1" :precision="0" style="width: 100%" />
+                        <el-input-number v-model="row.quantity" :min="1" :precision="0" style="width: 100%"/>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作" width="70">
                     <template #default="{ $index }">
                         <el-button link type="danger" size="small" @click="dialog.items.splice($index, 1)"
-                            >删</el-button
+                        >删
+                        </el-button
                         >
                     </template>
                 </el-table-column>
@@ -224,11 +245,11 @@
                     <el-descriptions-item label="状态">{{ statusText(detail.data.status) }}</el-descriptions-item>
                 </el-descriptions>
                 <el-table :data="detail.data.items || []" border size="small" class="mt16">
-                    <el-table-column prop="skuCode" label="SKU" width="110" />
-                    <el-table-column prop="productNameSnapshot" label="商品" />
-                    <el-table-column prop="price" label="单价" width="90" />
-                    <el-table-column prop="quantity" label="数量" width="80" />
-                    <el-table-column prop="subtotal" label="小计" width="90" />
+                    <el-table-column prop="skuCode" label="SKU" width="110"/>
+                    <el-table-column prop="productNameSnapshot" label="商品"/>
+                    <el-table-column prop="price" label="单价" width="90"/>
+                    <el-table-column prop="quantity" label="数量" width="80"/>
+                    <el-table-column prop="subtotal" label="小计" width="90"/>
                 </el-table>
             </template>
             <template #footer>
@@ -239,9 +260,9 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { Plus, Document, Clock, Check, Close } from "@element-plus/icons-vue";
+import {reactive, ref, onMounted} from "vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {Plus, Document, Clock, Check, Close} from "@element-plus/icons-vue";
 import request from "../../utils/request";
 
 const loading = ref(false);
@@ -250,8 +271,8 @@ const customers = ref([]);
 const warehouses = ref([]);
 const goodsList = ref([]);
 
-const searchForm = reactive({ orderNo: "", status: null });
-const pagination = reactive({ pageNum: 1, pageSize: 10, total: 0 });
+const searchForm = reactive({orderNo: "", status: null});
+const pagination = reactive({pageNum: 1, pageSize: 10, total: 0});
 
 const dialog = reactive({
     visible: false,
@@ -268,7 +289,7 @@ const dialog = reactive({
     items: [],
 });
 
-const detail = reactive({ visible: false, data: null });
+const detail = reactive({visible: false, data: null});
 
 const statistics = reactive({
     totalCount: 0,
@@ -290,12 +311,12 @@ async function loadStatistics() {
 }
 
 function statusText(s) {
-    const m = { 0: "草稿", 1: "已确认待出库", 2: "已出库完成", 3: "已作废" };
+    const m = {0: "草稿", 1: "已确认待出库", 2: "已出库完成", 3: "已作废"};
     return m[s] != null ? m[s] : s;
 }
 
 function statusType(s) {
-    const m = { 0: "info", 1: "warning", 2: "success", 3: "danger" };
+    const m = {0: "info", 1: "warning", 2: "success", 3: "danger"};
     return m[s] || "info";
 }
 
@@ -372,7 +393,7 @@ function resetSearch() {
 async function openAdd() {
     await loadBase();
     dialog.title = "新建销售订单";
-    dialog.form = { id: null, orderNo: "", customerId: null, warehouseId: null, orderDate: "", remark: "" };
+    dialog.form = {id: null, orderNo: "", customerId: null, warehouseId: null, orderDate: "", remark: ""};
     const d = new Date();
     dialog.form.orderDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     dialog.items = [];
@@ -420,7 +441,7 @@ async function openDetail(row) {
 }
 
 function addRow() {
-    dialog.items.push({ productId: null, price: 0, quantity: 1 });
+    dialog.items.push({productId: null, price: 0, quantity: 1});
 }
 
 async function submitSave() {
@@ -468,7 +489,7 @@ async function submitSave() {
 }
 
 function handleConfirm(row) {
-    ElMessageBox.confirm("确认后订单进入「待出库」，不可再改明细。", "确认订单", { type: "warning" })
+    ElMessageBox.confirm("确认后订单进入「待出库」，不可再改明细。", "确认订单", {type: "warning"})
         .then(async () => {
             const res = await request.post(`/sale/confirm/${row.id}`);
             if (res.code === "200") {
@@ -478,11 +499,12 @@ function handleConfirm(row) {
                 ElMessage.error(res.msg || "失败");
             }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
 }
 
 function handleCancel(row) {
-    ElMessageBox.confirm("确定作废该订单？", "作废", { type: "warning" })
+    ElMessageBox.confirm("确定作废该订单？", "作废", {type: "warning"})
         .then(async () => {
             const res = await request.post(`/sale/cancel/${row.id}`);
             if (res.code === "200") {
@@ -492,7 +514,8 @@ function handleCancel(row) {
                 ElMessage.error(res.msg || "失败");
             }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
 }
 
 onMounted(() => {
@@ -506,17 +529,21 @@ onMounted(() => {
 .sale-order {
     padding: 12px;
 }
+
 .stat-row {
     margin-bottom: 12px;
 }
+
 .stat-card {
     cursor: default;
 }
+
 .stat-content {
     display: flex;
     align-items: center;
     gap: 12px;
 }
+
 .stat-icon {
     width: 48px;
     height: 48px;
@@ -527,36 +554,44 @@ onMounted(() => {
     color: #fff;
     font-size: 22px;
 }
+
 .stat-info {
     flex: 1;
 }
+
 .stat-label {
     font-size: 13px;
     color: #909399;
     margin-bottom: 4px;
 }
+
 .stat-value {
     font-size: 22px;
     font-weight: 600;
     color: #303133;
 }
+
 .search-card {
     margin-bottom: 12px;
 }
+
 .toolbar {
     margin-bottom: 12px;
 }
+
 .pagination-container {
     margin-top: 16px;
     display: flex;
     justify-content: flex-end;
 }
+
 .sub-head {
     display: flex;
     justify-content: space-between;
     margin: 8px 0;
     font-weight: 500;
 }
+
 .mt16 {
     margin-top: 16px;
 }

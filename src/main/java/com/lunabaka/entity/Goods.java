@@ -14,6 +14,7 @@ public class Goods {
     @Alias("SKU编码")
     private String skuCode;
 
+    @PropIgnore
     private String img;
 
     @Alias("商品名称")
@@ -21,6 +22,9 @@ public class Goods {
 
     @PropIgnore
     private Long categoryId;
+
+    @Alias("商品种类")
+    private String categoryName;
 
     @Alias("品牌")
     private String brand;

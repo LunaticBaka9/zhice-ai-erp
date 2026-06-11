@@ -29,7 +29,7 @@
         </div>
 
         <el-card shadow="never">
-            <el-table v-loading="loading" :data="tableData" border stripe>
+            <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
                 <el-table-column prop="billNo" label="入库单号" width="170" />
                 <el-table-column prop="purchaseBillNo" label="采购单号" width="160" />
                 <el-table-column prop="warehouseId" label="仓库ID" width="88" />

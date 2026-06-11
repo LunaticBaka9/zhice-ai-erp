@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.lunabaka.entity.Category;
 import com.lunabaka.entity.Goods;
 import com.lunabaka.exception.CustomerException;
+import com.lunabaka.mapper.CategoryMapper;
 import com.lunabaka.mapper.GoodsMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -16,6 +18,9 @@ import jakarta.annotation.Resource;
 public class GoodsService {
     @Resource
     private GoodsMapper goodsMapper;
+
+    @Resource
+    private CategoryMapper categoryMapper;
 
     public List<Goods> selectAllGoods() {
         return goodsMapper.selectAllGoods(null);
@@ -57,6 +62,12 @@ public class GoodsService {
         Goods dbGoods = goodsMapper.selectById(goods.getId());
         if (dbGoods == null) {
             throw new CustomerException("找不到商品，无法更新");
+        }
+        if (goods.getCategoryId() != null && goods.getCategoryId() != 0) {
+            Category category = categoryMapper.selectById(goods.getCategoryId().intValue());
+            if (category == null) {
+                throw new CustomerException("商品分类不存在，无法更新");
+            }
         }
         goodsMapper.updateGoods(goods);
     }

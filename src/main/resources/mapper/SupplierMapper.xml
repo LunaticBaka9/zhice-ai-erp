@@ -32,7 +32,7 @@
     </select>
 
     <update id="update" parameterType="com.lunabaka.entity.Supplier">
-        UPDATE `customer`
+        UPDATE `supplier`
         <set>
             <if test="code != null">code = #{code},</if>
             <if test="name != null">name = #{name},</if>

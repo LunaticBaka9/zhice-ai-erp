@@ -27,7 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/error",
                         "/static/**",
                         "/favicon.ico",
-                        "/index.html");
+                        "/index.html"
+                );
     }
 
     @Override
@@ -42,29 +43,26 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        File appDir;
         try {
-            File appDir;
-            try {
-                java.net.URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
-                if (url != null) {
-                    File jarFile = new File(url.toURI().getPath());
-                    appDir = jarFile.getParentFile();
-                } else {
-                    appDir = null;
-                }
-            } catch (Exception ex) {
+            java.net.URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
+            if (url != null) {
+                File jarFile = new File(url.toURI().getPath());
+                appDir = jarFile.getParentFile();
+            } else {
                 appDir = null;
             }
-            if (appDir == null) {
-                appDir = new File(System.getProperty("user.dir"));
-            }
-            File uploadDir = new File(appDir, "static");
-            if (uploadDir.exists()) {
-                registry.addResourceHandler("/static/**")
-                        .addResourceLocations("file:" + uploadDir.getAbsolutePath() + "/");
-            }
-        } catch (Exception e) {
-            System.out.println("静态资源路径配置: " + e.getMessage());
+        } catch (Exception ex) {
+            appDir = null;
         }
+        if (appDir == null) {
+            appDir = new File(System.getProperty("user.dir"));
+        }
+        File uploadDir = new File(appDir, "static");
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("file:" + uploadDir.getAbsolutePath() + "/");
     }
 }

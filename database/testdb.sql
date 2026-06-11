@@ -1,17 +1,17 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : testdb
+ Source Server         : mysql-8.0.12
  Source Server Type    : MySQL
- Source Server Version : 50726 (5.7.26)
+ Source Server Version : 80012 (8.0.12)
  Source Host           : localhost:3306
  Source Schema         : testdb
 
  Target Server Type    : MySQL
- Target Server Version : 50726 (5.7.26)
+ Target Server Version : 80012 (8.0.12)
  File Encoding         : 65001
 
- Date: 08/05/2026 16:14:13
+ Date: 11/06/2026 18:07:09
 */
 
 SET NAMES utf8mb4;
@@ -29,11 +29,11 @@ CREATE TABLE `category`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_parent_id`(`parent_id`) USING BTREE,
-  INDEX `idx_category_parent_id`(`parent_id`) USING BTREE,
-  INDEX `idx_category_name`(`name`) USING BTREE,
-  INDEX `idx_category_sort_order`(`sort_order`) USING BTREE,
-  INDEX `idx_category_parent_sort`(`parent_id`, `sort_order`) USING BTREE
+  INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE,
+  INDEX `idx_category_parent_id`(`parent_id` ASC) USING BTREE,
+  INDEX `idx_category_name`(`name` ASC) USING BTREE,
+  INDEX `idx_category_sort_order`(`sort_order` ASC) USING BTREE,
+  INDEX `idx_category_parent_sort`(`parent_id` ASC, `sort_order` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -67,13 +67,13 @@ CREATE TABLE `customer`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_code`(`code`) USING BTREE,
-  INDEX `idx_customer_name`(`name`) USING BTREE,
-  INDEX `idx_customer_contact_person`(`contact_person`) USING BTREE,
-  INDEX `idx_customer_phone`(`phone`) USING BTREE,
-  INDEX `idx_customer_status`(`status`) USING BTREE,
-  INDEX `idx_customer_status_id`(`status`, `id`) USING BTREE,
-  INDEX `idx_customer_name_status`(`name`, `status`) USING BTREE
+  UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE,
+  INDEX `idx_customer_name`(`name` ASC) USING BTREE,
+  INDEX `idx_customer_contact_person`(`contact_person` ASC) USING BTREE,
+  INDEX `idx_customer_phone`(`phone` ASC) USING BTREE,
+  INDEX `idx_customer_status`(`status` ASC) USING BTREE,
+  INDEX `idx_customer_status_id`(`status` ASC, `id` ASC) USING BTREE,
+  INDEX `idx_customer_name_status`(`name` ASC, `status` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '客户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -108,22 +108,22 @@ CREATE TABLE `goods`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `del_flag` int(255) NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_sku_code`(`sku_code`) USING BTREE,
-  INDEX `idx_category_id`(`category_id`) USING BTREE,
-  INDEX `idx_barcode`(`barcode`) USING BTREE,
-  INDEX `idx_goods_name`(`name`) USING BTREE,
-  INDEX `idx_goods_brand`(`brand`) USING BTREE,
-  INDEX `idx_goods_category_id`(`category_id`) USING BTREE,
-  INDEX `idx_goods_barcode`(`barcode`) USING BTREE,
-  INDEX `idx_goods_category_status_time`(`category_id`, `del_flag`, `create_time`) USING BTREE,
-  INDEX `idx_goods_spec`(`spec`) USING BTREE,
+  UNIQUE INDEX `uk_sku_code`(`sku_code` ASC) USING BTREE,
+  INDEX `idx_category_id`(`category_id` ASC) USING BTREE,
+  INDEX `idx_barcode`(`barcode` ASC) USING BTREE,
+  INDEX `idx_goods_name`(`name` ASC) USING BTREE,
+  INDEX `idx_goods_brand`(`brand` ASC) USING BTREE,
+  INDEX `idx_goods_category_id`(`category_id` ASC) USING BTREE,
+  INDEX `idx_goods_barcode`(`barcode` ASC) USING BTREE,
+  INDEX `idx_goods_category_status_time`(`category_id` ASC, `del_flag` ASC, `create_time` ASC) USING BTREE,
+  INDEX `idx_goods_spec`(`spec` ASC) USING BTREE,
   CONSTRAINT `fk_product_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '商品表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of goods
 -- ----------------------------
-INSERT INTO `goods` VALUES (1, 'FR001', '芒果', NULL, 6, '海南农场', '50个/箱', '箱', '690123456789', 30.00, 50.00, 35.00, 10.00, 200.00, '2026-04-13 15:55:11', '2026-04-15 21:34:54', 0);
+INSERT INTO `goods` VALUES (1, 'FR001', '芒果', NULL, 6, '海南农场', '50个/箱', '箱', '690123456789', 30.00, 50.00, 35.00, 10.00, 200.00, '2026-04-13 15:55:11', '2026-06-11 17:17:28', 0);
 INSERT INTO `goods` VALUES (2, 'FR002', '榴莲', NULL, 6, '泰国进口', '500g~/个', '个', '690123456790', 80.00, 150.00, 85.00, 5.00, 50.00, '2026-04-13 17:47:14', '2026-04-15 17:38:36', 0);
 INSERT INTO `goods` VALUES (3, 'FR003', '阿克苏苹果', NULL, 7, '新疆基地', '50个/箱', '箱', '690123456791', 25.00, 45.00, 28.00, 20.00, 300.00, '2026-04-10 09:30:00', '2026-04-15 17:37:36', 0);
 INSERT INTO `goods` VALUES (4, 'FR004', '智利车厘子', NULL, 6, '智利进口', '50个/箱', '箱', '690123456792', 120.00, 200.00, 130.00, 10.00, 100.00, '2026-04-11 10:00:00', '2026-04-15 17:37:38', 0);
@@ -159,11 +159,11 @@ CREATE TABLE `inventory`  (
   `create_by` int(11) NULL DEFAULT NULL COMMENT '创建人 ID',
   `update_by` int(11) NULL DEFAULT NULL COMMENT '更新人 ID',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_inventory_goods_warehouse`(`goods_id`, `warehouse_id`) USING BTREE,
-  UNIQUE INDEX `uk_inventory`(`goods_id`, `warehouse_id`, `batch_no`) USING BTREE,
-  INDEX `idx_inventory_goods_id`(`goods_id`) USING BTREE,
-  INDEX `idx_inventory_warehouse_id`(`warehouse_id`) USING BTREE,
-  INDEX `idx_inventory_qty_on_hand`(`qty_on_hand`) USING BTREE
+  UNIQUE INDEX `uk_inventory_goods_warehouse`(`goods_id` ASC, `warehouse_id` ASC) USING BTREE,
+  UNIQUE INDEX `uk_inventory`(`goods_id` ASC, `warehouse_id` ASC, `batch_no` ASC) USING BTREE,
+  INDEX `idx_inventory_goods_id`(`goods_id` ASC) USING BTREE,
+  INDEX `idx_inventory_warehouse_id`(`warehouse_id` ASC) USING BTREE,
+  INDEX `idx_inventory_qty_on_hand`(`qty_on_hand` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存快照表（实时库存）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -204,12 +204,12 @@ CREATE TABLE `inventory_alert`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_goods_id`(`goods_id`) USING BTREE,
-  INDEX `idx_sku_code`(`sku_code`) USING BTREE,
-  INDEX `idx_alert_type`(`alert_type`) USING BTREE,
-  INDEX `idx_alert_level`(`alert_level`) USING BTREE,
-  INDEX `idx_acknowledged`(`acknowledged`) USING BTREE,
-  INDEX `idx_create_time`(`create_time`) USING BTREE
+  INDEX `idx_goods_id`(`goods_id` ASC) USING BTREE,
+  INDEX `idx_sku_code`(`sku_code` ASC) USING BTREE,
+  INDEX `idx_alert_type`(`alert_type` ASC) USING BTREE,
+  INDEX `idx_alert_level`(`alert_level` ASC) USING BTREE,
+  INDEX `idx_acknowledged`(`acknowledged` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存预警表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -247,20 +247,20 @@ CREATE TABLE `inventory_operation`  (
   `update_by` int(11) NULL DEFAULT NULL COMMENT '更新人 ID',
   `del_flag` tinyint(1) NOT NULL DEFAULT 0 COMMENT '删除标志：0-未删除，1-已删除',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_operation_no`(`operation_no`) USING BTREE,
-  INDEX `idx_operation_type`(`operation_type`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE,
-  INDEX `idx_goods_id`(`goods_id`) USING BTREE,
-  INDEX `idx_from_warehouse`(`from_warehouse_id`) USING BTREE,
-  INDEX `idx_to_warehouse`(`to_warehouse_id`) USING BTREE,
-  INDEX `idx_create_time`(`create_time`) USING BTREE,
-  INDEX `idx_inv_op_operation_no`(`operation_no`) USING BTREE,
-  INDEX `idx_inv_op_goods_id`(`goods_id`) USING BTREE,
-  INDEX `idx_inv_op_operation_type`(`operation_type`) USING BTREE,
-  INDEX `idx_inv_op_status`(`status`) USING BTREE,
-  INDEX `idx_inv_op_create_time`(`create_time`) USING BTREE,
-  INDEX `idx_inv_op_goods_warehouse_time`(`goods_id`, `from_warehouse_id`, `create_time`) USING BTREE,
-  INDEX `idx_inv_op_source_no`(`source_no`) USING BTREE
+  UNIQUE INDEX `uk_operation_no`(`operation_no` ASC) USING BTREE,
+  INDEX `idx_operation_type`(`operation_type` ASC) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE,
+  INDEX `idx_goods_id`(`goods_id` ASC) USING BTREE,
+  INDEX `idx_from_warehouse`(`from_warehouse_id` ASC) USING BTREE,
+  INDEX `idx_to_warehouse`(`to_warehouse_id` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE,
+  INDEX `idx_inv_op_operation_no`(`operation_no` ASC) USING BTREE,
+  INDEX `idx_inv_op_goods_id`(`goods_id` ASC) USING BTREE,
+  INDEX `idx_inv_op_operation_type`(`operation_type` ASC) USING BTREE,
+  INDEX `idx_inv_op_status`(`status` ASC) USING BTREE,
+  INDEX `idx_inv_op_create_time`(`create_time` ASC) USING BTREE,
+  INDEX `idx_inv_op_goods_warehouse_time`(`goods_id` ASC, `from_warehouse_id` ASC, `create_time` ASC) USING BTREE,
+  INDEX `idx_inv_op_source_no`(`source_no` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '库存作业表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -313,8 +313,8 @@ CREATE TABLE `notice`  (
   `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `attachments` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
   PRIMARY KEY (`nid`) USING BTREE,
-  INDEX `idx_publishDate_status`(`publishDate`, `status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+  INDEX `idx_publishDate_status`(`publishDate` ASC, `status` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of notice
@@ -337,10 +337,11 @@ INSERT INTO `notice` VALUES (20, 2, '尝试用别的账号进行一个发布', '
 INSERT INTO `notice` VALUES (21, 2, '!!!!!!', 'test', '系统更新', '', '<p>😍😍😍😍😍😍😍😍😍😘😘😘😘😘😘😘😋😋😋😋😋😋😋</p>', '2026-04-02 16:54:29', 6, '已发布', NULL);
 INSERT INTO `notice` VALUES (22, 2, '测试定时发布', 'test', '系统更新', '', '<p>啊手动阀手动阀手动阀</p>', '2026-04-03 09:50:00', 8, '已发布', '');
 INSERT INTO `notice` VALUES (23, 1, '测试附件发布', '管理员', '功能上线', '', '<p>测试上传附件</p><p>👍👍👍👍👍👍👍👍👍👍😍😍😍😍😍😍😍😍😍</p>', '2026-04-03 15:03:05', 12, '已发布', '');
-INSERT INTO `notice` VALUES (24, 1, '写点啥，', '管理员', '维护通知', '', '<blockquote>12332112345677654321</blockquote><p><span style=\"color: rgb(0, 0, 0); background-color: rgb(0, 0, 0); font-size: 48px; font-family: 微软雅黑;\"><s><u><em><strong>写点东西试试，反正就是写点玩意</strong></em></u></s></span></p><p><a href=\"https://www.bilibili.com\" target=\"_blank\"><u>asdfasdf &nbsp; &nbsp; </u></a></p><hr/><p>🤣🤣🤣🤣🤣🤣🤣🤣🤣🤣😘😘😘😘😘😘👊👊👀💀👻💩😬😡😣😖🙏🙏🤝😊😀😃😁😛😙😋😛😋😋😋😋😋</p><p><br></p>', '2026-04-03 16:38:33', 15, '已发布', '');
+INSERT INTO `notice` VALUES (24, 1, '写点啥，', '管理员', '维护通知', '', '<blockquote>12332112345677654321</blockquote><p><span style=\"color: rgb(0, 0, 0); background-color: rgb(0, 0, 0); font-size: 48px; font-family: 微软雅黑;\"><s><u><em><strong>写点东西试试，反正就是写点玩意</strong></em></u></s></span></p><p><a href=\"https://www.bilibili.com\" target=\"_blank\"><u>asdfasdf &nbsp; &nbsp; </u></a></p><hr/><p>🤣🤣🤣🤣🤣🤣🤣🤣🤣🤣😘😘😘😘😘😘👊👊👀💀👻💩😬😡😣😖🙏🙏🤝😊😀😃😁😛😙😋😛😋😋😋😋😋</p><p><br></p>', '2026-04-03 16:38:33', 16, '已发布', '');
 INSERT INTO `notice` VALUES (25, 2, 'Notice Test for normal user', 'test', '其他公告', '测试一下', '<p>测试一下</p>', '2026-04-07 09:56:12', 7, '已发布', '[]');
 INSERT INTO `notice` VALUES (27, 2, '测试公告已读未读功能', 'test', '功能上线', '', '<h1>测试公告已读未读功能</h1>', '2026-04-07 11:01:43', 4, '已发布', '[]');
-INSERT INTO `notice` VALUES (28, 1, '测试系统日志', '管理员', '功能上线', '', '<p>测试更改</p>', '2026-04-07 11:46:30', 3, '已发布', '[{\"name\":\"124397002.jpg\",\"url\":\"/api/static/upload/picture/1775543068731_124397002.jpg\",\"size\":8537}]');
+INSERT INTO `notice` VALUES (28, 1, '测试系统日志', '管理员', '功能上线', '', '<p>测试更改</p>', '2026-04-07 11:46:30', 4, '已发布', '[{\"name\":\"124397002.jpg\",\"url\":\"/api/static/upload/picture/1775543068731_124397002.jpg\",\"size\":8537}]');
+INSERT INTO `notice` VALUES (29, 1, 'Test', '管理员', '系统更新', 'Test', '<p>testststststst</p>', '2026-06-11 17:36:30', 2, '已发布', '[{\"name\":\"A_small_cup_of_coffee.JPG\",\"url\":\"http://localhost:8080/static/upload/picture/1781170586313_A_small_cup_of_coffee.JPG\",\"size\":32886}]');
 
 -- ----------------------------
 -- Table structure for notice_read_record
@@ -352,9 +353,9 @@ CREATE TABLE `notice_read_record`  (
   `user_id` int(11) NOT NULL COMMENT '用户ID',
   `read_time` datetime NULL DEFAULT NULL COMMENT '阅读时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `unique_notice_user`(`notice_id`, `user_id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 61 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '公告阅读记录表' ROW_FORMAT = DYNAMIC;
+  UNIQUE INDEX `unique_notice_user`(`notice_id` ASC, `user_id` ASC) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 62 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '公告阅读记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of notice_read_record
@@ -386,6 +387,7 @@ INSERT INTO `notice_read_record` VALUES (57, 6, 1, '2026-04-07 14:28:02');
 INSERT INTO `notice_read_record` VALUES (58, 5, 1, '2026-04-07 14:28:03');
 INSERT INTO `notice_read_record` VALUES (59, 4, 1, '2026-04-07 14:28:06');
 INSERT INTO `notice_read_record` VALUES (60, 3, 1, '2026-04-07 14:28:08');
+INSERT INTO `notice_read_record` VALUES (61, 29, 1, '2026-06-11 17:36:35');
 
 -- ----------------------------
 -- Table structure for operation_log
@@ -403,9 +405,9 @@ CREATE TABLE `operation_log`  (
   `module` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '模块名称',
   `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '操作类型',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_username`(`username`) USING BTREE,
-  INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 110 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
+  INDEX `idx_username`(`username` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 112 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operation_log
@@ -519,6 +521,8 @@ INSERT INTO `operation_log` VALUES (106, '系统', '用户登录', 'controller.c
 INSERT INTO `operation_log` VALUES (107, '系统', '用户登录', 'controller.com.lunabaka.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 530, '0:0:0:0:0:0:0:1', '2026-04-16 15:03:24', '用户管理', '登录');
 INSERT INTO `operation_log` VALUES (108, '系统', '用户登录', 'controller.com.lunabaka.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 180, '0:0:0:0:0:0:0:1', '2026-04-16 15:47:54', '用户管理', '登录');
 INSERT INTO `operation_log` VALUES (109, '系统', '用户登录', 'controller.com.lunabaka.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 454, '0:0:0:0:0:0:0:1', '2026-05-08 15:11:22', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (110, '系统', '修改用户', 'com.lunabaka.controller.UserController.updateInfo()', '[{\"UID\":1,\"昵称\":\"管理员\",\"角色\":\"超级管理员\",\"部门\":\"研发组\",\"备注\":\"BioHazard 1\",\"入职时间\":\"2026-03-19 22:30:00\"}]', 15, '0:0:0:0:0:0:0:1', '2026-06-11 17:20:16', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (111, '系统', '新增公告', 'com.lunabaka.controller.NoticeController.postNotice()', '[{\"公告标题\":\"Test\",\"公告类型\":\"系统更新\",\"公告摘要\":\"Test\",\"公告内容\":\"<p>testststststst</p>\",\"发布时间\":1781170590247,\"发布作者\":\"管理员\",\"公告状态\":\"已发布\",\"附件\":\"[{\\\"name\\\":\\\"A_small_cup_of_coffee.JPG\\\",\\\"url\\\":\\\"http://localhost:8080/static/upload/picture/1781170586313_A_small_cup_of_coffee.JPG\\\",\\\"size\\\":32886}]\"}]', 117, '0:0:0:0:0:0:0:1', '2026-06-11 17:36:30', '公告管理', '新增');
 
 -- ----------------------------
 -- Table structure for purchase
@@ -532,17 +536,237 @@ CREATE TABLE `purchase`  (
   `total_amount` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '含税总金额',
   `status` tinyint(4) NULL DEFAULT NULL COMMENT '状态：0-草稿，1-待审核，2-已完成，3-已作废',
   `in_stock_time` datetime NULL DEFAULT NULL COMMENT '实际入库时间（用于成本核算的截止点）',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `confirm_time` datetime NULL DEFAULT NULL COMMENT '确认时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of purchase
 -- ----------------------------
-INSERT INTO `purchase` VALUES (1, 'PO20260414001', 1, 1, '15000.00', 2, '2026-04-14 10:00:00');
-INSERT INTO `purchase` VALUES (2, 'PO20260414002', 2, 1, '25000.00', 1, NULL);
-INSERT INTO `purchase` VALUES (3, 'PO20260414003', 3, 2, '8000.00', 0, NULL);
-INSERT INTO `purchase` VALUES (4, 'PO20260414004', 4, 1, '35000.00', 2, '2026-04-13 15:30:00');
-INSERT INTO `purchase` VALUES (5, 'PO20260414005', 5, 2, '12000.00', 2, '2026-04-12 11:00:00');
+INSERT INTO `purchase` VALUES (1, 'PO20260414001', 1, 1, '15000.00', 2, '2026-04-14 10:00:00', NULL, '2026-04-14 09:00:00', '2026-04-14 09:00:00', NULL);
+INSERT INTO `purchase` VALUES (2, 'PO20260414002', 2, 1, '25000.00', 1, NULL, NULL, '2026-04-14 09:30:00', '2026-04-14 09:30:00', NULL);
+INSERT INTO `purchase` VALUES (3, 'PO20260414003', 3, 2, '8000.00', 0, NULL, NULL, '2026-04-14 10:00:00', '2026-04-14 10:00:00', NULL);
+INSERT INTO `purchase` VALUES (4, 'PO20260414004', 4, 1, '35000.00', 2, '2026-04-13 15:30:00', NULL, '2026-04-13 14:00:00', '2026-04-13 15:30:00', '2026-04-13 15:30:00');
+INSERT INTO `purchase` VALUES (5, 'PO20260414005', 5, 2, '12000.00', 2, '2026-04-12 11:00:00', NULL, '2026-04-12 10:00:00', '2026-04-12 11:00:00', '2026-04-12 11:00:00');
+
+-- ----------------------------
+-- Table structure for purchase_inbound
+-- ----------------------------
+DROP TABLE IF EXISTS `purchase_inbound`;
+CREATE TABLE `purchase_inbound`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '入库单ID',
+  `purchase_id` int(11) NOT NULL COMMENT '关联采购订单ID',
+  `bill_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '入库单号',
+  `warehouse_id` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '入库仓库ID',
+  `status` tinyint(4) NULL DEFAULT 0 COMMENT '状态：0-待确认，1-已确认',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `confirm_time` datetime NULL DEFAULT NULL COMMENT '确认时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_bill_no`(`bill_no` ASC) USING BTREE,
+  INDEX `idx_purchase_id`(`purchase_id` ASC) USING BTREE,
+  INDEX `idx_warehouse_id`(`warehouse_id` ASC) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '采购入库单表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of purchase_inbound
+-- ----------------------------
+INSERT INTO `purchase_inbound` VALUES (1, 1, 'IB20260414001', 1, 1, '芒果入库完成', '2026-04-14 10:00:00', '2026-04-14 10:30:00');
+INSERT INTO `purchase_inbound` VALUES (2, 4, 'IB20260413001', 1, 1, '智利车厘子等入库', '2026-04-13 15:30:00', '2026-04-13 16:00:00');
+INSERT INTO `purchase_inbound` VALUES (3, 5, 'IB20260412001', 2, 1, '饮料类入库', '2026-04-12 11:00:00', '2026-04-12 11:30:00');
+
+-- ----------------------------
+-- Table structure for purchase_inbound_item
+-- ----------------------------
+DROP TABLE IF EXISTS `purchase_inbound_item`;
+CREATE TABLE `purchase_inbound_item`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '入库明细ID',
+  `inbound_id` bigint(20) UNSIGNED NOT NULL COMMENT '入库单ID',
+  `purchase_item_id` bigint(20) UNSIGNED NULL DEFAULT NULL COMMENT '采购明细ID',
+  `goods_id` int(10) UNSIGNED NOT NULL COMMENT '商品ID',
+  `quantity` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '入库数量',
+  `unit_price` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '入库单价',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_inbound_id`(`inbound_id` ASC) USING BTREE,
+  INDEX `idx_goods_id`(`goods_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '采购入库明细表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of purchase_inbound_item
+-- ----------------------------
+INSERT INTO `purchase_inbound_item` VALUES (1, 1, 1, 1, 500.00, 30.00);
+INSERT INTO `purchase_inbound_item` VALUES (2, 2, 7, 4, 150.00, 120.00);
+INSERT INTO `purchase_inbound_item` VALUES (3, 2, 8, 6, 500.00, 16.00);
+INSERT INTO `purchase_inbound_item` VALUES (4, 2, 9, 3, 300.00, 25.00);
+INSERT INTO `purchase_inbound_item` VALUES (5, 3, 10, 9, 200.00, 7.50);
+INSERT INTO `purchase_inbound_item` VALUES (6, 3, 11, 11, 100.00, 42.00);
+INSERT INTO `purchase_inbound_item` VALUES (7, 3, 12, 12, 100.00, 38.00);
+INSERT INTO `purchase_inbound_item` VALUES (8, 3, 13, 13, 100.00, 14.00);
+
+-- ----------------------------
+-- Table structure for purchase_item
+-- ----------------------------
+DROP TABLE IF EXISTS `purchase_item`;
+CREATE TABLE `purchase_item`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '明细ID',
+  `purchase_id` int(11) NOT NULL COMMENT '采购订单ID',
+  `goods_id` int(10) UNSIGNED NOT NULL COMMENT '商品ID',
+  `quantity` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '数量',
+  `unit_price` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '单价',
+  `amount` decimal(12, 2) NOT NULL DEFAULT 0.00 COMMENT '金额',
+  `sort_no` int(11) NULL DEFAULT 0 COMMENT '排序号',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_purchase_id`(`purchase_id` ASC) USING BTREE,
+  INDEX `idx_goods_id`(`goods_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '采购明细表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of purchase_item
+-- ----------------------------
+INSERT INTO `purchase_item` VALUES (1, 1, 1, 500.00, 30.00, 15000.00, 1);
+INSERT INTO `purchase_item` VALUES (2, 2, 2, 200.00, 80.00, 16000.00, 1);
+INSERT INTO `purchase_item` VALUES (3, 2, 5, 300.00, 30.00, 9000.00, 2);
+INSERT INTO `purchase_item` VALUES (4, 3, 7, 1000.00, 2.80, 2800.00, 1);
+INSERT INTO `purchase_item` VALUES (5, 3, 8, 1000.00, 2.80, 2800.00, 2);
+INSERT INTO `purchase_item` VALUES (6, 3, 10, 2000.00, 0.90, 1800.00, 3);
+INSERT INTO `purchase_item` VALUES (7, 4, 4, 150.00, 120.00, 18000.00, 1);
+INSERT INTO `purchase_item` VALUES (8, 4, 6, 500.00, 16.00, 8000.00, 2);
+INSERT INTO `purchase_item` VALUES (9, 4, 3, 300.00, 25.00, 7500.00, 3);
+INSERT INTO `purchase_item` VALUES (10, 5, 9, 200.00, 7.50, 1500.00, 1);
+INSERT INTO `purchase_item` VALUES (11, 5, 11, 100.00, 42.00, 4200.00, 2);
+INSERT INTO `purchase_item` VALUES (12, 5, 12, 100.00, 38.00, 3800.00, 3);
+INSERT INTO `purchase_item` VALUES (13, 5, 13, 100.00, 14.00, 1400.00, 4);
+
+-- ----------------------------
+-- Table structure for sal_order
+-- ----------------------------
+DROP TABLE IF EXISTS `sal_order`;
+CREATE TABLE `sal_order`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '订单ID',
+  `order_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '订单编号',
+  `customer_id` bigint(20) UNSIGNED NULL DEFAULT NULL COMMENT '客户ID',
+  `warehouse_id` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '出库仓库ID',
+  `order_date` datetime NULL DEFAULT NULL COMMENT '订单日期',
+  `total_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '订单总额',
+  `discount_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '折扣金额',
+  `final_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '最终金额',
+  `status` tinyint(4) NULL DEFAULT 0 COMMENT '状态：0-草稿，1-已确认，2-已完成，3-已作废',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `created_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '创建人',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `confirm_time` datetime NULL DEFAULT NULL COMMENT '确认时间',
+  `deliver_time` datetime NULL DEFAULT NULL COMMENT '发货时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_order_no`(`order_no` ASC) USING BTREE,
+  INDEX `idx_customer_id`(`customer_id` ASC) USING BTREE,
+  INDEX `idx_warehouse_id`(`warehouse_id` ASC) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE,
+  INDEX `idx_created_at`(`created_at` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sal_order
+-- ----------------------------
+INSERT INTO `sal_order` VALUES (1, 'SO20260415001', 1, 1, '2026-04-15 09:00:00', 5000.00, 200.00, 4800.00, 1, '鲜丰水果店采购订单', 'admin', '2026-04-15 09:00:00', '2026-04-15 09:30:00', '2026-04-15 09:30:00', NULL);
+INSERT INTO `sal_order` VALUES (2, 'SO20260415002', 2, 2, '2026-04-15 10:00:00', 8000.00, 500.00, 7500.00, 2, '百果园饮料采购', 'admin', '2026-04-15 10:00:00', '2026-04-15 14:00:00', '2026-04-15 10:30:00', '2026-04-15 14:00:00');
+INSERT INTO `sal_order` VALUES (3, 'SO20260415003', 3, 1, '2026-04-15 11:00:00', 15000.00, 0.00, 15000.00, 1, '盒马鲜生批量采购', 'admin', '2026-04-15 11:00:00', '2026-04-15 11:00:00', '2026-04-15 11:30:00', NULL);
+INSERT INTO `sal_order` VALUES (4, 'SO20260416001', 4, 2, '2026-04-16 08:00:00', 3500.00, 300.00, 3200.00, 0, '永辉超市零食采购', 'test', '2026-04-16 08:00:00', '2026-04-16 08:00:00', NULL, NULL);
+INSERT INTO `sal_order` VALUES (5, 'SO20260416002', 1, 1, '2026-04-16 09:00:00', 12000.00, 1000.00, 11000.00, 1, '鲜丰水果店追加订单', 'admin', '2026-04-16 09:00:00', '2026-04-16 09:00:00', '2026-04-16 10:00:00', NULL);
+
+-- ----------------------------
+-- Table structure for sal_order_item
+-- ----------------------------
+DROP TABLE IF EXISTS `sal_order_item`;
+CREATE TABLE `sal_order_item`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '明细ID',
+  `order_id` bigint(20) UNSIGNED NOT NULL COMMENT '订单ID',
+  `product_id` bigint(20) UNSIGNED NULL DEFAULT NULL COMMENT '商品ID',
+  `product_name_snapshot` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '商品名称快照',
+  `price` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '单价',
+  `quantity` int(11) NULL DEFAULT 0 COMMENT '数量',
+  `subtotal` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '小计',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_order_id`(`order_id` ASC) USING BTREE,
+  INDEX `idx_product_id`(`product_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单明细表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sal_order_item
+-- ----------------------------
+INSERT INTO `sal_order_item` VALUES (1, 1, 1, '芒果', 50.00, 50, 2500.00, '2026-04-15 09:00:00');
+INSERT INTO `sal_order_item` VALUES (2, 1, 3, '阿克苏苹果', 45.00, 30, 1350.00, '2026-04-15 09:00:00');
+INSERT INTO `sal_order_item` VALUES (3, 1, 5, '红心火龙果', 60.00, 15, 900.00, '2026-04-15 09:00:00');
+INSERT INTO `sal_order_item` VALUES (4, 2, 7, '可乐', 5.00, 500, 2500.00, '2026-04-15 10:00:00');
+INSERT INTO `sal_order_item` VALUES (5, 2, 8, '雪碧', 5.00, 400, 2000.00, '2026-04-15 10:00:00');
+INSERT INTO `sal_order_item` VALUES (6, 2, 9, '橙汁', 15.00, 150, 2250.00, '2026-04-15 10:00:00');
+INSERT INTO `sal_order_item` VALUES (7, 2, 10, '农夫山泉', 2.00, 500, 1000.00, '2026-04-15 10:00:00');
+INSERT INTO `sal_order_item` VALUES (8, 3, 4, '智利车厘子', 200.00, 40, 8000.00, '2026-04-15 11:00:00');
+INSERT INTO `sal_order_item` VALUES (9, 3, 6, '脐橙', 35.00, 200, 7000.00, '2026-04-15 11:00:00');
+INSERT INTO `sal_order_item` VALUES (10, 4, 11, '开心果', 80.00, 20, 1600.00, '2026-04-16 08:00:00');
+INSERT INTO `sal_order_item` VALUES (11, 4, 12, '腰果', 75.00, 20, 1500.00, '2026-04-16 08:00:00');
+INSERT INTO `sal_order_item` VALUES (12, 5, 1, '芒果', 50.00, 100, 5000.00, '2026-04-16 09:00:00');
+INSERT INTO `sal_order_item` VALUES (13, 5, 2, '榴莲', 150.00, 30, 4500.00, '2026-04-16 09:00:00');
+INSERT INTO `sal_order_item` VALUES (14, 5, 4, '智利车厘子', 200.00, 10, 2000.00, '2026-04-16 09:00:00');
+
+-- ----------------------------
+-- Table structure for sale_outbound
+-- ----------------------------
+DROP TABLE IF EXISTS `sale_outbound`;
+CREATE TABLE `sale_outbound`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '出库单ID',
+  `sale_order_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联销售订单ID',
+  `bill_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '出库单号',
+  `warehouse_id` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '出库仓库ID',
+  `status` tinyint(4) NULL DEFAULT 0 COMMENT '状态：0-待确认，1-已确认',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `confirm_time` datetime NULL DEFAULT NULL COMMENT '确认时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_bill_no`(`bill_no` ASC) USING BTREE,
+  INDEX `idx_sale_order_id`(`sale_order_id` ASC) USING BTREE,
+  INDEX `idx_warehouse_id`(`warehouse_id` ASC) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售出库单表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sale_outbound
+-- ----------------------------
+INSERT INTO `sale_outbound` VALUES (1, 1, 'OB20260415001', 1, 1, '鲜丰水果店发货', '2026-04-15 10:00:00', '2026-04-15 10:30:00');
+INSERT INTO `sale_outbound` VALUES (2, 2, 'OB20260415002', 2, 1, '百果园饮料发货', '2026-04-15 14:00:00', '2026-04-15 14:30:00');
+INSERT INTO `sale_outbound` VALUES (3, 3, 'OB20260415003', 1, 0, '盒马鲜生待发货', '2026-04-15 12:00:00', NULL);
+
+-- ----------------------------
+-- Table structure for sale_outbound_item
+-- ----------------------------
+DROP TABLE IF EXISTS `sale_outbound_item`;
+CREATE TABLE `sale_outbound_item`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '出库明细ID',
+  `outbound_id` bigint(20) UNSIGNED NOT NULL COMMENT '出库单ID',
+  `sale_order_item_id` bigint(20) UNSIGNED NULL DEFAULT NULL COMMENT '订单明细ID',
+  `product_id` bigint(20) UNSIGNED NULL DEFAULT NULL COMMENT '商品ID',
+  `quantity` int(11) NULL DEFAULT 0 COMMENT '出库数量',
+  `price` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '出库单价',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_outbound_id`(`outbound_id` ASC) USING BTREE,
+  INDEX `idx_product_id`(`product_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售出库明细表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sale_outbound_item
+-- ----------------------------
+INSERT INTO `sale_outbound_item` VALUES (1, 1, 1, 1, 50, 50.00);
+INSERT INTO `sale_outbound_item` VALUES (2, 1, 2, 3, 30, 45.00);
+INSERT INTO `sale_outbound_item` VALUES (3, 1, 3, 5, 15, 60.00);
+INSERT INTO `sale_outbound_item` VALUES (4, 2, 4, 7, 500, 5.00);
+INSERT INTO `sale_outbound_item` VALUES (5, 2, 5, 8, 400, 5.00);
+INSERT INTO `sale_outbound_item` VALUES (6, 2, 6, 9, 150, 15.00);
+INSERT INTO `sale_outbound_item` VALUES (7, 2, 7, 10, 500, 2.00);
 
 -- ----------------------------
 -- Table structure for sign_record
@@ -558,7 +782,7 @@ CREATE TABLE `sign_record`  (
   `sign_in_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `sign_out_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`sid`) USING BTREE,
-  INDEX `idx_user_id`(`uid`) USING BTREE
+  INDEX `idx_user_id`(`uid` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 115 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '签到记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -602,12 +826,12 @@ CREATE TABLE `supplier`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_code`(`code`) USING BTREE,
-  UNIQUE INDEX `uk_supplier_code`(`code`) USING BTREE,
-  INDEX `idx_supplier_name`(`name`) USING BTREE,
-  INDEX `idx_supplier_contact_person`(`contact_person`) USING BTREE,
-  INDEX `idx_supplier_phone`(`phone`) USING BTREE,
-  INDEX `idx_supplier_status`(`status`) USING BTREE
+  UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE,
+  UNIQUE INDEX `uk_supplier_code`(`code` ASC) USING BTREE,
+  INDEX `idx_supplier_name`(`name` ASC) USING BTREE,
+  INDEX `idx_supplier_contact_person`(`contact_person` ASC) USING BTREE,
+  INDEX `idx_supplier_phone`(`phone` ASC) USING BTREE,
+  INDEX `idx_supplier_status`(`status` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '供应商表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -634,7 +858,7 @@ CREATE TABLE `sys_menu`  (
   `page_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `sort_num` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -683,13 +907,13 @@ CREATE TABLE `user`  (
   `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `del_flag` int(11) NULL DEFAULT 0,
   PRIMARY KEY (`uid`) USING BTREE,
-  UNIQUE INDEX `unique_id`(`uid`) USING BTREE
+  UNIQUE INDEX `unique_id`(`uid` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, 'admin', '$2a$10$TAaQrJuqFfcc8qx.ClKWDedN7QPFQaRFTuo2oMskPZsUqljjXMpqm', '管理员', 'admin@test.com', '超级管理员', '研发组', '14325345231', 'BioHazard 1', '2026-03-19 22:30:00', '启用', '2026-03-19 15:34:57', '2026-04-13 15:40:39', '', 0);
+INSERT INTO `user` VALUES (1, 'admin', '$2a$10$TAaQrJuqFfcc8qx.ClKWDedN7QPFQaRFTuo2oMskPZsUqljjXMpqm', '管理员', 'admin@test.com', '超级管理员', '研发组', '14325345231', 'BioHazard 1', '2026-03-19 22:30:00', '启用', '2026-03-19 15:34:57', '2026-06-11 17:20:15', 'http://localhost:8080/static/upload/avatars/1781169613562_avatar_1.jpg', 0);
 INSERT INTO `user` VALUES (2, 'test', '$2a$10$S9dJRQmFd4FQatv//3QvN.Xi7zJoCXmSAgedfwspl2iZWbdOsPwkm', 'test', 'test@test.test', '测试工程师', '研发组', '12312312321', 'testste', '2026-03-21 00:00:00', '启用', '2026-03-21 15:35:05', '2026-04-13 15:40:39', '', 0);
 INSERT INTO `user` VALUES (3, 'test2', '$2a$10$f2p9.WE7vc3rG/cbrmJt2O0ziouhfd4Ae.VwiIgrMBICjPcr/wvDi', '特色t', 'test@test.com', '开发工程师', '研发组', '15432432413', '123', '2026-03-21 00:00:00', '启用', '2026-03-22 15:35:13', '2026-04-13 15:40:40', NULL, 0);
 INSERT INTO `user` VALUES (4, 'test3', '$2a$10$v7u7uktDVddIUpH8WUj71uzUqVvPughgFNjEWIYTG5mRqpKnuSbvm', 'test3', 'test@qqq.qwe', '开发工程师', '研发组', '15432432413', NULL, NULL, '启用', '2026-03-22 15:35:13', '2026-04-13 15:40:41', NULL, 0);
@@ -725,12 +949,12 @@ CREATE TABLE `warehouse`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `del_flag` int(11) NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_code`(`code`) USING BTREE,
-  UNIQUE INDEX `uk_warehouse_code`(`code`) USING BTREE,
-  INDEX `idx_warehouse_name`(`name`) USING BTREE,
-  INDEX `idx_warehouse_kind`(`kind`) USING BTREE,
-  INDEX `idx_warehouse_status`(`status`) USING BTREE,
-  INDEX `idx_warehouse_status_time`(`status`, `create_time`) USING BTREE
+  UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE,
+  UNIQUE INDEX `uk_warehouse_code`(`code` ASC) USING BTREE,
+  INDEX `idx_warehouse_name`(`name` ASC) USING BTREE,
+  INDEX `idx_warehouse_kind`(`kind` ASC) USING BTREE,
+  INDEX `idx_warehouse_status`(`status` ASC) USING BTREE,
+  INDEX `idx_warehouse_status_time`(`status` ASC, `create_time` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '仓库表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
