@@ -1,4 +1,4 @@
-package com.lunabaka.common;
+package com.lunabaka.config;
 
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;

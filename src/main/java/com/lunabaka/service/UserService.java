@@ -1,12 +1,14 @@
 package com.lunabaka.service;
 
-import com.lunabaka.common.PasswordUtil;
+import com.lunabaka.utils.EmailUtils;
+import com.lunabaka.utils.PasswordUtil;
 import com.lunabaka.entity.User;
 import com.lunabaka.exception.CustomerException;
 import com.lunabaka.mapper.UserMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +31,57 @@ public class UserService {
         if(dbuser.getStatus() != null && dbuser.getStatus().equals("禁用")){
             throw new CustomerException("账号已被禁用");
         }
+        return dbuser;
+    }
+
+    public void sendEmailCode(String email, HttpSession session) {
+        User dbuser = userMapper.selectByEmail(email);
+        if (dbuser == null) {
+            throw new CustomerException("找不到该邮箱，请重试");
+        }
+        if (dbuser.getStatus() != null && dbuser.getStatus().equals("禁用")) {
+            throw new CustomerException("账号已被禁用");
+        }
+        String loginCode = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+        EmailUtils.sendTextMail(email,"乡链-进销存系统","登录验证码", "您的验证码为: " + loginCode + "，5分钟内有效。");
+        session.setAttribute("email_code", loginCode);
+        session.setAttribute("email_code_email", email);
+        session.setAttribute("email_code_time", System.currentTimeMillis());
+    }
+
+    public User emailLogin(String email, String code, HttpSession session) {
+        String sessionCode = (String) session.getAttribute("email_code");
+        String sessionEmail = (String) session.getAttribute("email_code_email");
+        Long sessionCodeTime = (Long) session.getAttribute("email_code_time");
+
+        if (sessionCode == null || sessionEmail == null) {
+            throw new CustomerException("请先获取验证码");
+        }
+        if (!sessionEmail.equals(email)) {
+            throw new CustomerException("邮箱与验证码不匹配");
+        }
+        if (sessionCodeTime != null && System.currentTimeMillis() - sessionCodeTime > 5 * 60 * 1000) {
+            session.removeAttribute("email_code");
+            session.removeAttribute("email_code_email");
+            session.removeAttribute("email_code_time");
+            throw new CustomerException("验证码已过期，请重新获取");
+        }
+        if (!sessionCode.equals(code)) {
+            throw new CustomerException("验证码错误");
+        }
+
+        User dbuser = userMapper.selectByEmail(email);
+        if (dbuser == null) {
+            throw new CustomerException("找不到该邮箱，请重试");
+        }
+        if (dbuser.getStatus() != null && dbuser.getStatus().equals("禁用")) {
+            throw new CustomerException("账号已被禁用");
+        }
+
+        session.removeAttribute("email_code");
+        session.removeAttribute("email_code_email");
+        session.removeAttribute("email_code_time");
+
         return dbuser;
     }
 

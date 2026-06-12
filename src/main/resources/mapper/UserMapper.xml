@@ -22,6 +22,11 @@
         </where>
     </select>
 
+    <select id="selectByEmail" resultType="com.lunabaka.entity.User">
+        select * from `user`
+        where email=#{email}
+    </select>
+
     <update id="updateStatusById" parameterType="com.lunabaka.entity.User">
         UPDATE `user`
         SET status=#{status},updateTime=NOW()

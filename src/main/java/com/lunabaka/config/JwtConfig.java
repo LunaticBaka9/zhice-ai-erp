@@ -1,4 +1,4 @@
-package com.lunabaka.common;
+package com.lunabaka.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

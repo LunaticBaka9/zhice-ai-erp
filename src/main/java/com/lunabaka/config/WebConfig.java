@@ -1,7 +1,8 @@
-package com.lunabaka.common;
+package com.lunabaka.config;
 
 import java.io.File;
 
+import com.lunabaka.common.JwtInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -22,6 +23,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/login",
                         "/register",
+                        "/sendEmailCode",
+                        "/emailLogin",
                         "/file/upload",
                         "/file/uploadAvatar",
                         "/error",

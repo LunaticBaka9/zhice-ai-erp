@@ -1,4 +1,4 @@
-package com.lunabaka.common;
+package com.lunabaka.utils;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

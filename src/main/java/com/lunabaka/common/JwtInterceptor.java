@@ -1,5 +1,6 @@
 package com.lunabaka.common;
 
+import com.lunabaka.config.JwtConfig;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;

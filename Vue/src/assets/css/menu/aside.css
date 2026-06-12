@@ -1,0 +1,140 @@
+* {
+    overflow: hidden;
+}
+.aside-transition {
+    transition: width 0.3s ease-in-out;
+    overflow: hidden;
+}
+.aside-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #304156;
+    transition: 0.6s ease-out;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 折叠状态下隐藏滚动条和滚动条轨道 */
+.el-menu--collapse.aside-container {
+    overflow: hidden;
+}
+.el-menu--collapse.aside-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Logo区域样式 */
+.logo-container {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background-color: #1f2d3d;
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+
+.logo-text {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.logo-fade-enter-active,
+.logo-fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+.logo-fade-enter-from,
+.logo-fade-leave-to {
+    opacity: 0;
+}
+
+.aside-container .el-menu-item,
+.aside-container .el-sub-menu__title {
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.aside-container .el-menu-item:hover,
+.aside-container .el-sub-menu__title:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 激活菜单项样式 */
+.aside-container .el-menu-item.is-active {
+    background-color: rgba(64, 158, 255, 0.15) !important;
+    color: #409eff !important;
+    border-right: 3px solid #409eff;
+}
+
+.aside-container .el-menu-item.is-active .el-icon {
+    color: #409eff;
+}
+
+/* 子菜单激活状态 */
+.aside-container .el-sub-menu.is-active .el-sub-menu__title {
+    color: #409eff !important;
+}
+
+/* 菜单项之间的分隔线 */
+.aside-container .el-menu-item:not(:last-child) {
+    margin-bottom: 1px;
+}
+
+.aside-container .el-sub-menu:not(:last-child) {
+    margin-bottom: 1px;
+}
+
+/* 自定义滚动条 */
+.aside-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.aside-container::-webkit-scrollbar-thumb {
+    background-color: #263445;
+    border-radius: 3px;
+}
+
+.aside-container::-webkit-scrollbar-thumb:hover {
+    background-color: #1f2d3d;
+}
+
+.aside-container::-webkit-scrollbar-track {
+    background-color: #1f2d3d;
+}
+
+/* 折叠时图标间距调整 */
+.el-menu--collapse .el-menu-item .el-icon,
+.el-menu--collapse .el-sub-menu__title .el-icon {
+    margin: 0 auto;
+    width: 24px;
+    text-align: center;
+}
+
+/* 折叠时菜单项居中 */
+.el-menu--collapse .el-menu-item,
+.el-menu--collapse .el-sub-menu__title {
+    justify-content: center;
+    padding-left: 0 !important;
+}
+
+/* Logo区域悬停效果 */
+.logo-container:hover {
+    background-color: #1a2530;
+    transition: background-color 0.3s;
+}
+
+/* 菜单展开/折叠过渡 */
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+    width: 240px;
+    transition: width 0.3s;
+}
