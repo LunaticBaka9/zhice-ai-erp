@@ -2,7 +2,7 @@ const routeSale = [
     {
         path: "/sale/order",
         name: "SaleOrder",
-        component: () => import("../components/sale/Order.vue"),
+        component: () => import("../components/sale/order.vue"),
     },
     {
         path: "/sale/delivery",
