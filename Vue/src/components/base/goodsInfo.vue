@@ -317,8 +317,6 @@
                     </el-col>
                 </el-row>
 
-                <el-divider content-position="left">价格设置</el-divider>
-
                 <el-row :gutter="24">
                     <el-col :span="8">
                         <el-form-item label="采购价" prop="purchasePrice">
@@ -327,7 +325,7 @@
                                 :min="0"
                                 :precision="2"
                                 placeholder="参考采购价"
-                                style="width: 100%"
+                                style="width: 100px"
                             />
                         </el-form-item>
                     </el-col>
@@ -338,7 +336,7 @@
                                 :min="0"
                                 :precision="2"
                                 placeholder="标准售价"
-                                style="width: 100%"
+                                style="width: 100px"
                             />
                         </el-form-item>
                     </el-col>
@@ -349,13 +347,11 @@
                                 :min="0"
                                 :precision="2"
                                 placeholder="移动加权成本"
-                                style="width: 100%"
+                                style="width: 100px"
                             />
                         </el-form-item>
                     </el-col>
                 </el-row>
-
-                <el-divider content-position="left">库存预警</el-divider>
 
                 <el-row :gutter="20">
                     <el-col :span="12">

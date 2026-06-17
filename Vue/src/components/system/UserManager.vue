@@ -1,10 +1,5 @@
 <template>
     <div class="user-management">
-        <!-- 页面标题 -->
-        <!--    <div class="page-header">-->
-        <!--      <h2 class="page-title">用户管理</h2>-->
-        <!--    </div>-->
-
         <!-- 搜索栏 -->
         <el-card class="search-card" shadow="never">
             <el-form :inline="true" :model="searchForm" class="search-form">
@@ -57,7 +52,7 @@
             </el-form>
         </el-card>
 
-        <div class="card" style="margin-bottom: 10px">
+        <div class="card" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px">
             <el-button type="primary" @click="handleAdd">
                 <el-icon><Plus /></el-icon>
                 新增用户
@@ -515,7 +510,7 @@ const departmentOptions = ref([
         ],
     },
     {
-        id: "产品部t",
+        id: "产品部",
         name: "产品部",
         children: [
             { id: "产品组", name: "产品组" },
@@ -552,7 +547,7 @@ const dialog = reactive({
     isView: false,
     loading: false,
     form: {
-        id: null,
+        uid: null,
         avatar: "",
         username: "",
         name: "",
@@ -691,8 +686,12 @@ const getUserList = async () => {
         const params = {
             pageNum: pagination.pageNum,
             pageSize: pagination.pageSize,
-            ...searchForm,
         };
+        Object.entries(searchForm).forEach(([key, value]) => {
+            if (value !== '') {
+                params[key] = value;
+            }
+        });
         const res = await request.get("/user/list", { params });
         if (res.code === "200") {
             userList.value = res.data.records || res.data.list || [];
@@ -744,14 +743,14 @@ const handleAdd = () => {
     dialog.isAdd = true;
     dialog.isView = false;
     dialog.form = {
-        id: null,
+        uid: null,
         avatar: "",
         username: "",
         name: "",
         password: "",
         confirmPassword: "",
         role: "",
-        department: "",
+        department: [],
         phone: "",
         email: "",
         joinDate: "",
@@ -766,17 +765,23 @@ const handleEdit = (row) => {
     dialog.title = "编辑用户";
     dialog.isAdd = false;
     dialog.isView = false;
-    const formData = { ...row };
-    if (formData.department && typeof formData.department === "string") {
-        formData.department = formData.department.split("/");
-    } else if (!formData.department) {
-        formData.department = [];
-    }
-
     dialog.form = {
-        ...row,
+        uid: row.uid,
+        avatar: row.avatar || "",
+        username: row.username || "",
+        name: row.name || "",
         password: "",
         confirmPassword: "",
+        role: row.role || "",
+        department:
+            row.department && typeof row.department === "string"
+                ? row.department.split("/")
+                : [],
+        phone: row.phone || "",
+        email: row.email || "",
+        joinDate: row.joinDate || "",
+        status: row.status || "启用",
+        bio: row.bio || "",
     };
     dialog.visible = true;
 };
@@ -796,7 +801,6 @@ const submitUser = async () => {
             dialog.loading = true;
             try {
                 const submitData = { ...dialog.form };
-
                 if (
                     submitData.department &&
                     Array.isArray(submitData.department)
@@ -878,7 +882,7 @@ const handleStatusChange = async (row) => {
 
 // 修改密码
 const handleResetPassword = (row) => {
-    resetPasswordDialog.userId = row.id;
+    resetPasswordDialog.userId = row.uid;
     resetPasswordDialog.form = {
         newPassword: "",
         confirmPassword: "",
@@ -928,7 +932,7 @@ const handleDialogClose = () => {
 };
 
 const exportData = async () => {
-    window.open("http://localhost:8080/user/exportData");
+    window.open("/user/exportData");
 };
 
 // 页面加载时获取数据

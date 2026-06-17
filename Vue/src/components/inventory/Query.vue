@@ -90,7 +90,7 @@
             </el-form>
         </el-card>
 
-        <div class="card" style="margin-bottom: 10px">
+        <div class="card" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: nowrap">
             <el-button type="primary" @click="handleAdd">
                 <el-icon><Plus /></el-icon>
                 新增商品
@@ -99,7 +99,7 @@
             <el-upload
                 action="/api/goods/importData"
                 :on-success="handleImport"
-                style="display: inline-block; margin-left: 10px"
+                style="display: inline-flex; align-items: center"
                 :show-file-list="false"
             >
                 <el-button type="primary">导入表格</el-button>
@@ -107,7 +107,6 @@
             <el-button
                 type="info"
                 @click="showStockFlow"
-                style="margin-left: 10px"
             >
                 <el-icon><Document /></el-icon>
                 库存流水

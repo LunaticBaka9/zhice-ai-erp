@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lunabaka.mapper.UserMapper">
     <select id="selectByUsername" resultType="com.lunabaka.entity.User">
-        SELECT * FROM `user` WHERE username=#{username}
+        SELECT * FROM `user` WHERE username=#{username} AND del_flag != 1
     </select>
 
     <select id="selectById"  resultType="com.lunabaka.entity.User">
@@ -35,8 +35,9 @@
 
     <update id="updateInfoById" parameterType="com.lunabaka.entity.User">
         UPDATE `user`
-        SET name = #{name},role = #{role},department = #{department},
-            bio = #{bio},joinDate = #{joinDate},avatar = #{avatar},
+        SET username = #{username}, name = #{name}, role = #{role}, department = #{department},
+            phone = #{phone}, email = #{email}, status = #{status},
+            bio = #{bio}, joinDate = #{joinDate}, avatar = #{avatar},
             updateTime=NOW()
         WHERE uid = #{uid}
     </update>
@@ -53,10 +54,10 @@
 
     <insert id="insertUser" parameterType="com.lunabaka.entity.User">
         insert into `user` (username,name,password,email,role,department,phone,bio,joinDate,status,createTime)
-        values(#{username},#{name}, #{password},#{email},#{role},#{department},#{phone},#{bio},#{joinDate},#{status},NOW())
+        values(#{username},#{name}, #{password},#{email},#{role},#{department},#{phone},#{bio},#{joinDate},'启用',NOW())
     </insert>
 
     <update id="deleteById">
-        update `user` set del_flag = 1;
+        update `user` set del_flag = 1 WHERE uid = #{uid}
     </update>
 </mapper>

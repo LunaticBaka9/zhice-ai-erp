@@ -157,8 +157,11 @@ public class UserService {
     }
 
     public void updateInfo(User user) {
+        if (user.getUid() == null) {
+            throw new CustomerException("用户ID不能为空");
+        }
         User dbUser = userMapper.selectByUsername(user.getUsername());
-        if (dbUser != null) {
+        if (dbUser != null && !dbUser.getUid().equals(user.getUid())) {
             throw new CustomerException("用户名重复");
         }
         userMapper.updateInfoById(user);
