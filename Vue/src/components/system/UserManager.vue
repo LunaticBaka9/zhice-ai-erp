@@ -64,7 +64,7 @@
             </el-button>
             <el-button type="primary" @click="exportData"> 导出表格 </el-button>
             <el-upload
-                action="/api/user/importData"
+                action="/user/importData"
                 :on-success="handleImport"
                 style="display: inline-block; margin-left: 10px"
                 :show-file-list="false"

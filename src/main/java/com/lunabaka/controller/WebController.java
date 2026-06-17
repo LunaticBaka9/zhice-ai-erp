@@ -19,11 +19,11 @@ public class WebController {
 
     @Resource
     UserService userService;
-    
+
     @Resource
     JwtConfig jwtConfig;
 
-    @OperationLogAnnotation(module="用户管理", type="登录", value="用户登录")
+    @OperationLogAnnotation(module = "用户管理", type = "登录", value = "用户登录")
     @PostMapping("/login")
     public Result login(@RequestBody User user) {
         User dbuser = userService.login(user);
@@ -36,8 +36,9 @@ public class WebController {
         return Result.success(result);
     }
 
+    @OperationLogAnnotation(module = "用户管理", type = "注册", value = "用户注册")
     @PostMapping("/register")
-    public Result register(@RequestBody User user){
+    public Result register(@RequestBody User user) {
         userService.insert(user);
         return Result.success();
     }
@@ -49,7 +50,14 @@ public class WebController {
         return Result.success();
     }
 
-    @OperationLogAnnotation(module="用户管理", type="登录", value="邮箱免密登录")
+    @PostMapping("/sendEmailRegCode")
+    public Result sendEmailRegCode(@RequestBody Map<String, String> params, HttpSession session) {
+        String email = params.get("email");
+        userService.sendEmailRegCode(email, session);
+        return Result.success();
+    }
+
+    @OperationLogAnnotation(module = "用户管理", type = "登录", value = "邮箱免密登录")
     @PostMapping("/emailLogin")
     public Result emailLogin(@RequestBody Map<String, String> params, HttpSession session) {
         String email = params.get("email");
@@ -61,5 +69,16 @@ public class WebController {
         result.put("user", dbuser);
         result.put("token", token);
         return Result.success(result);
+    }
+
+    @OperationLogAnnotation(module = "用户管理", type = "注册", value = "邮箱注册")
+    @PostMapping("/emailRegister")
+    public Result emailRegister(@RequestBody Map<String, String> params, HttpSession session) {
+        String email = params.get("email");
+        String password = params.get("password");
+        String code = params.get("code");
+
+        userService.emailRegister(email, password, code, session);
+        return Result.success();
     }
 }

@@ -186,7 +186,7 @@ const isTech = computed(() => {
     );
 });
 const isAdmin = computed(() => {
-    return data.user?.role.includes("管理员") === true;
+    return data.user?.role?.includes("管理员") === true;
 });
 
 // 菜单权限控制
