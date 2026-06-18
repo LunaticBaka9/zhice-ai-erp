@@ -35,8 +35,7 @@
 
     <update id="updateInfoById" parameterType="com.lunabaka.entity.User">
         UPDATE `user`
-        SET username = #{username}, name = #{name}, role = #{role}, department = #{department},
-            phone = #{phone}, email = #{email}, status = #{status},
+        SET name = #{name}, role = #{role}, department = #{department},
             bio = #{bio}, joinDate = #{joinDate}, avatar = #{avatar},
             updateTime=NOW()
         WHERE uid = #{uid}

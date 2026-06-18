@@ -264,49 +264,11 @@
         >
             <el-form-item label="头像" prop="avatar">
                 <el-upload class="avatar-uploader" :show-file-list="false" :before-upload="beforeAvatarUpload">
-                    <img v-if="profileDialog.form.avatar" :src="profileDialog.form.avatar" class="avatar" />
+                    <img v-if="profileDialog.form.avatar" :src="profileDialog.form.avatar" class="avatar" alt="头像"/>
                     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                 </el-upload>
-                <div class="avatar-tip">点击上传并编辑头像，支持jpg、png格式</div>
+                <div class="avatar-tip">支持jpg、png格式</div>
             </el-form-item>
-
-            <!-- 头像编辑对话框 -->
-            <el-dialog v-model="avatarDialog.visible" title="编辑头像" width="560px">
-                <div class="avatar-edit-container">
-                    <div class="avatar-edit-canvas-wrapper">
-                        <canvas
-                            ref="avatarCanvas"
-                            class="avatar-canvas"
-                            width="300"
-                            height="300"
-                            @mousedown="onCanvasMouseDown"
-                            @mousemove="onCanvasMouseMove"
-                            @mouseup="onCanvasMouseUp"
-                            @mouseleave="onCanvasMouseUp"
-                        ></canvas>
-                    </div>
-                    <div class="avatar-edit-controls">
-                        <input type="file" accept="image/*" @change="onAvatarFileChange" />
-                        <el-slider
-                            v-model="avatarDialog.scale"
-                            :min="0.2"
-                            :max="2"
-                            :step="0.01"
-                            show-tooltip="false"
-                            @input="drawAvatarToCanvas"
-                        />
-                        <div style="margin-top: 8px">拖动画布可移动裁剪区域，滑动调整缩放</div>
-                    </div>
-                </div>
-                <template #footer>
-                    <span class="dialog-footer">
-                        <el-button @click="avatarDialog.visible = false">取消</el-button>
-                        <el-button type="primary" @click="confirmAvatar" :loading="avatarDialog.loading"
-                            >确定</el-button
-                        >
-                    </span>
-                </template>
-            </el-dialog>
 
             <el-form-item label="姓名" prop="name">
                 <el-input v-model="profileDialog.form.name" placeholder="请输入姓名" maxlength="20" show-word-limit />
@@ -372,9 +334,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeMount, nextTick } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { Message, Phone, Plus } from "@element-plus/icons-vue";
+import {onBeforeMount, reactive, ref} from "vue";
+import {ElMessage} from "element-plus";
+import {Message, Phone, Plus} from "@element-plus/icons-vue";
 import request from "../utils/request";
 import axios from "axios";
 
@@ -555,19 +517,6 @@ const emailDialog = reactive({
         ],
     },
 });
-
-// 退出登录
-const handleLogout = () => {
-    ElMessageBox.confirm("确认退出登录吗？", "提示", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
-        type: "warning",
-    })
-        .then(() => {
-            logout();
-        })
-        .catch(() => {});
-};
 
 // 打开修改密码对话框
 const openPasswordDialog = () => {
@@ -858,126 +807,19 @@ const handleProfileDialogClose = () => {
     profileFormRef.value?.clearValidate();
 };
 
-// 头像编辑相关
-const avatarCanvas = ref(null);
-const avatarDialog = reactive({
-    visible: false,
-    image: "",
-    scale: 1,
-    offsetX: 0,
-    offsetY: 0,
-    dragging: false,
-    startX: 0,
-    startY: 0,
-    imgWidth: 0,
-    imgHeight: 0,
-    loading: false,
-});
+const beforeAvatarUpload = async (file) => {
+    const form = new FormData();
+    const fileName = `avatar_${data.user.uid}.jpg`;
+    form.append("photo", file, fileName);
+    form.append("uid", data.user.uid);
 
-const beforeAvatarUpload = (file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        avatarDialog.image = e.target.result;
-        avatarDialog.scale = 1;
-        avatarDialog.offsetX = 0;
-        avatarDialog.offsetY = 0;
-        avatarDialog.visible = true;
-        nextTick(() => {
-            drawAvatarToCanvas();
-        });
-    };
-    reader.readAsDataURL(file);
-    return false; // 阻止 el-upload 自动上传
-};
-
-const onAvatarFileChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        avatarDialog.image = ev.target.result;
-        avatarDialog.scale = 1;
-        avatarDialog.offsetX = 0;
-        avatarDialog.offsetY = 0;
-        nextTick(() => drawAvatarToCanvas());
-    };
-    reader.readAsDataURL(file);
-};
-
-const drawAvatarToCanvas = () => {
-    const canvas = avatarCanvas.value;
-    if (!canvas || !avatarDialog.image) return;
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.onload = () => {
-        const cw = canvas.width;
-        const ch = canvas.height;
-        avatarDialog.imgWidth = img.width;
-        avatarDialog.imgHeight = img.height;
-        ctx.clearRect(0, 0, cw, ch);
-        const scale = avatarDialog.scale;
-        const dw = img.width * scale;
-        const dh = img.height * scale;
-        const dx = (cw - dw) / 2 + avatarDialog.offsetX;
-        const dy = (ch - dh) / 2 + avatarDialog.offsetY;
-        ctx.drawImage(img, dx, dy, dw, dh);
-    };
-    img.src = avatarDialog.image;
-};
-
-const onCanvasMouseDown = (e) => {
-    avatarDialog.dragging = true;
-    avatarDialog.startX = e.clientX;
-    avatarDialog.startY = e.clientY;
-};
-
-const onCanvasMouseMove = (e) => {
-    if (!avatarDialog.dragging) return;
-    const dx = e.clientX - avatarDialog.startX;
-    const dy = e.clientY - avatarDialog.startY;
-    avatarDialog.startX = e.clientX;
-    avatarDialog.startY = e.clientY;
-    avatarDialog.offsetX += dx;
-    avatarDialog.offsetY += dy;
-    drawAvatarToCanvas();
-};
-
-const onCanvasMouseUp = () => {
-    avatarDialog.dragging = false;
-};
-
-const dataURLToBlob = (dataurl) => {
-    const arr = dataurl.split(",");
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
-};
-
-const confirmAvatar = async () => {
-    const canvas = avatarCanvas.value;
-    if (!canvas) return;
-    avatarDialog.loading = true;
     try {
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-        const blob = dataURLToBlob(dataUrl);
-        const form = new FormData();
-        const fileName = `avatar_${data.user.uid}.jpg`;
-        form.append("photo", blob, fileName);
-        form.append("uid", data.user.uid);
-
         const resp = await axios.post("/api/file/uploadAvatar", form, {
             headers: { "Content-Type": "multipart/form-data" },
         });
-
         const result = resp.data;
         if (result && result.code === "200") {
             profileDialog.form.avatar = result.data;
-            avatarDialog.visible = false;
             ElMessage.success("头像上传成功");
         } else {
             ElMessage.error(result.msg || "头像上传失败");
@@ -985,9 +827,8 @@ const confirmAvatar = async () => {
     } catch (err) {
         console.error(err);
         ElMessage.error("头像上传失败");
-    } finally {
-        avatarDialog.loading = false;
     }
+    return false;
 };
 
 // 提交编辑资料
@@ -1524,27 +1365,4 @@ const handleEnable2FA = () => {
     }
 }
 
-/* 头像编辑对话框样式 */
-.avatar-edit-container {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-}
-.avatar-edit-canvas-wrapper {
-    width: 300px;
-    height: 300px;
-    border: 1px dashed #d9d9d9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-}
-.avatar-canvas {
-    cursor: grab;
-    max-width: 100%;
-    max-height: 100%;
-}
-.avatar-edit-controls input[type="file"] {
-    margin-bottom: 8px;
-}
 </style>

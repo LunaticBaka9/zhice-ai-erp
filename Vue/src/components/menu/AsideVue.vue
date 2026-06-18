@@ -136,6 +136,9 @@
                 <el-menu-item index="/system/user">
                     <span>用户管理</span>
                 </el-menu-item>
+                <el-menu-item index="/system/role">
+                    <span>角色管理</span>
+                </el-menu-item>
                 <el-menu-item index="/monitor/operationLog">
                     <span>操作日志</span>
                 </el-menu-item>
@@ -157,24 +160,24 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import {computed, reactive, ref, watch} from "vue";
+import {useRoute} from "vue-router";
 import {
-    House,
-    ShoppingCart,
-    ShoppingBag,
-    Box,
-    PieChart,
-    Goods,
-    Notification,
-    Setting,
     Avatar,
+    Box,
+    Goods,
+    House,
     Message,
+    Notification,
+    PieChart,
+    Setting,
+    ShoppingBag,
+    ShoppingCart,
 } from "@element-plus/icons-vue";
-import { useMenuStore } from "../../store/menu.ts";
-import { storeToRefs } from "pinia";
-const { isCollapse } = storeToRefs(useMenuStore());
+import {useMenuStore} from "../../store/menu.ts";
+import {storeToRefs} from "pinia";
 
+const { isCollapse } = storeToRefs(useMenuStore());
 const data = reactive({
     user: JSON.parse(localStorage.getItem("local_user")),
     userInfo: [],

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lunabaka.mapper.RoleMapper">
+
+    <resultMap id="BaseResultMap" type="com.lunabaka.entity.Role">
+            <id property="id" column="id" />
+            <result property="name" column="name" />
+            <result property="status" column="status" />
+    </resultMap>
+
+    <select id="findAll" resultType="com.lunabaka.entity.Role">
+        select * from `role`
+    </select>
+
+    <select id="selectList" resultType="com.lunabaka.entity.Role">
+        select * from `role`
+        <where>
+            <if test="name != null">AND name = #{name}</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+    </select>
+
+
+</mapper>
