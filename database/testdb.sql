@@ -11,7 +11,7 @@
  Target Server Version : 80012 (8.0.12)
  File Encoding         : 65001
 
- Date: 11/06/2026 18:07:09
+ Date: 22/06/2026 17:40:05
 */
 
 SET NAMES utf8mb4;
@@ -286,7 +286,7 @@ CREATE TABLE `message`  (
   `is_read` tinyint(4) NULL DEFAULT NULL,
   `del_flag` tinyint(4) NULL DEFAULT 0,
   PRIMARY KEY (`msg_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of message
@@ -314,7 +314,7 @@ CREATE TABLE `notice`  (
   `attachments` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
   PRIMARY KEY (`nid`) USING BTREE,
   INDEX `idx_publishDate_status`(`publishDate` ASC, `status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '公告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of notice
@@ -407,7 +407,7 @@ CREATE TABLE `operation_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_username`(`username` ASC) USING BTREE,
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 112 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 128 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operation_log
@@ -523,6 +523,22 @@ INSERT INTO `operation_log` VALUES (108, '系统', '用户登录', 'controller.c
 INSERT INTO `operation_log` VALUES (109, '系统', '用户登录', 'controller.com.lunabaka.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 454, '0:0:0:0:0:0:0:1', '2026-05-08 15:11:22', '用户管理', '登录');
 INSERT INTO `operation_log` VALUES (110, '系统', '修改用户', 'com.lunabaka.controller.UserController.updateInfo()', '[{\"UID\":1,\"昵称\":\"管理员\",\"角色\":\"超级管理员\",\"部门\":\"研发组\",\"备注\":\"BioHazard 1\",\"入职时间\":\"2026-03-19 22:30:00\"}]', 15, '0:0:0:0:0:0:0:1', '2026-06-11 17:20:16', '用户管理', '修改');
 INSERT INTO `operation_log` VALUES (111, '系统', '新增公告', 'com.lunabaka.controller.NoticeController.postNotice()', '[{\"公告标题\":\"Test\",\"公告类型\":\"系统更新\",\"公告摘要\":\"Test\",\"公告内容\":\"<p>testststststst</p>\",\"发布时间\":1781170590247,\"发布作者\":\"管理员\",\"公告状态\":\"已发布\",\"附件\":\"[{\\\"name\\\":\\\"A_small_cup_of_coffee.JPG\\\",\\\"url\\\":\\\"http://localhost:8080/static/upload/picture/1781170586313_A_small_cup_of_coffee.JPG\\\",\\\"size\\\":32886}]\"}]', 117, '0:0:0:0:0:0:0:1', '2026-06-11 17:36:30', '公告管理', '新增');
+INSERT INTO `operation_log` VALUES (112, '系统', '用户登录', 'com.lunabaka.controller.WebController.login()', '[{\"用户名\":\"admin\",\"密码\":\"123456\"}]', 625, '0:0:0:0:0:0:0:1', '2026-06-22 14:24:28', '用户管理', '登录');
+INSERT INTO `operation_log` VALUES (113, '系统', '修改用户状态', 'com.lunabaka.controller.UserController.updateStatus()', '[{\"昵称\":\"系统管理员\",\"备注\":\" 系统管理员\",\"状态\":\"禁用\"}]', 75, '0:0:0:0:0:0:0:1', '2026-06-22 15:47:51', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (114, '系统', '修改用户状态', 'com.lunabaka.controller.UserController.updateStatus()', '[{\"昵称\":\"系统管理员\",\"备注\":\" 系统管理员\",\"状态\":\"禁用\"}]', 5, '0:0:0:0:0:0:0:1', '2026-06-22 15:48:10', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (115, '系统', '修改用户状态', 'com.lunabaka.controller.UserController.updateStatus()', '[{\"昵称\":\"系统管理员\",\"备注\":\" 系统管理员\",\"状态\":\"禁用\"}]', 8, '0:0:0:0:0:0:0:1', '2026-06-22 15:48:30', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (116, '系统', '修改用户状态', 'com.lunabaka.controller.UserController.updateStatus()', '[{\"昵称\":\"系统管理员\",\"备注\":\" 系统管理员\",\"状态\":\"禁用\"}]', 7, '0:0:0:0:0:0:0:1', '2026-06-22 15:49:02', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (117, '系统', '修改用户状态', 'com.lunabaka.controller.UserController.updateStatus()', '[{\"昵称\":\"系统管理员\",\"备注\":\" 系统管理员\",\"状态\":\"0\"}]', 2, '0:0:0:0:0:0:0:1', '2026-06-22 15:50:33', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (118, '系统', '修改用户状态', 'com.lunabaka.controller.UserController.updateStatus()', '[{\"昵称\":\"系统管理员\",\"备注\":\" 系统管理员\",\"状态\":\"0\"}]', 7, '0:0:0:0:0:0:0:1', '2026-06-22 15:50:51', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (119, '系统', '修改用户状态', 'com.lunabaka.controller.UserController.updateStatus()', '[{\"昵称\":\"系统管理员\",\"备注\":\" 系统管理员\",\"状态\":\"0\"}]', 2, '0:0:0:0:0:0:0:1', '2026-06-22 15:51:06', '用户管理', '修改');
+INSERT INTO `operation_log` VALUES (120, '系统', '修改用户角色状态', 'com.lunabaka.controller.RoleController.updateStatus()', '[{\"id\":1,\"status\":0}]', 43, '0:0:0:0:0:0:0:1', '2026-06-22 16:45:43', '用户角色管理', '修改');
+INSERT INTO `operation_log` VALUES (121, '系统', '修改用户角色状态', 'com.lunabaka.controller.RoleController.updateStatus()', '[{\"id\":1,\"status\":1}]', 7, '0:0:0:0:0:0:0:1', '2026-06-22 16:45:47', '用户角色管理', '修改');
+INSERT INTO `operation_log` VALUES (122, '系统', '添加用户角色', 'com.lunabaka.controller.RoleController.addRole()', '[{\"id\":2,\"name\":\"采购员\",\"bio\":\"采购\",\"status\":1}]', 9, '0:0:0:0:0:0:0:1', '2026-06-22 16:47:21', '用户角色管理', '新增');
+INSERT INTO `operation_log` VALUES (123, '系统', '添加用户角色', 'com.lunabaka.controller.RoleController.addRole()', '[{\"id\":3,\"name\":\"销售员\",\"bio\":\"销售\",\"status\":1}]', 4, '0:0:0:0:0:0:0:1', '2026-06-22 16:47:44', '用户角色管理', '新增');
+INSERT INTO `operation_log` VALUES (124, '系统', '添加用户角色', 'com.lunabaka.controller.RoleController.addRole()', '[{\"id\":4,\"name\":\"仓库管理员\",\"bio\":\"仓库管理员\",\"status\":1}]', 3, '0:0:0:0:0:0:0:1', '2026-06-22 16:47:52', '用户角色管理', '新增');
+INSERT INTO `operation_log` VALUES (125, '系统', '添加用户角色', 'com.lunabaka.controller.RoleController.addRole()', '[{\"id\":5,\"name\":\"财务人员\",\"bio\":\"财务人员\",\"status\":1}]', 13, '0:0:0:0:0:0:0:1', '2026-06-22 16:48:01', '用户角色管理', '新增');
+INSERT INTO `operation_log` VALUES (126, '系统', '添加用户角色', 'com.lunabaka.controller.RoleController.addRole()', '[{\"id\":6,\"name\":\"测试\",\"bio\":\"测试员\",\"status\":1}]', 33, '0:0:0:0:0:0:0:1', '2026-06-22 17:20:01', '用户角色管理', '新增');
+INSERT INTO `operation_log` VALUES (127, '系统', '删除用户角色', 'com.lunabaka.controller.RoleController.deleteById()', '[{\"id\":6,\"name\":\"测试\",\"bio\":\"测试员\",\"status\":1}]', 8, '0:0:0:0:0:0:0:1', '2026-06-22 17:20:03', '用户角色管理', '删除');
 
 -- ----------------------------
 -- Table structure for purchase
@@ -541,7 +557,7 @@ CREATE TABLE `purchase`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `confirm_time` datetime NULL DEFAULT NULL COMMENT '确认时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '采购订单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of purchase
@@ -640,6 +656,43 @@ INSERT INTO `purchase_item` VALUES (10, 5, 9, 200.00, 7.50, 1500.00, 1);
 INSERT INTO `purchase_item` VALUES (11, 5, 11, 100.00, 42.00, 4200.00, 2);
 INSERT INTO `purchase_item` VALUES (12, 5, 12, 100.00, 38.00, 3800.00, 3);
 INSERT INTO `purchase_item` VALUES (13, 5, 13, 100.00, 14.00, 1400.00, 4);
+
+-- ----------------------------
+-- Table structure for role
+-- ----------------------------
+DROP TABLE IF EXISTS `role`;
+CREATE TABLE `role`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '角色ID',
+  `name` char(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '角色名称',
+  `bio` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '角色简介',
+  `status` int(11) NULL DEFAULT NULL COMMENT '角色状态 0-停用/1-启用',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of role
+-- ----------------------------
+INSERT INTO `role` VALUES (1, '系统管理员', ' 系统管理员', 1);
+INSERT INTO `role` VALUES (2, '采购员', '采购', 1);
+INSERT INTO `role` VALUES (3, '销售员', '销售', 1);
+INSERT INTO `role` VALUES (4, '仓库管理员', '仓库管理员', 1);
+INSERT INTO `role` VALUES (5, '财务人员', '财务人员', 1);
+
+-- ----------------------------
+-- Table structure for role_menu
+-- ----------------------------
+DROP TABLE IF EXISTS `role_menu`;
+CREATE TABLE `role_menu`  (
+  `id` bigint(20) NOT NULL COMMENT '角色菜单关联ID',
+  `role_id` bigint(20) NULL DEFAULT NULL COMMENT '角色ID',
+  `menu_id` int(11) NULL DEFAULT NULL COMMENT '菜单ID',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_role_menu`(`role_id`, `menu_id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色菜单关联表' ROW_FORMAT = Fixed;
+
+-- ----------------------------
+-- Records of role_menu
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for sal_order
@@ -858,7 +911,7 @@ CREATE TABLE `sys_menu`  (
   `page_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `sort_num` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -908,7 +961,7 @@ CREATE TABLE `user`  (
   `del_flag` int(11) NULL DEFAULT 0,
   PRIMARY KEY (`uid`) USING BTREE,
   UNIQUE INDEX `unique_id`(`uid` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
@@ -931,7 +984,24 @@ INSERT INTO `user` VALUES (33, '125', '$2a$10$C1mV3qLobTFVbM87VM1TLuYJPDWpv38vyx
 INSERT INTO `user` VALUES (34, '126', '$2a$10$P9kkQ0/sLcEQ3tk9AlMJkOvfIbmUm5hy8hj/wdCQ68nqzzBYvs2Dy', '126', 'test@test.com', '开发工程师', '研发组', '14323453217', '46', '2026-03-23 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:49', NULL, 0);
 INSERT INTO `user` VALUES (35, '127', '$2a$10$yV41NqzlSI9ViTKXGOi5UOAjwvhHeaWx2sjJAHPxQJ9IcuEktUnaO', '127', 'test@test.com', '开发工程师', '研发组', '14323453218', '47', '2026-03-24 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:51', NULL, 0);
 INSERT INTO `user` VALUES (36, '128', '$2a$10$zRuP.d4C4E2FoCsznNo/VOSKNREe/4mXZgBycgnBkRu8ucjuXMO9S', '128', 'test@test.com', '开发工程师', '研发组', '14323453219', '48', '2026-03-25 22:30:00', '启用', '2026-04-01 15:28:33', '2026-04-13 15:40:52', NULL, 0);
-INSERT INTO `user` VALUES (40, 'admin1', '$2a$10$K1Cqk46hTkm663sDkShDhOfRogbrsJeMxYjiRunbGdFIC55V9XFlu', 'admin1', 'test@test.com', NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-07 15:37:16', '2026-04-13 15:40:52', NULL, 0);
+INSERT INTO `user` VALUES (40, 'admin1', '$2a$10$K1Cqk46hTkm663sDkShDhOfRogbrsJeMxYjiRunbGdFIC55V9XFlu', 'admin1', 'test@test.com', '超级管理员', NULL, NULL, NULL, NULL, NULL, '2026-04-07 15:37:16', '2026-06-22 16:56:20', NULL, 0);
+
+-- ----------------------------
+-- Table structure for user_role
+-- ----------------------------
+DROP TABLE IF EXISTS `user_role`;
+CREATE TABLE `user_role`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '用户角色关联ID',
+  `user_id` bigint(20) NULL DEFAULT NULL COMMENT '用户ID',
+  `role_id` bigint(20) NULL DEFAULT NULL COMMENT '角色ID',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_user_role`(`user_id`, `role_id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色关联表' ROW_FORMAT = Fixed;
+
+-- ----------------------------
+-- Records of user_role
+-- ----------------------------
+INSERT INTO `user_role` VALUES (1, 1, 1);
 
 -- ----------------------------
 -- Table structure for warehouse

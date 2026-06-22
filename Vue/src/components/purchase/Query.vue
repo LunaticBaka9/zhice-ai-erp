@@ -5,10 +5,14 @@
                 <el-card shadow="never" class="search-card">
                     <el-form :inline="true" :model="orderSearch">
                         <el-form-item label="单号">
-                            <el-input v-model="orderSearch.billNo" clearable style="width: 140px" />
+                            <el-input v-model="orderSearch.billNo" clearable
+                                      @clear="loadOrders"
+                                      @keyup.enter="loadOrders" style="width: 140px" />
                         </el-form-item>
                         <el-form-item label="状态">
-                            <el-select v-model="orderSearch.status" clearable placeholder="全部" style="width: 130px">
+                            <el-select v-model="orderSearch.status" clearable
+                                       @clear="loadOrders"
+                                       @keyup.enter="loadOrders" placeholder="全部" style="width: 130px">
                                 <el-option label="草稿" :value="0" />
                                 <el-option label="已确认待入库" :value="1" />
                                 <el-option label="已入库完成" :value="2" />
@@ -88,8 +92,8 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
-import { ElMessage } from "element-plus";
+import {onMounted, reactive, ref} from "vue";
+import {ElMessage} from "element-plus";
 import request from "../../utils/request";
 
 const activeTab = ref("order");

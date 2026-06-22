@@ -3,14 +3,19 @@
         <el-card shadow="never" class="search-card">
             <el-form :inline="true" :model="searchForm" class="search-form">
                 <el-form-item label="单号">
-                    <el-input v-model="searchForm.billNo" placeholder="采购单号" clearable style="width: 160px" />
+                    <el-input v-model="searchForm.billNo" placeholder="采购单号" clearable
+                              @clear="loadList"
+                              @keyup.enter="loadList" style="width: 160px"/>
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 140px">
-                        <el-option label="草稿" :value="0" />
-                        <el-option label="已确认待入库" :value="1" />
-                        <el-option label="已入库完成" :value="2" />
-                        <el-option label="已作废" :value="3" />
+                    <el-select v-model="searchForm.status" placeholder="全部"
+                               clearable
+                               @clear="loadList"
+                               @keyup.enter="loadList" style="width: 140px">
+                        <el-option label="草稿" :value="0"/>
+                        <el-option label="已确认待入库" :value="1"/>
+                        <el-option label="已入库完成" :value="2"/>
+                        <el-option label="已作废" :value="3"/>
                     </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -22,29 +27,37 @@
 
         <div class="toolbar">
             <el-button type="primary" @click="openAdd">
-                <el-icon><Plus /></el-icon>
+                <el-icon>
+                    <Plus/>
+                </el-icon>
                 新增采购订单
             </el-button>
         </div>
 
         <el-card shadow="never">
             <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
-                <el-table-column prop="billNo" label="采购单号" width="160" />
-                <el-table-column prop="supplierName" label="供应商" min-width="120" />
-                <el-table-column prop="warehouseId" label="仓库ID" width="88" />
-                <el-table-column prop="totalAmount" label="总金额" width="100" />
+                <el-table-column prop="billNo" label="采购单号" width="160"/>
+                <el-table-column prop="supplierName" label="供应商" min-width="120"/>
+                <el-table-column prop="warehouseId" label="仓库ID" width="88"/>
+                <el-table-column prop="totalAmount" label="总金额" width="100"/>
                 <el-table-column label="状态" width="120">
                     <template #default="{ row }">
                         <el-tag :type="poStatusType(row.status)">{{ poStatusText(row.status) }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="createTime" label="创建时间" width="170" />
+                <el-table-column prop="createTime" label="创建时间" width="170"/>
                 <el-table-column label="操作" width="240" fixed="right">
                     <template #default="{ row }">
                         <el-button link type="primary" size="small" @click="openDetail(row)">详情</el-button>
-                        <el-button v-if="row.status === 0" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-                        <el-button v-if="row.status === 0" link type="success" size="small" @click="handleConfirm(row)">确认</el-button>
-                        <el-button v-if="row.status !== 2 && row.status !== 3" link type="danger" size="small" @click="handleCancel(row)">作废</el-button>
+                        <el-button v-if="row.status === 0" link type="primary" size="small" @click="openEdit(row)">
+                            编辑
+                        </el-button>
+                        <el-button v-if="row.status === 0" link type="success" size="small" @click="handleConfirm(row)">
+                            确认
+                        </el-button>
+                        <el-button v-if="row.status !== 2 && row.status !== 3" link type="danger" size="small"
+                                   @click="handleCancel(row)">作废
+                        </el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -61,31 +74,34 @@
             </div>
         </el-card>
 
-        <el-dialog v-model="dialog.visible" :title="dialog.title" width="900px" destroy-on-close @closed="onDialogClosed">
+        <el-dialog v-model="dialog.visible" :title="dialog.title" width="900px" destroy-on-close
+                   @closed="onDialogClosed">
             <el-form :model="dialog.form" label-width="100px">
                 <el-row :gutter="12">
                     <el-col :span="8">
                         <el-form-item label="供应商" required>
-                            <el-select v-model="dialog.form.supplierId" placeholder="选择供应商" filterable style="width: 100%">
-                                <el-option v-for="s in suppliers" :key="s.id" :label="s.name" :value="s.id" />
+                            <el-select v-model="dialog.form.supplierId" placeholder="选择供应商" filterable
+                                       style="width: 100%">
+                                <el-option v-for="s in suppliers" :key="s.id" :label="s.name" :value="s.id"/>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="入库仓库" required>
-                            <el-select v-model="dialog.form.warehouseId" placeholder="选择仓库" filterable style="width: 100%">
-                                <el-option v-for="w in warehouses" :key="w.id" :label="w.name" :value="Number(w.id)" />
+                            <el-select v-model="dialog.form.warehouseId" placeholder="选择仓库" filterable
+                                       style="width: 100%">
+                                <el-option v-for="w in warehouses" :key="w.id" :label="w.name" :value="Number(w.id)"/>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="单号">
-                            <el-input v-model="dialog.form.billNo" placeholder="留空自动生成" clearable />
+                            <el-input v-model="dialog.form.billNo" placeholder="留空自动生成" clearable/>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-form-item label="备注">
-                    <el-input v-model="dialog.form.remark" type="textarea" :rows="2" />
+                    <el-input v-model="dialog.form.remark" type="textarea" :rows="2"/>
                 </el-form-item>
             </el-form>
             <div class="sub-table-wrap">
@@ -108,12 +124,14 @@
                     </el-table-column>
                     <el-table-column label="数量" width="120">
                         <template #default="{ row }">
-                            <el-input-number v-model="row.quantity" :min="0.01" :precision="2" :step="1" style="width: 100%" @change="calcRow(row)" />
+                            <el-input-number v-model="row.quantity" :min="0.01" :precision="2" :step="1"
+                                             style="width: 100%" @change="calcRow(row)"/>
                         </template>
                     </el-table-column>
                     <el-table-column label="单价" width="120">
                         <template #default="{ row }">
-                            <el-input-number v-model="row.unitPrice" :min="0" :precision="2" :step="1" style="width: 100%" @change="calcRow(row)" />
+                            <el-input-number v-model="row.unitPrice" :min="0" :precision="2" :step="1"
+                                             style="width: 100%" @change="calcRow(row)"/>
                         </template>
                     </el-table-column>
                     <el-table-column label="金额" width="100">
@@ -123,7 +141,8 @@
                     </el-table-column>
                     <el-table-column label="操作" width="70" fixed="right">
                         <template #default="{ $index }">
-                            <el-button link type="danger" size="small" @click="dialog.items.splice($index, 1)">删</el-button>
+                            <el-button link type="danger" size="small" @click="dialog.items.splice($index, 1)">删
+                            </el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -151,11 +170,11 @@
                     <el-descriptions-item label="备注">{{ detail.data.remark || "—" }}</el-descriptions-item>
                 </el-descriptions>
                 <el-table :data="detail.data.items || []" border size="small" class="mt16">
-                    <el-table-column prop="skuCode" label="SKU" width="120" />
-                    <el-table-column prop="goodsName" label="商品" />
-                    <el-table-column prop="quantity" label="数量" width="90" />
-                    <el-table-column prop="unitPrice" label="单价" width="90" />
-                    <el-table-column prop="amount" label="金额" width="90" />
+                    <el-table-column prop="skuCode" label="SKU" width="120"/>
+                    <el-table-column prop="goodsName" label="商品"/>
+                    <el-table-column prop="quantity" label="数量" width="90"/>
+                    <el-table-column prop="unitPrice" label="单价" width="90"/>
+                    <el-table-column prop="amount" label="金额" width="90"/>
                 </el-table>
             </template>
             <template #footer>
@@ -166,9 +185,9 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { Plus } from "@element-plus/icons-vue";
+import {onMounted, reactive, ref} from "vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {Plus} from "@element-plus/icons-vue";
 import request from "../../utils/request";
 
 const loading = ref(false);
@@ -208,12 +227,12 @@ const detail = reactive({
 });
 
 function poStatusText(s) {
-    const m = { 0: "草稿", 1: "已确认待入库", 2: "已入库完成", 3: "已作废" };
+    const m = {0: "草稿", 1: "已确认待入库", 2: "已入库完成", 3: "已作废"};
     return m[s] != null ? m[s] : s;
 }
 
 function poStatusType(s) {
-    const m = { 0: "info", 1: "warning", 2: "success", 3: "danger" };
+    const m = {0: "info", 1: "warning", 2: "success", 3: "danger"};
     return m[s] || "info";
 }
 
@@ -259,7 +278,7 @@ function resetSearch() {
 
 function openAdd() {
     dialog.title = "新增采购订单";
-    dialog.form = { id: null, billNo: "", supplierId: null, warehouseId: null, remark: "" };
+    dialog.form = {id: null, billNo: "", supplierId: null, warehouseId: null, remark: ""};
     dialog.items = [];
     dialog.visible = true;
 }
@@ -377,11 +396,12 @@ function handleConfirm(row) {
                 ElMessage.error(res.msg || "操作失败");
             }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
 }
 
 function handleCancel(row) {
-    ElMessageBox.confirm("确定作废该采购订单？", "作废", { type: "warning" })
+    ElMessageBox.confirm("确定作废该采购订单？", "作废", {type: "warning"})
         .then(async () => {
             const res = await request.post(`/purchase/order/cancel/${row.id}`);
             if (res.code === "200") {
@@ -391,7 +411,8 @@ function handleCancel(row) {
                 ElMessage.error(res.msg || "操作失败");
             }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
 }
 
 onMounted(() => {
@@ -404,20 +425,25 @@ onMounted(() => {
 .purchase-order {
     padding: 12px;
 }
+
 .search-card {
     margin-bottom: 12px;
 }
+
 .toolbar {
     margin-bottom: 12px;
 }
+
 .pagination-container {
     margin-top: 16px;
     display: flex;
     justify-content: flex-end;
 }
+
 .sub-table-wrap {
     margin-top: 8px;
 }
+
 .sub-table-head {
     display: flex;
     justify-content: space-between;
@@ -425,6 +451,7 @@ onMounted(() => {
     margin-bottom: 8px;
     font-weight: 500;
 }
+
 .mt16 {
     margin-top: 16px;
 }

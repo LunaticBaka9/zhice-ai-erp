@@ -30,6 +30,7 @@
                         clearable
                         @clear="load"
                     >
+                        <el-option label="登录" value="登录" />
                         <el-option label="新增" value="新增" />
                         <el-option label="删除" value="删除" />
                         <el-option label="修改" value="修改" />
@@ -82,16 +83,7 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column
-                    prop="operation"
-                    label="操作描述"
-                    width="200"
-                />
-                <el-table-column prop="method" label="方法名">
-                    <template #default="{ row }">
-                        <span class="ellipsis-text">{{ row.method }}</span>
-                    </template>
-                </el-table-column>
+                <el-table-column prop="operation" label="操作描述" />
                 <el-table-column prop="time" label="执行时间" width="100">
                     <template #default="{ row }"> {{ row.time }}ms </template>
                 </el-table-column>
@@ -165,11 +157,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { Search, Refresh, Delete } from "@element-plus/icons-vue";
+import {onMounted, reactive, ref} from "vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {Delete, Refresh, Search} from "@element-plus/icons-vue";
 import request from "../../utils/request.js";
-import { formatDateTime } from "../../utils/date.js";
+import {formatDateTime} from "../../utils/date.js";
 
 const data = reactive({
     tableData: [],

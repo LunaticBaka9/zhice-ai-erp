@@ -3,13 +3,19 @@
         <el-card shadow="never" class="search-card">
             <el-form :inline="true" :model="searchForm" class="search-form">
                 <el-form-item label="入库单号">
-                    <el-input v-model="searchForm.billNo" clearable style="width: 150px" />
+                    <el-input v-model="searchForm.billNo" clearable
+                              @clear="loadList"
+                              @keyup.enter="loadList" style="width: 150px" />
                 </el-form-item>
                 <el-form-item label="采购单号">
-                    <el-input v-model="searchForm.purchaseBillNo" clearable style="width: 150px" />
+                    <el-input v-model="searchForm.purchaseBillNo" clearable
+                              @clear="loadList"
+                              @keyup.enter="loadList" style="width: 150px" />
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 120px">
+                    <el-select v-model="searchForm.status" placeholder="全部" clearable
+                               @clear="loadList"
+                               @keyup.enter="loadList" style="width: 120px">
                         <el-option label="草稿" :value="0" />
                         <el-option label="已确认入账" :value="1" />
                     </el-select>
@@ -113,9 +119,9 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { Plus } from "@element-plus/icons-vue";
+import {onMounted, reactive, ref} from "vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {Plus} from "@element-plus/icons-vue";
 import request from "../../utils/request";
 
 const loading = ref(false);

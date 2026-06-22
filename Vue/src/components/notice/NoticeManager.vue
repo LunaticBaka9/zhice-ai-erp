@@ -50,7 +50,7 @@
             </el-form>
         </el-card>
 
-        <div class="card" style="margin-bottom: 10px">
+        <div class="card" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px">
             <el-button type="primary" @click="exportData"> 导出表格 </el-button>
             <el-upload
                 action="/api/notice/importData"
@@ -147,12 +147,12 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
-import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { Search, Refresh, Edit, Delete, Plus } from "@element-plus/icons-vue";
+import {reactive, ref} from "vue";
+import {useRouter} from "vue-router";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {Delete, Edit, Refresh, Search} from "@element-plus/icons-vue";
 import request from "../../utils/request.js";
-import { formatDateTime, parseDate } from "../../utils/date.js";
+import {formatDateTime, parseDate} from "../../utils/date.js";
 
 const user = JSON.parse(localStorage.getItem("local_user"));
 

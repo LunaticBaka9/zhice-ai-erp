@@ -179,28 +179,29 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, reactive } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
+import {computed, onMounted, onUnmounted, reactive, ref} from "vue";
+import {useRoute, useRouter} from "vue-router";
+import {ElMessage, ElMessageBox, ElNotification} from "element-plus";
 import {
-    Fold,
-    Expand,
-    Bell,
-    ArrowDown,
-    SwitchButton,
-    Avatar,
-    Setting,
-    FullScreen,
     Aim,
-    Warning,
-    InfoFilled,
-    Tickets,
-    SuccessFilled,
+    ArrowDown,
+    Avatar,
+    Bell,
     ChatDotRound,
     Document,
+    Expand,
+    Fold,
+    FullScreen,
+    InfoFilled,
+    Setting,
+    SuccessFilled,
+    SwitchButton,
+    Tickets,
+    Warning,
 } from "@element-plus/icons-vue";
 import request from "../../utils/request";
-import { useMenuStore } from "../../store/menu";
+import {useMenuStore} from "../../store/menu";
+
 const menuStore = useMenuStore();
 const isCollapse = menuStore.isCollapse;
 const handleToggle = menuStore.handleToggle;
@@ -223,17 +224,23 @@ const breadcrumbMap = {
     "/notice/index": "公告详情",
     "/notice/post": "公告发布",
     "/notice/manager": "公告管理",
+    "/base/goodsInfo": "商品管理",
+    "/base/supplier": "供应商管理",
+    "/base/customer": "客户管理",
+    "/base/warehouse": "仓库管理",
+    "/sale/order": "销售订单",
+    "/sale/delivery": "销售发货",
+    "purchase/order": "采购订单",
+    "purchase/inbound": "采购入库",
+    "purchase/query": "采购单据查询",
     "/system/user": "用户管理",
-    "/system/sign": "打卡管理",
+    "/system/role": "角色管理",
     "/monitor/operationLog": "操作日志",
     "/user/list": "用户列表",
     "/user/detail": "用户详情",
     "/order": "订单管理",
     "/order/list": "订单列表",
     "/order/detail": "订单详情",
-    "/product": "商品管理",
-    "/product/list": "商品列表",
-    "/product/detail": "商品详情",
 };
 
 // 生成面包屑数据

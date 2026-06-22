@@ -445,17 +445,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import {
-    Plus,
-    Search,
-    Refresh,
-    View,
-    Edit,
-    Delete,
-    Key,
-} from "@element-plus/icons-vue";
+import {onMounted, reactive, ref} from "vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {Delete, Edit, Key, Plus, Refresh, Search, View,} from "@element-plus/icons-vue";
 import request from "../../utils/request";
 
 // 默认头像
@@ -813,7 +805,7 @@ const submitUser = async () => {
                     const res = await request.post("/user/add", submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增用户成功");
-                        dialog.visible = false;
+                            dialog.visible = false;
                         getUserList();
                     } else {
                         ElMessage.error(res.msg || "新增用户失败");

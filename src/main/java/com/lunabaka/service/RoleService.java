@@ -1,6 +1,6 @@
 package com.lunabaka.service;
 
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.lunabaka.entity.Role;
 
 /**
@@ -8,9 +8,8 @@ import com.lunabaka.entity.Role;
 * @description 针对表【role(用户角色表)】的数据库操作Service
 * @createDate 2026-06-18 15:11:32
 */
-public interface RoleService {
+public interface RoleService extends IService<Role> {
 
-    PageInfo<Role> page(int pageNum, int pageSize, Role query);
+    void updateStatus(Role role);
 
-    PageInfo<Role> page(Integer pageNum, Integer pageSize, Role role);
 }

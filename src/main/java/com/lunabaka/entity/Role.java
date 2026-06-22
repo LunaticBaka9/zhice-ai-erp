@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 用户角色表
  *
@@ -16,16 +18,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role {
-    /**
-     * 角色ID
-     */
+public class Role implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
-
-    /**
-     * 角色名称
-     */
     private String name;
     private String bio;
     private int status;

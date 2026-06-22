@@ -1,14 +1,11 @@
 package com.lunabaka.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lunabaka.entity.Role;
 import com.lunabaka.mapper.RoleMapper;
 import com.lunabaka.service.RoleService;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
 * @author je123
@@ -16,25 +13,13 @@ import java.util.List;
 * {@code @createDate} 2026-06-18 15:11:32
  */
 @Service
-public class RoleServiceImpl implements RoleService {
+public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 
-    @Resource
-    RoleMapper roleMapper;
-
-    public RoleServiceImpl(RoleMapper roleMapper) {
-        this.roleMapper = roleMapper;
-    }
-
-    @Override
-    public PageInfo<Role> page(int pageNum, int pageSize, Role query) {
-        PageHelper.startPage(pageNum, pageSize);
-        List<Role> list = roleMapper.selectList(query != null ? query : new Role());
-        return PageInfo.of(list);
-    }
-
-    @Override
-    public PageInfo<Role> page(Integer pageNum, Integer pageSize, Role role) {
-        return null;
+    public void updateStatus(Role role){
+        LambdaUpdateWrapper<Role> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Role::getId, role.getId())
+                .set(Role::getStatus, role.getStatus());
+        baseMapper.update(null, wrapper);
     }
 
 }

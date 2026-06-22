@@ -5,7 +5,7 @@
             <el-form :inline="true" :model="searchForm" class="search-form">
                 <el-form-item label="用户角色名">
                     <el-input
-                        v-model="searchForm.username"
+                        v-model="searchForm.name"
                         placeholder="请输入用户角色名"
                         clearable
                         @clear="handleSearch"
@@ -54,28 +54,20 @@
             >
                 <el-table-column type="selection" width="55" />
                 <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="name" label="用户角色" width="120" />
-                <el-table-column label="状态" width="100">
+                <el-table-column prop="name" label="用户角色" />
+                <el-table-column prop="bio" label="简介" />
+                <el-table-column label="状态" >
                     <template #default="{ row }">
                         <el-switch
                             v-model="row.status"
-                            active-value="启用"
-                            inactive-value="禁用"
+                            :active-value="1"
+                            :inactive-value="0"
                             @change="handleStatusChange(row)"
                         />
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="200" fixed="right">
+                <el-table-column label="操作" fixed="right">
                     <template #default="{ row }">
-                        <el-button
-                            link
-                            type="primary"
-                            size="small"
-                            @click="handleView(row)"
-                        >
-                            <el-icon><View /></el-icon>
-                            查看
-                        </el-button>
                         <el-button
                             link
                             type="primary"
@@ -93,15 +85,6 @@
                         >
                             <el-icon><Delete /></el-icon>
                             删除
-                        </el-button>
-                        <el-button
-                            link
-                            type="primary"
-                            size="small"
-                            @click="handleResetPassword(row)"
-                        >
-                            <el-icon><Key /></el-icon>
-                            修改密码
                         </el-button>
                     </template>
                 </el-table-column>
@@ -121,7 +104,7 @@
             </div>
         </el-card>
 
-        <!-- 新增/编辑用户对话框 -->
+        <!-- 新增/编辑用户角色对话框 -->
         <el-dialog
             v-model="dialog.visible"
             :title="dialog.title"
@@ -135,13 +118,14 @@
                 :rules="dialog.rules"
                 label-width="100px"
                 status-icon
+                :key="dialog.form.id || 'add'"
             >
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="姓名" prop="name">
+                        <el-form-item label="用户角色" prop="name">
                             <el-input
                                 v-model="dialog.form.name"
-                                placeholder="请输入姓名"
+                                placeholder="请输入用户角色"
                                 :disabled="dialog.isView"
                             />
                         </el-form-item>
@@ -157,8 +141,8 @@
                                 style="width: 100%"
                                 :disabled="dialog.isView"
                             >
-                                <el-option label="启用" value="启用" />
-                                <el-option label="禁用" value="禁用" />
+                                <el-option :label="'启用'" :value="1" />
+                                <el-option :label="'禁用'" :value="0" />
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -183,7 +167,7 @@
                     <el-button
                         v-if="!dialog.isView"
                         type="primary"
-                        @click="submitUser"
+                        @click="submitRole"
                         :loading="dialog.loading"
                     >
                         确认
@@ -191,61 +175,13 @@
                 </span>
             </template>
         </el-dialog>
-
-        <!-- 查看用户详情对话框 -->
-        <el-dialog v-model="viewDialog.visible" title="用户详情" width="500px">
-            <el-descriptions :column="1" border>
-                <el-descriptions-item label="用户名">{{
-                        viewDialog.data.username
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="姓名">{{
-                        viewDialog.data.name
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="角色">{{
-                        viewDialog.data.role
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="部门">{{
-                        viewDialog.data.department
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="手机号">{{
-                        viewDialog.data.phone
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="邮箱">{{
-                        viewDialog.data.email
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="入职时间">{{
-                        viewDialog.data.joinDate
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="状态">
-                    <el-tag
-                        :type="
-                            viewDialog.data.status === '启用'
-                                ? 'success'
-                                : 'danger'
-                        "
-                    >
-                        {{ viewDialog.data.status }}
-                    </el-tag>
-                </el-descriptions-item>
-                <el-descriptions-item label="个人简介">{{
-                        viewDialog.data.bio || "暂无"
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="创建时间">{{
-                        viewDialog.data.createTime
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="更新时间">{{
-                        viewDialog.data.updateTime
-                    }}</el-descriptions-item>
-            </el-descriptions>
-        </el-dialog>
-
     </div>
 </template>
 
 <script setup>
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
-import {Delete, Edit, Key, Plus, Refresh, Search, View,} from "@element-plus/icons-vue";
+import {Delete, Edit, Plus, Refresh, Search,} from "@element-plus/icons-vue";
 import request from "../../utils/request";
 
 // 搜索表单
@@ -268,46 +204,6 @@ const pagination = reactive({
 // 选中的行
 const selectedRows = ref([]);
 
-// 部门选项
-const departmentOptions = ref([
-    {
-        id: "技术部",
-        name: "技术部",
-        children: [
-            { id: "研发组", name: "研发组" },
-            { id: "测试组", name: "测试组" },
-            { id: "运维组", name: "运维组" },
-        ],
-    },
-    {
-        id: "产品部",
-        name: "产品部",
-        children: [
-            { id: "产品组", name: "产品组" },
-            { id: "设计组", name: "设计组" },
-            { id: "交互组", name: "交互组" },
-        ],
-    },
-    {
-        id: "市场部",
-        name: "市场部",
-        children: [
-            { id: "运营组", name: "运营组" },
-            { id: "销售组", name: "销售组" },
-            { id: "公关组", name: "公关组" },
-        ],
-    },
-    {
-        id: "admin",
-        name: "行政部",
-        children: [
-            { id: "admin-hr", name: "人力资源" },
-            { id: "admin-finance", name: "财务组" },
-            { id: "admin-office", name: "办公室" },
-        ],
-    },
-]);
-
 // 新增/编辑对话框
 const roleFormRef = ref();
 const dialog = reactive({
@@ -319,12 +215,12 @@ const dialog = reactive({
     form: {
         id: null,
         name: "",
-        role: "",
-        status: "启用",
+        bio: "",
+        status: 1,
     },
     rules: {
         name: [
-            { required: true, message: "请输入姓名", trigger: "blur" },
+            { required: true, message: "请输入用户角色", trigger: "blur" },
             {
                 min: 2,
                 max: 20,
@@ -335,13 +231,7 @@ const dialog = reactive({
     },
 });
 
-// 查看详情对话框
-const viewDialog = reactive({
-    visible: false,
-    data: {},
-});
-
-// 获取用户列表
+// 获取用户角色列表
 const getRoleList = async () => {
     loading.value = true;
     try {
@@ -356,9 +246,8 @@ const getRoleList = async () => {
         });
         const res = await request.get("/role/list", { params });
         if (res.code === "200") {
-            userList.value = res.data.records || res.data.list || [];
+            roleList.value = res.data.records;
             pagination.total = res.data.total || 0;
-            console.log(res.data);
         } else {
             ElMessage.error(res.msg || "获取用户角色列表失败");
         }
@@ -399,7 +288,7 @@ const handleSelectionChange = (val) => {
     selectedRows.value = val;
 };
 
-// 新增用户
+// 新增用户角色
 const handleAdd = () => {
     dialog.title = "新增用户角色";
     dialog.isAdd = true;
@@ -407,83 +296,54 @@ const handleAdd = () => {
     dialog.form = {
         id: null,
         name: "",
-        status: "启用",
+        status: 1,
         bio: "",
     };
     dialog.visible = true;
 };
 
-// 编辑用户
+// 编辑用户角色
 const handleEdit = (row) => {
     dialog.title = "编辑用户角色";
     dialog.isAdd = false;
     dialog.isView = false;
     dialog.form = {
-        uid: row.uid,
-        avatar: row.avatar || "",
-        username: row.username || "",
+        id: row.id || null,
         name: row.name || "",
-        password: "",
-        confirmPassword: "",
-        role: row.role || "",
-        department:
-            row.department && typeof row.department === "string"
-                ? row.department.split("/")
-                : [],
-        phone: row.phone || "",
-        email: row.email || "",
-        joinDate: row.joinDate || "",
-        status: row.status || "启用",
+        status: row.status ?? 1,
         bio: row.bio || "",
     };
     dialog.visible = true;
 };
 
-// 查看用户
-const handleView = (row) => {
-    viewDialog.data = { ...row };
-    viewDialog.visible = true;
-};
-
 // 提交用户
-const submitUser = async () => {
-    if (!userFormRef.value) return;
-
-    await userFormRef.value.validate(async (valid) => {
+const submitRole = async () => {
+    if (!roleFormRef.value) return;
+    await roleFormRef.value.validate(async (valid) => {
         if (valid) {
             dialog.loading = true;
             try {
                 const submitData = { ...dialog.form };
-                if (
-                    submitData.department &&
-                    Array.isArray(submitData.department)
-                ) {
-                    submitData.department = submitData.department.join("/");
-                }
-
                 if (dialog.isAdd) {
-                    delete submitData.confirmPassword;
-                    const res = await request.post("/user/add", submitData);
+                    const res = await request.post("/role/add", submitData);
                     if (res.code === "200") {
-                        ElMessage.success("新增用户成功");
+                        ElMessage.success("新增用户角色成功");
                         dialog.visible = false;
                         getRoleList();
                     } else {
-                        ElMessage.error(res.msg || "新增用户失败");
+                        ElMessage.error(res.msg || "新增用户角色失败");
                     }
                 } else {
-                    delete submitData.password;
-                    delete submitData.confirmPassword;
                     const res = await request.post(
-                        "/user/updateInfo",
+                        "/role/updateInfo",
                         submitData,
                     );
                     if (res.code === "200") {
-                        ElMessage.success("更新用户成功");
+                        ElMessage.success("更新用户角色成功");
                         dialog.visible = false;
                         getRoleList();
                     } else {
-                        ElMessage.error(res.msg || "更新用户失败");
+                        ElMessage.error(res.msg || "更新用户角色失败");
                     }
                 }
             } catch (error) {
@@ -497,14 +357,14 @@ const submitUser = async () => {
 
 // 删除用户
 const handleDelete = (row) => {
-    ElMessageBox.confirm(`确定要删除用户"${row.name}"吗？`, "提示", {
+    ElMessageBox.confirm(`确定要删除用户角色"${row.name}"吗？`, "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
     })
         .then(async () => {
             try {
-                const res = await request.post(`/user/delete`, row);
+                const res = await request.post(`/role/delete`, row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getRoleList();
@@ -518,18 +378,16 @@ const handleDelete = (row) => {
         .catch(() => {});
 };
 
-// // 修改状态
 const handleStatusChange = async (row) => {
     try {
-        const res = await request.post(`/user/updateStatus`, row);
+        const res = await request.post(`/role/updateStatus`, { id: row.id, status: row.status });
         if (res.code !== "200") {
             ElMessage.error("状态修改失败");
-            // 回滚状态
-            row.status = row.status === "启用" ? "禁用" : "启用";
+            row.status = row.status === 1 ? 0 : 1;
         }
     } catch (error) {
         ElMessage.error("状态修改失败");
-        row.status = row.status === "启用" ? "禁用" : "启用";
+        row.status = row.status === 1 ? 0 : 1;
     }
 };
 
@@ -545,11 +403,11 @@ const handleImport = (res, file, filelist) => {
 
 // 关闭对话框
 const handleDialogClose = () => {
-    userFormRef.value?.clearValidate();
+    roleFormRef.value?.clearValidate();
 };
 
 const exportData = async () => {
-    window.open("/user/exportData");
+    window.open("/role/exportData");
 };
 
 // 页面加载时获取数据
