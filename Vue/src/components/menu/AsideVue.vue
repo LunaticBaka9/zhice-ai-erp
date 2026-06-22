@@ -139,6 +139,9 @@
                 <el-menu-item index="/system/role">
                     <span>角色管理</span>
                 </el-menu-item>
+                <el-menu-item index="/system/menu">
+                    <span>菜单管理</span>
+                </el-menu-item>
                 <el-menu-item index="/monitor/operationLog">
                     <span>操作日志</span>
                 </el-menu-item>

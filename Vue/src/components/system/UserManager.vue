@@ -933,131 +933,16 @@ onMounted(() => {
 });
 </script>
 
+<style src="@/assets/css/manager.css" scoped></style>
 <style scoped>
-.user-management {
-    padding: 20px;
-    background-color: #f5f7fa;
-    min-height: 100vh;
-}
-
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.page-title {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 500;
-    color: #303133;
-}
-
-.search-card {
-    margin-bottom: 10px;
-}
-
-.search-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.search-form .el-form-item {
-    margin-bottom: 0;
-    margin-right: 20px;
-}
-
-.table-card {
-    position: relative;
-}
-
-.pagination-container {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.dialog-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-    .user-management {
-        padding: 12px;
-    }
-
-    .search-form {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-form .el-form-item {
-        margin-bottom: 12px;
-        margin-right: 0;
-    }
-
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    :deep(.el-table) {
-        overflow-x: auto;
-    }
-}
-
-/* 表格样式优化 */
-:deep(.el-table) {
-    font-size: 14px;
-}
-
-:deep(.el-table th) {
-    background-color: #f5f7fa;
-    color: #606266;
-    font-weight: 500;
-}
-
-:deep(.el-table .el-table__row) {
-    transition: background-color 0.2s;
-}
-
-:deep(.el-table .el-table__row:hover) {
-    background-color: #f5f7fa;
-}
-
-/* 设置表格行高 */
-:deep(.el-table__row) {
-    height: 60px;
-}
-
-/* 或者设置单元格内边距 */
-:deep(.el-table__body td) {
-    padding: 15px 0;
-}
-
-/* 或者设置单元格的高度 */
-:deep(.el-table td),
-:deep(.el-table th) {
-    padding: 12px 0;
-}
-
-/* 头像样式 */
 :deep(.el-avatar) {
     margin: 4px 0;
 }
 
-/* 标签样式 */
 :deep(.el-tag) {
     font-weight: normal;
 }
 
-/* 按钮组样式 */
 :deep(.el-button--link) {
     margin: 0 4px;
 }

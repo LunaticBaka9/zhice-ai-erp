@@ -1,8 +1,8 @@
 <template>
-    <div class="operation-log-management">
+    <div class="user-management">
         <!-- 搜索栏 -->
-        <el-card class="search-card" shadow="never" style="margin-bottom: 5px">
-            <el-form :inline="true">
+        <el-card class="search-card" shadow="never">
+            <el-form :inline="true" class="search-form">
                 <el-form-item label="操作用户">
                     <el-input
                         v-model="searchForm.username"
@@ -103,7 +103,7 @@
             </el-table>
 
             <!-- 分页 -->
-            <div class="pagination-wrapper">
+            <div class="pagination-container">
                 <el-pagination
                     v-model:current-page="data.pageNum"
                     v-model:page-size="data.pageSize"
@@ -285,29 +285,10 @@ onMounted(() => {
 });
 </script>
 
+<style src="@/assets/css/manager.css" scoped></style>
 <style scoped>
-.operation-log-management {
-    padding: 20px;
-}
-
-.search-card {
-    margin-bottom: 10px;
-}
-
 .el-select {
     --el-select-width: 220px;
-}
-
-.pagination-wrapper {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
-
-.ellipsis-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .params-pre {

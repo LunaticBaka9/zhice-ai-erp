@@ -5,9 +5,9 @@ const routeManager = [
         component: () => import("../components/system/UserManager.vue"),
     },
     {
-        path: "/system/sysMenu",
-        name: "sysMenuManager",
-        component: () => import("../components/system/SysMenuManager.vue")
+        path: "/system/menu",
+        name: "menuManager",
+        component: () => import("../components/system/MenuManager.vue")
     },
     {
         path: "/system/role",
