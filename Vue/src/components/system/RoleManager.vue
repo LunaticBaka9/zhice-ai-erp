@@ -32,7 +32,7 @@
             </el-button>
             <el-button type="primary" @click="exportData"> 导出表格 </el-button>
             <el-upload
-                action="/user/importData"
+                action="/role/importData"
                 :on-success="handleImport"
                 style="display: inline-block; margin-left: 10px"
                 :show-file-list="false"
@@ -407,7 +407,20 @@ const handleDialogClose = () => {
 };
 
 const exportData = async () => {
-    window.open("/role/exportData");
+    try {
+        const res = await request.get("/role/exportData", { responseType: "blob" });
+        const blob = new Blob([res], { type: "application/vnd.ms-excel" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "用户角色信息表.xls";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
+        ElMessage.error("导出失败");
+    }
 };
 
 // 页面加载时获取数据

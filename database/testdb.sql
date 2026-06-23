@@ -11,7 +11,7 @@
  Target Server Version : 80012 (8.0.12)
  File Encoding         : 65001
 
- Date: 22/06/2026 17:40:05
+ Date: 23/06/2026 15:56:51
 */
 
 SET NAMES utf8mb4;
@@ -270,6 +270,59 @@ INSERT INTO `inventory_operation` VALUES (1, 'WH1776155534114', 'inbound', NULL,
 INSERT INTO `inventory_operation` VALUES (2, 'WH1776156962129', 'transfer', 1, '一号仓库', 2, '二号仓库', 1, '苹果', 'APL001', 2.00, '个', 'Test', 'cancelled', '', 'manual', NULL, '2026-04-14 16:56:16', '2026-04-14 17:14:31', '2026-04-14 17:14:27', NULL, NULL, 0);
 INSERT INTO `inventory_operation` VALUES (3, 'WH1776157025744', 'outbound', 1, '一号仓库', NULL, NULL, 1, '苹果', 'APL001', 1.00, '个', 'Test', 'completed', '', 'manual', NULL, '2026-04-14 16:57:16', '2026-04-14 16:57:21', NULL, NULL, NULL, 0);
 INSERT INTO `inventory_operation` VALUES (4, 'WH1776157051705', 'adjustment', 1, '一号仓库', 1, '一号仓库', 1, '苹果', 'APL001', 5.00, '个', 'TEST', 'completed', '', 'manual', NULL, '2026-04-14 16:57:48', '2026-04-14 17:14:15', '2026-04-14 17:14:15', NULL, NULL, 0);
+
+-- ----------------------------
+-- Table structure for menu
+-- ----------------------------
+DROP TABLE IF EXISTS `menu`;
+CREATE TABLE `menu`  (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `icon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `pid` int(11) NULL DEFAULT NULL,
+  `page_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `sort_num` int(11) NULL DEFAULT NULL,
+  `status` int(11) NULL DEFAULT NULL COMMENT '菜单状态',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统菜单表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of menu
+-- ----------------------------
+INSERT INTO `menu` VALUES (1, '工作台', '/', 'house', '工作台', NULL, '/views/dashboard/index', 1, 1);
+INSERT INTO `menu` VALUES (2, '系统公告', 'notice', 'notification', '公告相关操作', NULL, '/views/notice/index', 2, 1);
+INSERT INTO `menu` VALUES (3, '公告详情', '/notice/index', 'notification', '公告详情', 2, '/views/notice/index', 201, 1);
+INSERT INTO `menu` VALUES (4, '公告发布', '/notice/post', 'notification', '公告发布', 2, '/views/notice/post', 202, 1);
+INSERT INTO `menu` VALUES (5, '公告管理', '/notice/manager', 'notification', '公告管理', 2, '/views/notice/manager', 203, 1);
+INSERT INTO `menu` VALUES (6, '基础资料', 'base', 'goods', '基础资料管理', NULL, '/views/base/index', 3, 1);
+INSERT INTO `menu` VALUES (7, '商品管理', '/base/goodsInfo', 'goods', '商品管理', 6, '/views/base/goodsInfo', 301, 1);
+INSERT INTO `menu` VALUES (8, '供应商管理', '/base/supplier', 'goods', '供应商管理', 6, '/views/base/supplier', 302, 1);
+INSERT INTO `menu` VALUES (9, '客户管理', '/base/customer', 'goods', '客户管理', 6, '/views/base/customer', 303, 1);
+INSERT INTO `menu` VALUES (10, '仓库管理', '/base/warehouse', 'goods', '仓库管理', 6, '/views/base/warehouse', 304, 1);
+INSERT INTO `menu` VALUES (11, '销售管理', 'sale', 'shopping-bag', '销售相关操作', NULL, '/views/sale/index', 4, 1);
+INSERT INTO `menu` VALUES (12, '销售订单', '/sale/order', 'shopping-bag', '销售订单', 11, '/views/sale/order', 401, 1);
+INSERT INTO `menu` VALUES (13, '销售发货', '/sale/delivery', 'shopping-bag', '销售发货', 11, '/views/sale/delivery', 402, 1);
+INSERT INTO `menu` VALUES (14, '采购管理', 'purchase', 'shopping-cart', '采购相关操作', NULL, '/views/purchase/index', 5, 1);
+INSERT INTO `menu` VALUES (15, '采购订单', '/purchase/order', 'shopping-cart', '采购订单', 14, '/views/purchase/order', 501, 1);
+INSERT INTO `menu` VALUES (16, '采购入库', '/purchase/inbound', 'shopping-cart', '采购入库', 14, '/views/purchase/inbound', 502, 1);
+INSERT INTO `menu` VALUES (17, '采购单据查询', '/purchase/query', 'shopping-cart', '采购单据查询', 14, '/views/purchase/query', 503, 1);
+INSERT INTO `menu` VALUES (18, '库存管理', 'inventory', 'box', '库存相关操作', NULL, '/views/inventory/index', 6, 1);
+INSERT INTO `menu` VALUES (19, '库存查询', '/inventory/query', 'box', '库存查询', 18, '/views/inventory/query', 601, 1);
+INSERT INTO `menu` VALUES (20, '仓库作业', '/inventory/operation', 'box', '仓库作业', 18, '/views/inventory/operation', 602, 1);
+INSERT INTO `menu` VALUES (21, '库存预警', '/inventory/warning', 'box', '库存预警', 18, '/views/inventory/warning', 603, 1);
+INSERT INTO `menu` VALUES (22, '报表分析', 'report', 'pie-chart', '报表分析', NULL, '/views/report/index', 7, 1);
+INSERT INTO `menu` VALUES (23, '核心报表', '/report/core', 'pie-chart', '核心报表', 22, '/views/report/core', 701, 1);
+INSERT INTO `menu` VALUES (24, '销售分析', '/report/sales', 'pie-chart', '销售分析', 22, '/views/report/sales', 702, 1);
+INSERT INTO `menu` VALUES (25, '库存分析', '/report/inventory', 'pie-chart', '库存分析', 22, '/views/report/inventory', 703, 1);
+INSERT INTO `menu` VALUES (26, '系统管理', '/system', 'setting', '系统基础配置', NULL, '/views/system/index', 8, 1);
+INSERT INTO `menu` VALUES (27, '用户管理', '/system/user', 'setting', '用户管理', 26, '/views/system/user', 801, 1);
+INSERT INTO `menu` VALUES (28, '角色管理', '/system/role', 'setting', '角色管理', 26, '/views/system/role', 802, 1);
+INSERT INTO `menu` VALUES (29, '菜单管理', '/system/menu', 'setting', '菜单管理', 26, '/views/system/menu', 803, 1);
+INSERT INTO `menu` VALUES (30, '操作日志', '/monitor/operationLog', 'setting', '操作日志', 26, '/views/monitor/operationLog', 804, 1);
+INSERT INTO `menu` VALUES (31, '消息中心', '/message', 'message', '消息中心', NULL, '/views/message/index', 9, 1);
+INSERT INTO `menu` VALUES (32, '个人主页', '/userInfo', 'avatar', '个人主页', NULL, '/views/userInfo/index', 10, 1);
 
 -- ----------------------------
 -- Table structure for message
@@ -667,7 +720,7 @@ CREATE TABLE `role`  (
   `bio` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '角色简介',
   `status` int(11) NULL DEFAULT NULL COMMENT '角色状态 0-停用/1-启用',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色表' ROW_FORMAT = Dynamic;
+) ENGINE = MyISAM AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role
@@ -688,7 +741,7 @@ CREATE TABLE `role_menu`  (
   `menu_id` int(11) NULL DEFAULT NULL COMMENT '菜单ID',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_role_menu`(`role_id`, `menu_id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色菜单关联表' ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色菜单关联表' ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of role_menu
@@ -898,48 +951,6 @@ INSERT INTO `supplier` VALUES (5, 'S005', '越南火龙果供应商', NULL, 'Ngu
 INSERT INTO `supplier` VALUES (6, 'S006', '江西赣南脐橙农场', NULL, '刘老板', '13912340006', 'liu@gan-nan-orange.com', '江西省赣州市安远县脐橙基地', '6222021234567895', NULL, '91360700MA5TWX2468', 0, '2026-04-14 10:00:00', '2026-04-14 10:00:00');
 
 -- ----------------------------
--- Table structure for sys_menu
--- ----------------------------
-DROP TABLE IF EXISTS `sys_menu`;
-CREATE TABLE `sys_menu`  (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `icon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `pid` int(11) NULL DEFAULT NULL,
-  `page_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `sort_num` int(11) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统菜单表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_menu
--- ----------------------------
-INSERT INTO `sys_menu` VALUES (1, '系统管理', '/system', 'setting', '系统基础配置', NULL, '/views/system/index', 1);
-INSERT INTO `sys_menu` VALUES (2, '用户管理', '/system/user', 'user', '用户列表', 1, '/views/system/user', 101);
-INSERT INTO `sys_menu` VALUES (3, '角色管理', '/system/role', 'role', '角色列表', 1, '/views/system/role', 102);
-INSERT INTO `sys_menu` VALUES (4, '菜单管理', '/system/menu', 'menu', '菜单列表', 1, '/views/system/menu', 103);
-INSERT INTO `sys_menu` VALUES (5, '仓库管理', '/warehouse', 'box', '仓库基础配置', NULL, '/views/warehouse/index', 2);
-INSERT INTO `sys_menu` VALUES (6, '仓库列表', '/warehouse/list', 'box', '仓库列表', 5, '/views/warehouse/list', 201);
-INSERT INTO `sys_menu` VALUES (7, '商品管理', '/goods', 'shopping', '商品基础配置', NULL, '/views/goods/index', 3);
-INSERT INTO `sys_menu` VALUES (8, '商品列表', '/goods/list', 'shopping', '商品列表', 7, '/views/goods/list', 301);
-INSERT INTO `sys_menu` VALUES (9, '分类管理', '/goods/category', 'folder', '商品分类', 7, '/views/goods/category', 302);
-INSERT INTO `sys_menu` VALUES (10, '库存管理', '/inventory', 'database', '库存相关操作', NULL, '/views/inventory/index', 4);
-INSERT INTO `sys_menu` VALUES (11, '库存作业', '/inventory/operation', 'file', '出入库作业', 10, '/views/inventory/operation', 401);
-INSERT INTO `sys_menu` VALUES (12, '库存预警', '/inventory/alert', 'warning', '库存预警', 10, '/views/inventory/alert', 402);
-INSERT INTO `sys_menu` VALUES (13, '采购管理', '/purchase', 'shopping-cart', '采购相关操作', NULL, '/views/purchase/index', 5);
-INSERT INTO `sys_menu` VALUES (14, '采购订单', '/purchase/order', 'shopping-cart', '采购订单', 13, '/views/purchase/order', 501);
-INSERT INTO `sys_menu` VALUES (15, '供应商管理', '/purchase/supplier', 'team', '供应商列表', 13, '/views/purchase/supplier', 502);
-INSERT INTO `sys_menu` VALUES (16, '客户管理', '/customer', 'contacts', '客户相关操作', NULL, '/views/customer/index', 6);
-INSERT INTO `sys_menu` VALUES (17, '客户列表', '/customer/list', 'contacts', '客户列表', 16, '/views/customer/list', 601);
-INSERT INTO `sys_menu` VALUES (18, '公告管理', '/notice', 'notification', '公告相关操作', NULL, '/views/notice/index', 7);
-INSERT INTO `sys_menu` VALUES (19, '公告列表', '/notice/list', 'notification', '公告列表', 18, '/views/notice/list', 701);
-INSERT INTO `sys_menu` VALUES (20, '签到管理', '/sign', 'calendar', '员工签到', NULL, '/views/sign/index', 8);
-INSERT INTO `sys_menu` VALUES (21, '日志管理', '/log', 'file-text', '系统日志', NULL, '/views/log/index', 9);
-INSERT INTO `sys_menu` VALUES (22, '操作日志', '/log/operation', 'file-text', '操作日志', 21, '/views/log/operation', 901);
-
--- ----------------------------
 -- Table structure for user
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
@@ -996,7 +1007,7 @@ CREATE TABLE `user_role`  (
   `role_id` bigint(20) NULL DEFAULT NULL COMMENT '角色ID',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_role`(`user_id`, `role_id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色关联表' ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色关联表' ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of user_role

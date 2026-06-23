@@ -1,33 +1,24 @@
 package com.lunabaka.entity;
 
-import java.util.List;
-
 import com.baomidou.mybatisplus.annotation.TableField;
-
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class SysMenu {
-    
-    private int id;
-
-    private int pid;
-
+public class Menu {
+    private Integer id;
+    private Integer pid;
     private String name;
-
     private String path;
-
     private String icon;
-
     private String description;
-
     private String page_path;
-
-    private int sort_num;
-
+    private Integer sort_num;
+    private Boolean status;
      /**
      * 子菜单集合（非数据库字段）
      */
     @TableField(exist = false)
-    private List<SysMenu> children;
+    private List<Menu> children;
 }

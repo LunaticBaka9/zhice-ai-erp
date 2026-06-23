@@ -1,38 +1,13 @@
 <template>
     <div class="user-management">
-        <!-- 搜索栏 -->
-        <el-card class="search-card" shadow="never">
-            <el-form :inline="true" :model="searchForm" class="search-form">
-                <el-form-item label="用户角色名">
-                    <el-input
-                        v-model="searchForm.name"
-                        placeholder="请输入用户角色名"
-                        clearable
-                        @clear="handleSearch"
-                        @keyup.enter="handleSearch"
-                    />
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">
-                        <el-icon><Search /></el-icon>
-                        搜索
-                    </el-button>
-                    <el-button @click="resetSearch">
-                        <el-icon><Refresh /></el-icon>
-                        重置
-                    </el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
-
         <div class="card" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px">
             <el-button type="primary" @click="handleAdd">
                 <el-icon><Plus /></el-icon>
-                新增用户角色
+                新增菜单
             </el-button>
             <el-button type="primary" @click="exportData"> 导出表格 </el-button>
             <el-upload
-                action="/user/importData"
+                action="/menu/importData"
                 :on-success="handleImport"
                 style="display: inline-block; margin-left: 10px"
                 :show-file-list="false"
@@ -41,40 +16,39 @@
             </el-upload>
         </div>
 
-        <!-- 用户角色表格 -->
+        <!-- 菜单表格（树形展示） -->
         <el-card class="table-card" shadow="never">
             <el-table
-                :data="roleList"
+                :data="menuList"
                 v-loading="loading"
-                stripe
-                border
                 style="width: 100%"
-                :table-layout="fixed"
-                @selection-change="handleSelectionChange"
+                row-key="id"
+                :tree-props="{ children: 'children' }"
             >
-                <el-table-column type="selection" width="55" />
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="name" label="用户角色" />
-                <el-table-column prop="bio" label="简介" />
-                <el-table-column label="状态" >
+                <el-table-column prop="name" label="名称" />
+                <el-table-column label="状态" width="120">
                     <template #default="{ row }">
-                        <el-switch
-                            v-model="row.status"
-                            :active-value="1"
-                            :inactive-value="0"
-                            @change="handleStatusChange(row)"
-                        />
+                        <span :style="{ color: row.status ? '#67c23a' : '#f56c6c' }">
+                            {{ row.status ? '启用' : '禁用' }}
+                        </span>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" fixed="right">
+                <el-table-column label="操作" fixed="right" width="320">
                     <template #default="{ row }">
+                        <el-button
+                            link
+                            type="primary"
+                            size="small"
+                            @click="handleAdd(row)"
+                        >
+                            添加子菜单
+                        </el-button>
                         <el-button
                             link
                             type="primary"
                             size="small"
                             @click="handleEdit(row)"
                         >
-                            <el-icon><Edit /></el-icon>
                             编辑
                         </el-button>
                         <el-button
@@ -83,28 +57,14 @@
                             size="small"
                             @click="handleDelete(row)"
                         >
-                            <el-icon><Delete /></el-icon>
                             删除
                         </el-button>
                     </template>
                 </el-table-column>
             </el-table>
-
-            <!-- 分页 -->
-            <div class="pagination-container">
-                <el-pagination
-                    v-model:current-page="pagination.pageNum"
-                    v-model:page-size="pagination.pageSize"
-                    :page-sizes="[5, 10, 20, 50, 100]"
-                    :total="pagination.total"
-                    layout="total, sizes, prev, pager, next, jumper"
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                />
-            </div>
         </el-card>
 
-        <!-- 新增/编辑用户角色对话框 -->
+        <!-- 新增/编辑菜单对话框 -->
         <el-dialog
             v-model="dialog.visible"
             :title="dialog.title"
@@ -113,7 +73,7 @@
             @close="handleDialogClose"
         >
             <el-form
-                ref="roleFormRef"
+                ref="menuFormRef"
                 :model="dialog.form"
                 :rules="dialog.rules"
                 label-width="100px"
@@ -122,10 +82,27 @@
             >
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="用户角色" prop="name">
+                        <el-form-item label="菜单" prop="name">
                             <el-input
                                 v-model="dialog.form.name"
-                                placeholder="请输入用户角色"
+                                placeholder="请输入菜单"
+                                :disabled="dialog.isView"
+                            />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="父级菜单" prop="pid">
+                            <el-tree-select
+                                v-model="dialog.form.pid"
+                                :data="menuList"
+                                :props="{ label: 'name', value: 'id', children: 'children' }"
+                                placeholder="请选择父级菜单（留空为顶级）"
+                                clearable
+                                filterable
+                                style="width: 100%"
                                 :disabled="dialog.isView"
                             />
                         </el-form-item>
@@ -141,18 +118,18 @@
                                 style="width: 100%"
                                 :disabled="dialog.isView"
                             >
-                                <el-option :label="'启用'" :value="1" />
-                                <el-option :label="'禁用'" :value="0" />
+                                <el-option :label="'启用'" :value="true" />
+                                <el-option :label="'禁用'" :value="false" />
                             </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
 
-                <el-form-item label="用户角色简介" prop="bio">
+                <el-form-item label="菜单简介" prop="bio">
                     <el-input
                         v-model="dialog.form.bio"
                         type="textarea"
-                        placeholder="请输入用户角色简介"
+                        placeholder="请输入菜单简介"
                         :rows="4"
                         maxlength="200"
                         show-word-limit
@@ -167,7 +144,7 @@
                     <el-button
                         v-if="!dialog.isView"
                         type="primary"
-                        @click="submitRole"
+                        @click="submitmenu"
                         :loading="dialog.loading"
                     >
                         确认
@@ -181,31 +158,20 @@
 <script setup>
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
-import {Delete, Edit, Plus, Refresh, Search,} from "@element-plus/icons-vue";
+import {Plus} from "@element-plus/icons-vue";
 import request from "../../utils/request";
 
 // 搜索表单
 const searchForm = reactive({
     name: "",
-    status: ""
 });
 
-// 用户列表数据
-const roleList = ref([]);
+// 菜单列表数据（树形）
+const menuList = ref([]);
 const loading = ref(false);
 
-// 分页参数
-const pagination = reactive({
-    pageNum: 1,
-    pageSize: 10,
-    total: 0,
-});
-
-// 选中的行
-const selectedRows = ref([]);
-
 // 新增/编辑对话框
-const roleFormRef = ref();
+const menuFormRef = ref();
 const dialog = reactive({
     visible: false,
     title: "",
@@ -214,13 +180,14 @@ const dialog = reactive({
     loading: false,
     form: {
         id: null,
+        pid: null,
         name: "",
         bio: "",
-        status: 1,
+        status: true,
     },
     rules: {
         name: [
-            { required: true, message: "请输入用户角色", trigger: "blur" },
+            { required: true, message: "请输入菜单", trigger: "blur" },
             {
                 min: 2,
                 max: 20,
@@ -231,119 +198,100 @@ const dialog = reactive({
     },
 });
 
-// 获取用户角色列表
-const getRoleList = async () => {
+// 所有菜单平面列表（用于父菜单选择）
+const allMenus = ref([]);
+
+const flatMenus = (menus, result = []) => {
+    for (const m of menus) {
+        result.push(m);
+        if (m.children && m.children.length) {
+            flatMenus(m.children, result);
+        }
+    }
+    return result;
+};
+
+// 获取菜单树
+const getMenuList = async () => {
     loading.value = true;
     try {
-        const params = {
-            pageNum: pagination.pageNum,
-            pageSize: pagination.pageSize,
-        };
-        Object.entries(searchForm).forEach(([key, value]) => {
-            if (value !== '') {
-                params[key] = value;
-            }
-        });
-        const res = await request.get("/role/list", { params });
+        const params = {};
+        if (searchForm.name) {
+            params.name = searchForm.name;
+        }
+        const res = await request.get("/menu/list", { params });
         if (res.code === "200") {
-            roleList.value = res.data.records;
-            pagination.total = res.data.total || 0;
+            const data = Array.isArray(res.data) ? res.data : (res.data.records || []);
+            menuList.value = data;
+            allMenus.value = flatMenus(data);
         } else {
-            ElMessage.error(res.msg || "获取用户角色列表失败");
+            ElMessage.error(res.msg || "获取菜单列表失败");
         }
     } catch (error) {
-        ElMessage.error("获取用户角色列表失败");
+        ElMessage.error("获取菜单列表失败");
     } finally {
         loading.value = false;
     }
 };
 
-// 搜索
-const handleSearch = () => {
-    pagination.pageNum = 1;
-    getRoleList();
-};
-
-// 重置搜索
-const resetSearch = () => {
-    Object.keys(searchForm).forEach((key) => {
-        searchForm[key] = "";
-    });
-    handleSearch();
-};
-
-// 分页改变
-const handleSizeChange = (val) => {
-    pagination.pageSize = val;
-    getRoleList();
-};
-
-const handleCurrentChange = (val) => {
-    pagination.pageNum = val;
-    getRoleList();
-};
-
-// 表格选择变化
-const handleSelectionChange = (val) => {
-    selectedRows.value = val;
-};
-
-// 新增用户角色
-const handleAdd = () => {
-    dialog.title = "新增用户角色";
+// 新增菜单
+const handleAdd = (row) => {
+    dialog.title = row ? "新增子菜单" : "新增菜单";
     dialog.isAdd = true;
     dialog.isView = false;
     dialog.form = {
         id: null,
+        pid: row ? row.id : null,
         name: "",
-        status: 1,
+        status: true,
         bio: "",
     };
     dialog.visible = true;
 };
 
-// 编辑用户角色
+// 编辑菜单
 const handleEdit = (row) => {
-    dialog.title = "编辑用户角色";
+    dialog.title = "编辑菜单";
     dialog.isAdd = false;
     dialog.isView = false;
     dialog.form = {
         id: row.id || null,
+        pid: row.pid || null,
         name: row.name || "",
-        status: row.status ?? 1,
+        status: row.status ?? true,
         bio: row.bio || "",
     };
     dialog.visible = true;
 };
 
-// 提交用户
-const submitRole = async () => {
-    if (!roleFormRef.value) return;
-    await roleFormRef.value.validate(async (valid) => {
+// 提交菜单
+const submitmenu = async () => {
+    if (!menuFormRef.value) return;
+    await menuFormRef.value.validate(async (valid) => {
         if (valid) {
             dialog.loading = true;
             try {
                 const submitData = { ...dialog.form };
                 if (dialog.isAdd) {
-                    const res = await request.post("/role/add", submitData);
+                    const res = await request.post("/menu/add", submitData);
                     if (res.code === "200") {
-                        ElMessage.success("新增用户角色成功");
+                        ElMessage.success("新增菜单成功");
                         dialog.visible = false;
-                        getRoleList();
+                        getMenuList();
                     } else {
-                        ElMessage.error(res.msg || "新增用户角色失败");
+                        ElMessage.error(res.msg || "新增菜单失败");
                     }
                 } else {
                     const res = await request.post(
-                        "/role/updateInfo",
+                        "/menu/updateInfo",
                         submitData,
                     );
                     if (res.code === "200") {
-                        ElMessage.success("更新用户角色成功");
+                        ElMessage.success("更新菜单成功");
                         dialog.visible = false;
-                        getRoleList();
+                        getMenuList();
                     } else {
-                        ElMessage.error(res.msg || "更新用户角色失败");
+                        ElMessage.error(res.msg || "更新菜单失败");
                     }
                 }
             } catch (error) {
@@ -355,19 +303,19 @@ const submitRole = async () => {
     });
 };
 
-// 删除用户
+// 删除菜单
 const handleDelete = (row) => {
-    ElMessageBox.confirm(`确定要删除用户角色"${row.name}"吗？`, "提示", {
+    ElMessageBox.confirm(`确定要删除菜单"${row.name}"吗？`, "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
     })
         .then(async () => {
             try {
-                const res = await request.post(`/role/delete`, row);
+                const res = await request.post(`/menu/delete`, row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
-                    getRoleList();
+                    getMenuList();
                 } else {
                     ElMessage.error(res.msg || "删除失败");
                 }
@@ -378,41 +326,25 @@ const handleDelete = (row) => {
         .catch(() => {});
 };
 
-const handleStatusChange = async (row) => {
-    try {
-        const res = await request.post(`/role/updateStatus`, { id: row.id, status: row.status });
-        if (res.code !== "200") {
-            ElMessage.error("状态修改失败");
-            row.status = row.status === 1 ? 0 : 1;
-        }
-    } catch (error) {
-        ElMessage.error("状态修改失败");
-        row.status = row.status === 1 ? 0 : 1;
-    }
-};
-
-
 const handleImport = (res, file, filelist) => {
     if (res.code === "200") {
         ElMessage.success("数据导入成功");
     } else {
         ElMessage.error(res.msg);
     }
-    getRoleList();
+    getMenuList();
 };
 
-// 关闭对话框
 const handleDialogClose = () => {
-    roleFormRef.value?.clearValidate();
+    menuFormRef.value?.clearValidate();
 };
 
 const exportData = async () => {
-    window.open("/role/exportData");
+    window.open("/menu/exportData");
 };
 
-// 页面加载时获取数据
 onMounted(() => {
-    getRoleList();
+    getMenuList();
 });
 </script>
 

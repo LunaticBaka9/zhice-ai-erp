@@ -117,7 +117,7 @@
                         />
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="200" fixed="right">
+                <el-table-column label="操作" width="260" fixed="right">
                     <template #default="{ row }">
                         <el-button
                             link
@@ -924,7 +924,20 @@ const handleDialogClose = () => {
 };
 
 const exportData = async () => {
-    window.open("/user/exportData");
+    try {
+        const res = await request.get("/user/exportData", { responseType: "blob" });
+        const blob = new Blob([res], { type: "application/vnd.ms-excel" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "用户信息表.xls";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
+        ElMessage.error("导出失败");
+    }
 };
 
 // 页面加载时获取数据

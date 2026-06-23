@@ -1,43 +1,40 @@
 package com.lunabaka.controller;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
+import com.github.pagehelper.PageInfo;
+import com.lunabaka.common.OperationLogAnnotation;
+import com.lunabaka.common.Result;
+import com.lunabaka.entity.Notice;
+import com.lunabaka.service.NoticeReadRecordService;
+import com.lunabaka.service.NoticeService;
+import jakarta.annotation.Resource;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.lunabaka.common.OperationLogAnnotation;
-import com.lunabaka.common.Result;
-import com.lunabaka.entity.Notice;
-import com.lunabaka.service.NoticeService;
-import com.lunabaka.service.NoticeReadRecordService;
-import com.github.pagehelper.PageInfo;
-
-import cn.hutool.poi.excel.ExcelReader;
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
-import jakarta.annotation.Resource;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/notice")
 public class NoticeController {
     @Resource
     NoticeService noticeService;
-    
+
     @Resource
     NoticeReadRecordService noticeReadRecordService;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @GetMapping("/selectByNid/{nid}")
     public Result getUserById(@PathVariable Long nid){
@@ -81,8 +78,20 @@ public class NoticeController {
 
     @PostMapping("/updateViews")
     public Result updateViews(@RequestBody Notice notice){
-        noticeService.updateNotice(notice);
-        return Result.success();
+        Long nid = notice.getNid();
+        if (nid == null) {
+            return Result.error("公告ID不能为空");
+        }
+        Long userId = notice.getUid();
+        if (userId != null) {
+            String limitKey = "notice:views:limit:" + nid + ":" + userId;
+            Boolean acquired = redisTemplate.opsForValue().setIfAbsent(limitKey, 1, 60, TimeUnit.SECONDS);
+            if (Boolean.FALSE.equals(acquired)) {
+                return Result.success();
+            }
+        }
+        Long views = redisTemplate.opsForValue().increment("notice:views:" + nid);
+        return Result.success(views);
     }
 
     @OperationLogAnnotation(module="公告管理", type="删除", value="删除公告")

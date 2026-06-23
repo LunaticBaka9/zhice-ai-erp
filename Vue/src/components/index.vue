@@ -214,26 +214,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
-import {
-    Document,
-    Download,
-    List,
-    Bell,
-    Clock,
-    TrendCharts,
-    EditPen,
-    User,
-    Setting,
-    ShoppingCart,
-    Box,
-    Plus,
-    Search,
-} from "@element-plus/icons-vue";
+import {computed, onMounted, ref} from "vue";
+import {useRouter} from "vue-router";
+import {ElMessage} from "element-plus";
+import {Document, Download,} from "@element-plus/icons-vue";
 import request from "../utils/request";
-import { formatDateTime, parseDate } from "../utils/date";
+import {formatDateTime, parseDate} from "../utils/date";
 
 const router = useRouter();
 
@@ -597,9 +583,9 @@ const viewNotice = async (item) => {
     }
 
     try {
-        const payload = { nid: item.nid, views: selectedAnnouncement.value.views };
-        await request.post(`/notice/updateViews`, payload);
         const userId = getLocalUserId();
+        const payload = { nid: item.nid, uid: userId };
+        await request.post(`/notice/updateViews`, payload);
         if (userId) {
             await request.post("/notice/markAsRead", {
                 noticeId: item.nid,

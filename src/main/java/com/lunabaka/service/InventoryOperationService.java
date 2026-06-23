@@ -1,9 +1,9 @@
 package com.lunabaka.service;
 
-import com.lunabaka.entity.InventoryOperation;
-import com.lunabaka.mapper.InventoryOperationMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lunabaka.entity.InventoryOperation;
+import com.lunabaka.mapper.InventoryOperationMapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -86,7 +86,6 @@ public class InventoryOperationService {
      * 更新作业状态
      * @param id 作业 ID
      * @param status 新状态
-     * @param shouldUpdateCompleteTime 是否更新完成时间
      * @return 影响行数
      */
     public int updateStatus(Long id, String status) {

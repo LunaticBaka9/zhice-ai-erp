@@ -209,17 +209,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import {
-    Search,
-    User,
-    View,
-    Document,
-    Download,
-} from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
+import {computed, onMounted, ref} from "vue";
+import {Document, Download, Search, User, View,} from "@element-plus/icons-vue";
+import {ElMessage} from "element-plus";
 import request from "../../utils/request.js";
-import { formatDateTime, parseDate } from "../../utils/date.js";
+import {formatDateTime, parseDate} from "../../utils/date.js";
 
 const user = JSON.parse(localStorage.getItem("local_user"));
 
@@ -306,7 +300,7 @@ const mapNoticeToAnnouncement = (notice) => {
 const loadNotices = async () => {
     try {
         const res = await request.get("/notice/selectAllNotice");
-        if (res && (res.code === "200" || res.code === 200)) {
+        if (res && (res.code === "200")) {
             const arr = Array.isArray(res.data) ? res.data : [];
             announcements.value = arr.map(mapNoticeToAnnouncement);
         } else {
@@ -400,7 +394,7 @@ const viewDetail = async (item) => {
     try {
         if (item && item.id) {
             const res = await request.get(`/notice/selectByNid/${item.id}`);
-            if (res && (res.code === "200" || res.code === 200)) {
+            if (res && (res.code === "200")) {
                 const n = res.data || {};
                 selectedAnnouncement.value = mapNoticeToAnnouncement(n);
             } else {
@@ -439,10 +433,10 @@ const viewDetail = async (item) => {
     try {
         const payload = {
             nid: item.id,
-            views: selectedAnnouncement.value.views,
+            uid: user?.uid,
         };
         const res = await request.post(`/notice/updateViews`, payload);
-        if (res && (res.code === "200" || res.code === 200)) {
+        if (res && (res.code === "200")) {
             // 同步更新本地列表中的阅读数
             const idx = announcements.value.findIndex((a) => a.id === item.id);
             if (idx !== -1) {

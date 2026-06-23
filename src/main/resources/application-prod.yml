@@ -13,22 +13,18 @@ spring:
     username: testdb
     password: jj25Xkf5En2W2fFp
     driver-class-name: com.mysql.cj.jdbc.Driver
+  #Redis
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
   mvc:
     static-path-pattern: /static/**
   web:
     resources:
       static-locations:
         classpath:/static/,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:SystemData
-
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.lunabaka.entity
-  configuration:
-    map-underscore-to-camel-case: true
-#mybatis-plus配置日志
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # JWT配置 (至少64字符以满足HS512的512位要求)
 config:
