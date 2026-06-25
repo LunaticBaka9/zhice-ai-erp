@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lunabaka.entity.Menu;
 import com.lunabaka.mapper.MenuMapper;
 import com.lunabaka.service.MenuService;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,16 +17,7 @@ import java.util.stream.Collectors;
 @Service
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
-    @Resource
-    MenuMapper menuMapper;
-
-    public void updateStatus(Menu menu){
-        LambdaUpdateWrapper<Menu> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(Menu::getId, menu.getId())
-                .set(Menu::getStatus, menu.getStatus());
-        baseMapper.update(null, wrapper);
-    }
-
+    // 返回Menu树状列表
     public List<Menu> getTreeList() {
         LambdaQueryWrapper<Menu> wrapper = Wrappers.lambdaQuery();
         wrapper.orderByAsc(Menu::getSort_num);
@@ -53,4 +43,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return tree;
     }
 
+    //修改菜单状态
+    public void updateStatus(Menu menu) {
+        LambdaUpdateWrapper<Menu> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Menu::getId, menu.getId())
+                .set(Menu::getStatus, menu.getStatus());
+        baseMapper.update(null, wrapper);
+    }
 }

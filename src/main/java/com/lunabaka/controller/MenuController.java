@@ -16,15 +16,32 @@ public class MenuController {
     MenuService menuService;
 
     @GetMapping("/list")
-    public Result list(@RequestParam(required = false) String name) {
+    public Result list() {
         List<Menu> treeList = menuService.getTreeList();
         return Result.success(treeList);
     }
 
-    @OperationLogAnnotation(module="菜单管理", type="修改", value="修改菜单状态")
+    //更新菜单信息
+    @OperationLogAnnotation(module = "菜单管理", type = "修改", value = "修改菜单信息")
+    @PostMapping("/updateInfo")
+    public Result updateInfo(@RequestBody Menu menu) {
+        menuService.updateById(menu);
+        return Result.success();
+    }
+
+    //更新菜单状态
+    @OperationLogAnnotation(module = "菜单管理", type = "修改", value = "修改菜单状态")
     @PostMapping("/updateStatus")
-    public Result updateStatus(@RequestBody Menu menu){
+    public Result updateStatus(@RequestBody Menu menu) {
         menuService.updateStatus(menu);
+        return Result.success();
+    }
+
+    //删除菜单
+    @OperationLogAnnotation(module = "菜单管理", type = "删除", value = "删除菜单")
+    @PostMapping("/delete")
+    public Result delete(@RequestBody Menu menu){
+        menuService.removeById(menu.getId());
         return Result.success();
     }
 }

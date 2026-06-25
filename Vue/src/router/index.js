@@ -8,6 +8,7 @@ import routeBase from "./routeBase.js";
 import routePurchase from "./routePurchase.js";
 import routeSale from "./routeSale.js";
 import routeReport from "./routeReport.js";
+import routeMeeting from "./routeMeeting.js";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -33,6 +34,7 @@ const router = createRouter({
         ...routePurchase,
         ...routeSale,
         ...routeReport,
+        ...routeMeeting,
     ],
 });
 

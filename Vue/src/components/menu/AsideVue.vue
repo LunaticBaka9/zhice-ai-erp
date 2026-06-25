@@ -110,6 +110,20 @@
                 </el-menu-item>
             </el-sub-menu>
 
+            <!-- 会议管理 -->
+            <el-sub-menu index="meeting">
+              <template #title>
+                <el-icon><ChatSquare /></el-icon>
+                <span>会议管理</span>
+              </template>
+              <el-menu-item index="/meeting/create">
+                <span>发起会议</span>
+              </el-menu-item>
+              <el-menu-item index="/meeting/index">
+                <span>会议列表</span>
+              </el-menu-item>
+            </el-sub-menu>
+
             <!-- 报表分析 -->
             <el-sub-menu v-if="showReportMenu" index="report">
                 <template #title>
@@ -166,16 +180,16 @@
 import {computed, reactive, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {
-    Avatar,
-    Box,
-    Goods,
-    House,
-    Message,
-    Notification,
-    PieChart,
-    Setting,
-    ShoppingBag,
-    ShoppingCart,
+  Avatar,
+  Box, ChatSquare,
+  Goods,
+  House,
+  Message,
+  Notification,
+  PieChart,
+  Setting,
+  ShoppingBag,
+  ShoppingCart,
 } from "@element-plus/icons-vue";
 import {useMenuStore} from "../../store/menu.ts";
 import {storeToRefs} from "pinia";
