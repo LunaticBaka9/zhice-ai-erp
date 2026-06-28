@@ -141,18 +141,29 @@
                 </el-menu-item>
             </el-sub-menu>
 
+            <!-- 部门管理 -->
+            <el-sub-menu v-if="isAdmin" index="/dept">
+                <template #title>
+                    <el-icon><Setting /></el-icon>
+                    <span>部门管理</span>
+                </template>
+                <el-menu-item index="/dept/list">
+                    <span>部门列表</span>
+                </el-menu-item>
+                <el-menu-item index="/system/user">
+                    <span>用户列表</span>
+                </el-menu-item>
+                <el-menu-item index="/system/role">
+                    <span>角色列表</span>
+                </el-menu-item>
+            </el-sub-menu>
+
             <!-- 系统管理 -->
             <el-sub-menu v-if="isAdmin" index="/system">
                 <template #title>
                     <el-icon><Setting /></el-icon>
                     <span>系统管理</span>
                 </template>
-                <el-menu-item index="/system/user">
-                    <span>用户管理</span>
-                </el-menu-item>
-                <el-menu-item index="/system/role">
-                    <span>角色管理</span>
-                </el-menu-item>
                 <el-menu-item index="/system/menu">
                     <span>菜单管理</span>
                 </el-menu-item>

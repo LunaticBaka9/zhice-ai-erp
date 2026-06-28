@@ -448,7 +448,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Key, Plus, Refresh, Search, View,} from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import request from "../../utils/request.js";
 
 // 默认头像
 const defaultAvatar =

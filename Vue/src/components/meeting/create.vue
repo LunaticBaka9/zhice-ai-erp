@@ -299,8 +299,7 @@ const submitForm = async () => {
 };
 
 onMounted(() => {
-    fetchDeptList();
-    fetchUserList();
+
 });
 
 onBeforeUnmount(() => {

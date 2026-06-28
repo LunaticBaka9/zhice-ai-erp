@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import routeIndex from "./routeIndex.js"; // 普通文件路由
-import routeManager from "./routeManager.js";
+import routeSystem from "./routeSystem.js";
 import routeUser from "./routeUser.js";
 import routeNotice from "./routeNotice.js";
 import routeInventory from "./routeInventory.js";
@@ -9,6 +9,7 @@ import routePurchase from "./routePurchase.js";
 import routeSale from "./routeSale.js";
 import routeReport from "./routeReport.js";
 import routeMeeting from "./routeMeeting.js";
+import routeDept from "./routeDept.js";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -26,8 +27,9 @@ const router = createRouter({
             meta: { requiresAuth: false },
         },
         ...routeIndex,
-        ...routeManager,
+        ...routeSystem,
         ...routeUser,
+        ...routeDept,
         ...routeNotice,
         ...routeInventory,
         ...routeBase,

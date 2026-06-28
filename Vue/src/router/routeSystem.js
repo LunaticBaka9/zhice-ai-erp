@@ -1,9 +1,4 @@
-const routeManager = [
-    {
-        path: "/system/user",
-        name: "userManager",
-        component: () => import("../components/system/UserManager.vue"),
-    },
+const routeSystem = [
     {
         path: "/system/menu",
         name: "menuManager",
@@ -12,7 +7,7 @@ const routeManager = [
     {
         path: "/system/role",
         name: "roleManager",
-        component: ()=> import("../components/system/RoleManager.vue")
+        component: ()=> import("../components/department/RoleManager.vue")
     },
     {
         path: "/monitor/operationLog",
@@ -21,4 +16,4 @@ const routeManager = [
     },
 ];
 
-export default routeManager;
+export default routeSystem;

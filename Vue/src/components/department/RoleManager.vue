@@ -182,7 +182,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Plus, Refresh, Search,} from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import request from "../../utils/request.js";
 
 // 搜索表单
 const searchForm = reactive({
@@ -247,7 +247,8 @@ const getRoleList = async () => {
         const res = await request.get("/role/list", { params });
         if (res.code === "200") {
             roleList.value = res.data.records;
-            pagination.total = res.data.total || 0;
+            pagination.total = res.data.total;
+            console.log(res.data);
         } else {
             ElMessage.error(res.msg || "获取用户角色列表失败");
         }
@@ -256,7 +257,7 @@ const getRoleList = async () => {
     } finally {
         loading.value = false;
     }
-};
+}
 
 // 搜索
 const handleSearch = () => {
