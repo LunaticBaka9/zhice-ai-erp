@@ -144,7 +144,7 @@
             <!-- 部门管理 -->
             <el-sub-menu v-if="isAdmin" index="/dept">
                 <template #title>
-                    <el-icon><Setting /></el-icon>
+                    <el-icon><OfficeBuilding /></el-icon>
                     <span>部门管理</span>
                 </template>
                 <el-menu-item index="/dept/list">
@@ -191,16 +191,16 @@
 import {computed, reactive, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {
-  Avatar,
-  Box, ChatSquare,
-  Goods,
-  House,
-  Message,
-  Notification,
-  PieChart,
-  Setting,
-  ShoppingBag,
-  ShoppingCart,
+    Avatar,
+    Box, ChatSquare,
+    Goods,
+    House,
+    Message,
+    Notification, OfficeBuilding,
+    PieChart,
+    Setting,
+    ShoppingBag,
+    ShoppingCart,
 } from "@element-plus/icons-vue";
 import {useMenuStore} from "../../store/menu.ts";
 import {storeToRefs} from "pinia";

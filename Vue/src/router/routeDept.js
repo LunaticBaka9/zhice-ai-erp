@@ -9,6 +9,11 @@ const routeDept = [
         name: "deptManager",
         component: () => import("../components/department/DeptManager.vue")
     },
+    {
+        path: "/dept/detail",
+        name: "deptDetail",
+        component:()=>import("../components/department/DeptDetail.vue")
+    }
 ];
 
 export default routeDept;

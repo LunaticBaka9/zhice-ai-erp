@@ -3,60 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lunabaka.mapper.UserMapper">
-    <select id="selectByUsername" resultType="com.lunabaka.entity.User">
-        SELECT * FROM `user` WHERE username=#{username} AND del_flag != 1
-    </select>
 
-    <select id="selectById"  resultType="com.lunabaka.entity.User">
-        SELECT * FROM `user` WHERE uid=#{uid}
-    </select>
-
-    <select id="selectAllUsers" resultType="com.lunabaka.entity.User">
-        select * from `user`
-        <where>
-            <if test="username != null">username like concat('%', #{username}, '%')</if>
-            <if test="name != null">and name like concat('%', #{name}, '%')</if>
-            <if test="phone != null">and phone like concat('%', #{phone}, '%')</if>
-            <if test="email != null">and email like concat('%', #{email}, '%')</if>
-            and del_flag != 1
-        </where>
-    </select>
-
-    <select id="selectByEmail" resultType="com.lunabaka.entity.User">
-        select * from `user`
-        where email=#{email}
-    </select>
-
-    <update id="updateStatusById" parameterType="com.lunabaka.entity.User">
-        UPDATE `user`
-        SET status=#{status},updateTime=NOW()
-        WHERE uid=#{uid}
-    </update>
-
-    <update id="updateInfoById" parameterType="com.lunabaka.entity.User">
-        UPDATE `user`
-        SET name = #{name}, role = #{role}, department = #{department},
-            bio = #{bio}, joinDate = #{joinDate}, avatar = #{avatar},
-            updateTime=NOW()
-        WHERE uid = #{uid}
-    </update>
-
-    <update id="updatePasswordById" parameterType="com.lunabaka.entity.User">
-        UPDATE `user`
-        SET password = #{password}, updateTime=NOW()
-        WHERE uid = #{uid}
-    </update>
-
-    <update id="updateAvatarById" parameterType="com.lunabaka.entity.User">
+    <update id="updateAvatarById">
         UPDATE `user` SET avatar = #{path}, updateTime = NOW() WHERE uid = #{uid}
     </update>
 
-    <insert id="insertUser" parameterType="com.lunabaka.entity.User">
-        insert into `user` (username,name,password,email,role,department,phone,bio,joinDate,status,createTime)
-        values(#{username},#{name}, #{password},#{email},#{role},#{department},#{phone},#{bio},#{joinDate},'启用',NOW())
-    </insert>
-
-    <update id="deleteById">
-        update `user` set del_flag = 1 WHERE uid = #{uid}
-    </update>
 </mapper>

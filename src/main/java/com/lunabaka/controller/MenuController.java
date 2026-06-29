@@ -2,6 +2,7 @@ package com.lunabaka.controller;
 
 import com.lunabaka.common.OperationLogAnnotation;
 import com.lunabaka.common.Result;
+import com.lunabaka.entity.Dept;
 import com.lunabaka.entity.Menu;
 import com.lunabaka.service.MenuService;
 import jakarta.annotation.Resource;
@@ -19,6 +20,14 @@ public class MenuController {
     public Result list() {
         List<Menu> treeList = menuService.getTreeList();
         return Result.success(treeList);
+    }
+
+//    添加菜单
+    @OperationLogAnnotation(module = "菜单管理", type = "新增", value = "新增菜单")
+    @PostMapping("/add")
+    public Result add(@RequestBody Menu menu) {
+        menuService.save(menu);
+        return Result.success();
     }
 
     //更新菜单信息
