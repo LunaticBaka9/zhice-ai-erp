@@ -79,7 +79,7 @@ import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { ElMessage } from "element-plus";
 import { User, OfficeBuilding, Shop } from "@element-plus/icons-vue";
 import * as echarts from "echarts";
-import request from "../../utils/request";
+import { getCoreReport } from "@/api";
 
 const loading = ref(false);
 const statistics = reactive({
@@ -156,7 +156,7 @@ function resizeCharts() {
 async function loadData() {
     loading.value = true;
     try {
-        const res = await request.get("/report/stat/core");
+        const res = await getCoreReport();
         if (!isApiOk(res) || !res.data) {
             ElMessage.error(res?.msg || "加载失败");
             return;

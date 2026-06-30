@@ -233,7 +233,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Search, Refresh, Edit, Delete, Download } from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getCustomerList as apiGetCustomerList, addCustomer, updateCustomer, deleteCustomer } from "@/api";
 
 const searchForm = reactive({
     code: "",
@@ -298,7 +298,7 @@ const getCustomerList = async () => {
             delete params.status;
         }
 
-        const res = await request.get("/customer/list", { params });
+        const res = await apiGetCustomerList(params);
         if (res.code === "200") {
             customerList.value = res.data?.records || res.data?.list || [];
             pagination.total = res.data?.total || 0;
@@ -378,7 +378,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.delete(`/customer/${row.id}`);
+                const res = await deleteCustomer(row.id);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getCustomerList();
@@ -400,10 +400,7 @@ const submitForm = async () => {
             dialog.loading = true;
             try {
                 const submitData = { ...dialog.form };
-                const api = dialog.isEdit ? "/customer/update" : "/customer/add";
-                const method = dialog.isEdit ? "post" : "post";
-
-                const res = await request[method](api, submitData);
+                const res = await (dialog.isEdit ? updateCustomer(submitData) : addCustomer(submitData));
                 if (res.code === "200") {
                     ElMessage.success(dialog.isEdit ? "更新成功" : "新增成功");
                     dialog.visible = false;

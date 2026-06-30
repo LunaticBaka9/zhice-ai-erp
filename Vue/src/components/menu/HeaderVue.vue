@@ -3,13 +3,14 @@
         <!-- 左侧区域 -->
         <div class="header-left">
             <el-icon class="collapse-icon" @click="handleToggle()">
-                <Fold v-if="!isCollapse" />
-                <Expand v-else />
+                <Fold v-if="!isCollapse"/>
+                <Expand v-else/>
             </el-icon>
             <!-- 面包屑导航 -->
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item :to="{ path: '/' }"
-                    >首页</el-breadcrumb-item
+                >首页
+                </el-breadcrumb-item
                 >
                 <el-breadcrumb-item
                     v-for="(item, index) in breadcrumbs"
@@ -52,7 +53,9 @@
                             class="action-icon message-icon"
                             @click="fetchMessages"
                         >
-                            <el-icon :size="20"><Bell /></el-icon>
+                            <el-icon :size="20">
+                                <Bell/>
+                            </el-icon>
                         </div>
                     </el-badge>
                 </template>
@@ -121,7 +124,8 @@
                         "
                     >
                         <el-button type="primary" link @click="loadMore"
-                            >查看更多</el-button
+                        >查看更多
+                        </el-button
                         >
                     </div>
                 </div>
@@ -135,13 +139,13 @@
                 class="notice-badge"
             >
                 <el-icon class="header-icon" @click="goToNotices" title="公告">
-                    <Document />
+                    <Document/>
                 </el-icon>
             </el-badge>
 
             <el-icon class="header-icon" @click="toggleFullscreen">
-                <FullScreen v-if="!isFullscreen" />
-                <Aim v-else />
+                <FullScreen v-if="!isFullscreen"/>
+                <Aim v-else/>
             </el-icon>
             <el-dropdown
                 @command="handleCommand"
@@ -154,20 +158,28 @@
                         :size="32"
                     />
                     <span class="username">{{ data.userInfo.name }}</span>
-                    <el-icon class="arrow-down"><ArrowDown /></el-icon>
+                    <el-icon class="arrow-down">
+                        <ArrowDown/>
+                    </el-icon>
                 </div>
                 <template #dropdown>
                     <el-dropdown-menu>
                         <el-dropdown-item command="profile">
-                            <el-icon><Avatar /></el-icon>
+                            <el-icon>
+                                <Avatar/>
+                            </el-icon>
                             个人中心
                         </el-dropdown-item>
                         <el-dropdown-item command="settings">
-                            <el-icon><Setting /></el-icon>
+                            <el-icon>
+                                <Setting/>
+                            </el-icon>
                             系统设置
                         </el-dropdown-item>
                         <el-dropdown-item divided command="logout">
-                            <el-icon><SwitchButton /></el-icon>
+                            <el-icon>
+                                <SwitchButton/>
+                            </el-icon>
                             退出登录
                         </el-dropdown-item>
                     </el-dropdown-menu>
@@ -199,7 +211,8 @@ import {
     Tickets,
     Warning,
 } from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import {getUserById} from "@/api/user";
+import {getUnreadCount} from "@/api/notice";
 import {useMenuStore} from "../../store/menu";
 
 const menuStore = useMenuStore();
@@ -230,9 +243,11 @@ const breadcrumbMap = {
     "/base/warehouse": "仓库管理",
     "/sale/order": "销售订单",
     "/sale/delivery": "销售发货",
-    "purchase/order": "采购订单",
-    "purchase/inbound": "采购入库",
-    "purchase/query": "采购单据查询",
+    "/purchase/order": "采购订单",
+    "/purchase/inbound": "采购入库",
+    "/purchase/query": "采购单据查询",
+    "/dept/list": "部门列表",
+    "/dept/detail": "部门详情",
     "/system/user": "用户管理",
     "/system/role": "角色管理",
     "/monitor/operationLog": "操作日志",
@@ -485,9 +500,7 @@ const fetchNoticeUnreadCount = async () => {
     try {
         const user = JSON.parse(localStorage.getItem("local_user"));
         if (!user || !user.uid) return;
-        const res = await request.get("/notice/unreadCount", {
-            params: { userId: user.uid },
-        });
+        const res = await getUnreadCount();
         if (res && (res.code === "200" || res.code === 200)) {
             noticeUnreadCount.value = res.data || 0;
         }
@@ -508,7 +521,7 @@ onMounted(() => {
     simulateRealTimeMessage();
     // 加载用户详细信息，确保头像和名称可用
     if (data.user && data.user.uid) {
-        request.get("user/selectById/" + data.user.uid).then((res) => {
+        getUserById(data.user.uid).then((res) => {
             if (res && res.code === "200") {
                 data.userInfo = res.data || {};
                 // 若 local_user 中缺少 avatar，则同步
@@ -523,7 +536,8 @@ onMounted(() => {
                                 JSON.stringify(localUser),
                             );
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                 }
             }
         });
@@ -587,7 +601,8 @@ const handleLogout = () => {
         .then(() => {
             logout();
         })
-        .catch(() => {});
+        .catch(() => {
+        });
 };
 
 const login = () => {
@@ -607,389 +622,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    document.removeEventListener("fullscreenchange", () => {});
+    document.removeEventListener("fullscreenchange", () => {
+    });
 });
 </script>
 
-<style scoped>
-.header-container {
-    background-color: #fff;
-    border-bottom: 1px solid #e6e9f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    height: 60px;
-    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-}
-
-/* 左侧区域 */
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.collapse-icon {
-    font-size: 20px;
-    cursor: pointer;
-    color: #606266;
-    transition: all 0.3s;
-}
-
-.collapse-icon:hover {
-    color: #409eff;
-    transform: scale(1.05);
-}
-
-/* 面包屑样式优化 */
-:deep(.el-breadcrumb) {
-    font-size: 14px;
-}
-
-:deep(.el-breadcrumb__inner) {
-    color: #606266;
-}
-
-:deep(.el-breadcrumb__inner:hover) {
-    color: #409eff;
-}
-
-/* 右侧区域 */
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-/* 搜索框 */
-.search-box {
-    margin-right: 8px;
-}
-
-.search-input {
-    width: 200px;
-}
-
-.search-input :deep(.el-input__wrapper) {
-    border-radius: 20px;
-    transition: all 0.3s;
-}
-
-.search-input :deep(.el-input__wrapper:hover) {
-    box-shadow: 0 0 0 1px #409eff inset;
-}
-
-.search-input :deep(.el-input__wrapper.is-focus) {
-    box-shadow: 0 0 0 1px #409eff inset;
-}
-
-/* 图标样式 */
-.header-icon {
-    font-size: 20px;
-    cursor: pointer;
-    color: #606266;
-    transition: all 0.3s;
-}
-
-.header-icon:hover {
-    color: #409eff;
-    transform: scale(1.05);
-}
-
-/* 通知徽章 */
-.notification-badge {
-    cursor: pointer;
-}
-
-.notification-badge :deep(.el-badge__content) {
-    border: none;
-    top: 8px;
-    right: 8px;
-}
-
-/* 用户下拉菜单 */
-.user-dropdown {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 20px;
-    transition: all 0.3s;
-}
-
-.user-dropdown:hover {
-    background-color: #f5f7fa;
-    transform: translateY(-1px);
-}
-
-.username {
-    color: #303133;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.arrow-down {
-    font-size: 12px;
-    color: #909399;
-    transition: transform 0.3s;
-}
-
-.user-dropdown:hover .arrow-down {
-    transform: translateY(2px);
-}
-
-/* 通知抽屉样式 */
-.notification-list {
-    padding: 0 12px;
-}
-
-.notification-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 12px;
-    border-bottom: 1px solid #ebeef5;
-    transition: all 0.3s;
-    position: relative;
-}
-
-.notification-item:hover {
-    background-color: #f5f7fa;
-}
-
-.notification-icon {
-    flex-shrink: 0;
-}
-
-.notification-content {
-    flex: 1;
-}
-
-.notification-title {
-    color: #303133;
-    font-size: 14px;
-    margin-bottom: 4px;
-    line-height: 1.4;
-}
-
-.notification-time {
-    color: #909399;
-    font-size: 12px;
-}
-
-.notification-close {
-    cursor: pointer;
-    color: #909399;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.notification-item:hover .notification-close {
-    opacity: 1;
-}
-
-.notification-close:hover {
-    color: #f56c6c;
-}
-
-.empty-notification {
-    padding: 40px 0;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-    .header-container {
-        padding: 0 12px;
-    }
-
-    .username {
-        display: none;
-    }
-
-    .search-input {
-        width: 120px;
-    }
-
-    .header-right {
-        gap: 12px;
-    }
-
-    :deep(.el-breadcrumb) {
-        display: none;
-    }
-}
-
-/* 深色模式 */
-:global([data-theme="dark"]) .header-container {
-    background-color: #1f2d3d;
-    border-bottom-color: #304156;
-}
-
-:global([data-theme="dark"]) .collapse-icon,
-:global([data-theme="dark"]) .header-icon {
-    color: #bfcbd9;
-}
-
-:global([data-theme="dark"]) .collapse-icon:hover,
-:global([data-theme="dark"]) .header-icon:hover {
-    color: #409eff;
-}
-
-:global([data-theme="dark"]) .username {
-    color: #e5eaf3;
-}
-
-:global([data-theme="dark"]) .user-dropdown:hover {
-    background-color: #304156;
-}
-
-:global([data-theme="dark"]) .search-input :deep(.el-input__wrapper) {
-    background-color: #304156;
-    box-shadow: 0 0 0 1px #40506a;
-}
-
-:global([data-theme="dark"]) .search-input :deep(.el-input__inner) {
-    color: #e5eaf3;
-}
-
-/* 消息弹窗样式 */
-:deep(.message-popover) {
-    padding: 0 !important;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.message-panel {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    max-height: 480px;
-}
-
-.message-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #f0f0f0;
-    background: #fafafa;
-    border-radius: 12px 12px 0 0;
-}
-
-.message-header .title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1f2f3d;
-}
-
-.message-list {
-    flex: 1;
-    overflow-y: auto;
-    max-height: 360px;
-}
-
-.message-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 20px;
-    border-bottom: 1px solid #f5f5f5;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.message-item:hover {
-    background-color: #f5f7fa;
-}
-
-.message-item.unread {
-    background-color: #ecf5ff;
-}
-
-.message-item.unread:hover {
-    background-color: #e1eaf5;
-}
-
-.message-icon-wrapper {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background-color: #f5f7fa;
-}
-
-.message-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.message-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #303133;
-    margin-bottom: 4px;
-    line-height: 1.4;
-}
-
-.message-desc {
-    font-size: 13px;
-    color: #606266;
-    line-height: 1.4;
-    margin-bottom: 6px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-.message-time {
-    font-size: 11px;
-    color: #909399;
-}
-
-.unread-dot {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    background-color: #f56c6c;
-    border-radius: 50%;
-}
-
-.message-footer {
-    padding: 12px 20px;
-    text-align: center;
-    border-top: 1px solid #f0f0f0;
-    background: #fff;
-    border-radius: 0 0 12px 12px;
-}
-
-/* 滚动条样式 */
-.message-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.message-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.message-list::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.message-list::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-</style>
+<style src="@/assets/css/menu/header.css"/>

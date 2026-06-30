@@ -92,7 +92,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Plus, Refresh, Search} from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getMeetingList as apiGetMeetingList, deleteMeeting } from "@/api";
 
 const statusTypeMap = {
     0: "warning",
@@ -153,7 +153,7 @@ const getMeetingList = async () => {
                 params[key] = value;
             }
         });
-        const res = await request.get("/meeting/list", {params});
+        const res = await apiGetMeetingList(params);
         if (res.code === "200") {
             meetingList.value = res.data.records;
             pagination.total = res.data.total || 0;
@@ -197,7 +197,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post("/meeting/delete", {id: row.id});
+                const res = await deleteMeeting({id: row.id});
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getMeetingList();

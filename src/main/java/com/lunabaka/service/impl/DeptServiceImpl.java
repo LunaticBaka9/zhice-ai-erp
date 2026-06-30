@@ -18,12 +18,15 @@ import java.util.stream.Collectors;
 
 @Service
 public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept>
-    implements DeptService{
+        implements DeptService {
 
     @Resource
     UserMapper userMapper;
 
-    public List<Dept> getTreeList(){
+    /**
+    *   获取部门的树状列表
+    **/
+    public List<Dept> getTreeList() {
         LambdaQueryWrapper<Dept> wrapper = Wrappers.lambdaQuery();
         List<Dept> allDepts = baseMapper.selectList(wrapper);
 
@@ -45,13 +48,6 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept>
             }
         }
         return tree;
-    }
-
-    public void updateStatus(Dept dept){
-        LambdaUpdateWrapper<Dept> wrapper = Wrappers.lambdaUpdate();
-        wrapper.eq(Dept::getId, dept.getId())
-                .set(Dept::getStatus, dept.getStatus());
-        baseMapper.update(wrapper);
     }
 
     /**
@@ -102,6 +98,87 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept>
             if (Objects.equals(dept.getParentId(), parentId)) {
                 collectSubDeptIds(allDepts, dept.getId(), result);
             }
+        }
+    }
+
+    /**
+     * 更新部门状态
+     */
+    public void updateStatus(Dept dept) {
+        LambdaUpdateWrapper<Dept> wrapper = Wrappers.lambdaUpdate();
+        wrapper.eq(Dept::getId, dept.getId())
+                .set(Dept::getStatus, dept.getStatus());
+        baseMapper.update(wrapper);
+
+        // 若部门被停用，递归停用所有子部门
+        if (dept.getStatus() != null && dept.getStatus() == 0) {
+            disableSubDepts(dept.getId());
+        }
+    }
+
+    /**
+     * 更新部门详细信息
+     */
+    public void updateInfo(Dept dept) {
+        LambdaUpdateWrapper<Dept> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Dept::getId, dept.getId())
+                .set(Dept::getName, dept.getName())
+                .set(Dept::getCode, dept.getCode())
+                .set(Dept::getIntro, dept.getIntro())
+                .set(Dept::getPhone, dept.getPhone())
+                .set(Dept::getAddress, dept.getAddress())
+                .set(Dept::getUserId, dept.getUserId())
+                .set(Dept::getStatus, dept.getStatus());
+        
+        if (dept.getParentId() == null) {
+            wrapper.set(Dept::getParentId, 0);
+        } else {
+            wrapper.set(Dept::getParentId, dept.getParentId());
+        }
+        // 若 userId 有值，查出用户姓名并填入 user_name
+        if (dept.getUserId() != null) {
+            User user = userMapper.selectById(dept.getUserId());
+            if (user != null) {
+                wrapper.set(Dept::getUserName, user.getName());
+            }
+        }
+        baseMapper.update(wrapper);
+
+        // 若部门被停用，递归停用所有子部门
+        if (dept.getStatus() != null && dept.getStatus() == 0) {
+            disableSubDepts(dept.getId());
+        }
+    }
+
+    /**
+     * 递归停用指定部门下的所有子部门
+     */
+    private void disableSubDepts(Long parentId) {
+        List<Dept> allDepts = baseMapper.selectList(Wrappers.lambdaQuery());
+        Set<Long> subIds = new HashSet<>();
+        collectSubDeptIds(allDepts, parentId, subIds);
+        // 移除父部门自身，只停用子部门
+        subIds.remove(parentId);
+        if (!subIds.isEmpty()) {
+            LambdaUpdateWrapper<Dept> wrapper = Wrappers.lambdaUpdate();
+            wrapper.in(Dept::getId, subIds)
+                    .set(Dept::getStatus, 0);
+            baseMapper.update(wrapper);
+        }
+    }
+
+    /**
+     * 删除部门的子部门
+     */
+    public void deleteSubDepts(Long parentId) {
+        List<Dept> allDepts = baseMapper.selectList(Wrappers.lambdaQuery());
+        Set<Long> subIds = new HashSet<>();
+        collectSubDeptIds(allDepts, parentId, subIds);
+        // 移除父部门自身，删除子部门
+        subIds.remove(parentId);
+        if (!subIds.isEmpty()) {
+            baseMapper.delete(Wrappers.<Dept>lambdaQuery()
+                    .in(Dept::getId, subIds));
         }
     }
 }

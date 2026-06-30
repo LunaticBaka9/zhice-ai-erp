@@ -160,7 +160,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Refresh, Search} from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getLogList, deleteAllLogs } from "@/api";
 import {formatDateTime} from "../../utils/date.js";
 
 const data = reactive({
@@ -183,14 +183,12 @@ const currentLog = ref(null);
 // 加载数据
 const load = async () => {
     try {
-        const res = await request.get("/operationLog/list", {
-            params: {
-                pageNum: data.pageNum,
-                pageSize: data.pageSize,
-                username: searchForm.username,
-                module: searchForm.module,
-                type: searchForm.type,
-            },
+        const res = await getLogList({
+            pageNum: data.pageNum,
+            pageSize: data.pageSize,
+            username: searchForm.username,
+            module: searchForm.module,
+            type: searchForm.type,
         });
         if (res && (res.code === "200" || res.code === 200)) {
             data.tableData = res.data?.list || [];
@@ -266,7 +264,7 @@ const handleDeleteAll = () => {
     })
         .then(async () => {
             try {
-                const res = await request.post("/operationLog/deleteAll");
+                const res = await deleteAllLogs();
                 if (res && (res.code === "200" || res.code === 200)) {
                     ElMessage.success("清空成功");
                     load();

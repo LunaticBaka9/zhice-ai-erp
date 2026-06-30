@@ -17,6 +17,11 @@ public class RoleController {
     @Resource
     RoleService roleService;
 
+    @GetMapping("/all")
+    public Result all() {
+        return Result.success(roleService.list());
+    }
+
     @GetMapping("/list")
     public Result list(@RequestParam(defaultValue = "1") Integer pageNum,
                        @RequestParam(defaultValue = "10") Integer pageSize,

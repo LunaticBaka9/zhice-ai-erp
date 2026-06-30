@@ -59,8 +59,8 @@ public class DeptController {
      */
     @PostMapping("/updateInfo")
     public Result updateInfo(@RequestBody Dept dept) {
-        deptService.updateById(dept);
-        return Result.success();
+       deptService.updateInfo(dept);
+       return Result.success();
     }
 
     /**
@@ -84,6 +84,8 @@ public class DeptController {
     @PostMapping("/delete")
     public Result delete(@RequestBody Dept dept) {
         deptService.removeById(dept);
+        // 删除子部门
+        deptService.deleteSubDepts(dept.getId());
         return Result.success();
     }
 

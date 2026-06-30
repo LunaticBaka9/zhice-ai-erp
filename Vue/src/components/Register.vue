@@ -2,7 +2,7 @@
 import { ref, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import router from "../router";
-import request from "../utils/request";
+import { register as apiRegister, emailRegister as apiEmailRegister, sendEmailRegCode } from "@/api";
 import { Check } from "@element-plus/icons-vue";
 
 const formRef = ref();
@@ -86,8 +86,7 @@ const register = () => {
     formRef.value.validate((valid) => {
         if (valid) {
             loading.value = true;
-            request
-                .post("/register", data.form)
+            apiRegister(data.form)
                 .then((res) => {
                     if (res.code === "200") {
                         ElMessage.success("注册成功");
@@ -107,8 +106,7 @@ const sendCode = () => {
     emailFormRef.value.validateField("email", (valid) => {
         if (valid) {
             codeLoading.value = true;
-            request
-                .post("/sendEmailRegCode", { email: emailData.form.email })
+            sendEmailRegCode({ email: emailData.form.email })
                 .then((res) => {
                     if (res.code === "200") {
                         ElMessage.success("验证码已发送");
@@ -140,8 +138,7 @@ const emailRegister = () => {
     emailFormRef.value.validate((valid) => {
         if (valid) {
             loading.value = true;
-            request
-                .post("/emailRegister", {
+            apiEmailRegister({
                     email: emailData.form.email,
                     password: emailData.form.password,
                     code: emailData.form.code,

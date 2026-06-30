@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 
+    // 更新角色状态
     public void updateStatus(Role role){
         LambdaUpdateWrapper<Role> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(Role::getId, role.getId())

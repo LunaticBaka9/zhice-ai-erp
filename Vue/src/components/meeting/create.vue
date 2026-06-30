@@ -46,7 +46,7 @@
                                 style="width: 100%"
                             >
                                 <el-option
-                                    v-for="dept in deptList"
+                                    v-for="dept in deptStore.deptList"
                                     :key="dept.id"
                                     :label="dept.name"
                                     :value="dept.id"
@@ -75,7 +75,7 @@
                         style="width: 100%"
                     >
                         <el-option
-                            v-for="user in userList"
+                            v-for="user in userStore.allUsers"
                             :key="user.id"
                             :label="`${user.realName} - ${user.job} - ${user.deptName}`"
                             :value="user.id"
@@ -167,7 +167,12 @@ import { ElMessage } from "element-plus";
 import { ArrowLeft, InfoFilled, Clock, Document, Refresh, Promotion } from "@element-plus/icons-vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import "@wangeditor/editor/dist/css/style.css";
-import request from "../../utils/request.js";
+import { createMeeting } from "@/api";
+import { useDeptStore } from "@/store/dept"
+import { useUserStore } from "@/store/user"
+
+const deptStore = useDeptStore();
+const userStore = useUserStore();
 
 const router = useRouter();
 
@@ -208,8 +213,7 @@ const formRules = {
     ],
 };
 
-const deptList = ref([]);
-const userList = ref([]);
+
 
 const editor = ref(null);
 const toolbarConfig = {
@@ -234,10 +238,7 @@ const handleEditorCreated = (instance) => {
 
 const fetchDeptList = async () => {
     try {
-        const res = await request.get("/dept/list");
-        if (res.code === "200") {
-            deptList.value = res.data || [];
-        }
+        await deptStore.fetchDeptList();
     } catch {
         ElMessage.error("获取部门列表失败");
     }
@@ -245,10 +246,7 @@ const fetchDeptList = async () => {
 
 const fetchUserList = async () => {
     try {
-        const res = await request.get("/user/list", { params: { pageSize: 9999 } });
-        if (res.code === "200") {
-            userList.value = res.data?.records || res.data?.list || [];
-        }
+        await userStore.fetchAllUsers();
     } catch {
         ElMessage.error("获取用户列表失败");
     }
@@ -282,7 +280,7 @@ const submitForm = async () => {
             }
             submitting.value = true;
             try {
-                const res = await request.post("/meeting/create", formData);
+                const res = await createMeeting(formData);
                 if (res.code === "200") {
                     ElMessage.success("会议发布成功");
                     router.push("/meeting/index");

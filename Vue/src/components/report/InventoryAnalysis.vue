@@ -32,7 +32,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { ElMessage } from "element-plus";
 import * as echarts from "echarts";
-import request from "../../utils/request";
+import { getInventoryReport } from "@/api";
 
 const loading = ref(false);
 const chartPurchaseRef = ref(null);
@@ -115,7 +115,7 @@ function resizeCharts() {
 async function loadData() {
     loading.value = true;
     try {
-        const res = await request.get("/report/stat/inventory");
+        const res = await getInventoryReport();
         if (!isApiOk(res) || !res.data) {
             ElMessage.error(res?.msg || "加载失败");
             return;

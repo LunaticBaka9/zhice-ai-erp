@@ -263,7 +263,14 @@
 import {reactive, ref, onMounted} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Plus, Document, Clock, Check, Close} from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import { getSaleList, getSaleStatistics, getSaleById, addSale, updateSale, confirmSale, cancelSale } from "@/api";
+import { useCustomerStore } from "@/store/customer";
+import { useGoodsStore } from "@/store/goods";
+import { useWarehouseStore } from "@/store/warehouse";
+
+const customerStore = useCustomerStore();
+const goodsStore = useGoodsStore();
+const warehouseStore = useWarehouseStore();
 
 const loading = ref(false);
 const tableData = ref([]);
@@ -300,7 +307,7 @@ const statistics = reactive({
 });
 
 async function loadStatistics() {
-    const res = await request.get("/sale/statistics");
+    const res = await getSaleStatistics();
     if (res.code === "200" && res.data) {
         statistics.totalCount = res.data.totalCount || 0;
         statistics.draftCount = res.data.draftCount || 0;
@@ -324,53 +331,25 @@ function isApiOk(res) {
     return res && (res.code === "200" || res.code === 200);
 }
 
-/** 分别请求，避免任一失败导致客户/仓库/商品全部为空 */
 async function loadBase() {
-    customers.value = [];
-    warehouses.value = [];
-    goodsList.value = [];
-    try {
-        const cust = await request.get("/customer/selectAllCustomer");
-        if (isApiOk(cust)) {
-            customers.value = Array.isArray(cust.data) ? cust.data : [];
-        } else {
-            ElMessage.error(cust?.msg || "客户列表加载失败");
-        }
-    } catch {
-        /* request 拦截器已提示 */
-    }
-    try {
-        const wh = await request.get("/warehouse/selectAll");
-        if (isApiOk(wh)) {
-            warehouses.value = Array.isArray(wh.data) ? wh.data : [];
-        } else {
-            ElMessage.error(wh?.msg || "仓库列表加载失败");
-        }
-    } catch {
-        /* request 拦截器已提示 */
-    }
-    try {
-        const goods = await request.get("/goods/selectAllGoods");
-        if (isApiOk(goods)) {
-            goodsList.value = Array.isArray(goods.data) ? goods.data : [];
-        } else {
-            ElMessage.error(goods?.msg || "商品列表加载失败");
-        }
-    } catch {
-        /* request 拦截器已提示 */
-    }
+    await Promise.all([
+        customerStore.fetchAllCustomers(),
+        warehouseStore.fetchAllWarehouses(),
+        goodsStore.fetchAllGoods(),
+    ]);
+    customers.value = customerStore.allCustomers;
+    warehouses.value = warehouseStore.allWarehouses;
+    goodsList.value = goodsStore.allGoods;
 }
 
 async function loadList() {
     loading.value = true;
     try {
-        const res = await request.get("/sale/list", {
-            params: {
-                pageNum: pagination.pageNum,
-                pageSize: pagination.pageSize,
-                orderNo: searchForm.orderNo || undefined,
-                status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
-            },
+        const res = await getSaleList({
+            pageNum: pagination.pageNum,
+            pageSize: pagination.pageSize,
+            orderNo: searchForm.orderNo || undefined,
+            status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
         });
         if (res.code === "200" && res.data) {
             tableData.value = res.data.list || [];
@@ -402,7 +381,7 @@ async function openAdd() {
 
 async function openEdit(row) {
     await loadBase();
-    const res = await request.get(`/sale/selectById/${row.id}`);
+    const res = await getSaleById(row.id);
     if (res.code !== "200" || !res.data) {
         ElMessage.error(res.msg || "加载失败");
         return;
@@ -431,7 +410,7 @@ async function openEdit(row) {
 }
 
 async function openDetail(row) {
-    const res = await request.get(`/sale/selectById/${row.id}`);
+    const res = await getSaleById(row.id);
     if (res.code === "200") {
         detail.data = res.data;
         detail.visible = true;
@@ -474,8 +453,7 @@ async function submitSave() {
                 quantity: it.quantity,
             })),
         };
-        const url = dialog.form.id ? "/sale/update" : "/sale/add";
-        const res = dialog.form.id ? await request.post(url, payload) : await request.post(url, payload);
+        const res = dialog.form.id ? await updateSale(payload) : await addSale(payload);
         if (res.code === "200") {
             ElMessage.success("保存成功");
             dialog.visible = false;
@@ -491,7 +469,7 @@ async function submitSave() {
 function handleConfirm(row) {
     ElMessageBox.confirm("确认后订单进入「待出库」，不可再改明细。", "确认订单", {type: "warning"})
         .then(async () => {
-            const res = await request.post(`/sale/confirm/${row.id}`);
+            const res = await confirmSale(row.id);
             if (res.code === "200") {
                 ElMessage.success("已确认");
                 loadList();
@@ -506,7 +484,7 @@ function handleConfirm(row) {
 function handleCancel(row) {
     ElMessageBox.confirm("确定作废该订单？", "作废", {type: "warning"})
         .then(async () => {
-            const res = await request.post(`/sale/cancel/${row.id}`);
+            const res = await cancelSale(row.id);
             if (res.code === "200") {
                 ElMessage.success("已作废");
                 loadList();

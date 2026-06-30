@@ -3,10 +3,13 @@ package com.lunabaka.controller;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.lunabaka.common.OperationLogAnnotation;
 import com.lunabaka.common.Result;
+import com.lunabaka.entity.Dept;
 import com.lunabaka.entity.User;
+import com.lunabaka.service.DeptService;
 import com.lunabaka.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
@@ -26,7 +29,8 @@ import java.util.List;
 public class UserController {
     @Resource
     UserService userService;
-
+    @Resource
+    private DeptService deptService;
     @GetMapping("/selectById/{uid}")
     public Result getUserById(@PathVariable Long uid){
         User user = userService.getById(uid);
@@ -65,6 +69,20 @@ public class UserController {
     @PostMapping("/updateStatus")
     public Result updateStatus(@RequestBody User user){
         userService.updateStatus(user);
+        return Result.success();
+    }
+
+    @PostMapping("/deptTransfer")
+    public Result deptTransfer(@RequestBody User user,
+                               @RequestParam("deptID") Long deptId){
+        Dept dept = deptService.getById(deptId);
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getUid, user.getUid())
+                .set(User::getRoleId, user.getRoleId())
+                .set(User::getRoleName, user.getRoleName())
+                .set(User::getDeptId, deptId)
+                .set(User::getDeptName, dept.getName());
+        userService.update(wrapper);
         return Result.success();
     }
 

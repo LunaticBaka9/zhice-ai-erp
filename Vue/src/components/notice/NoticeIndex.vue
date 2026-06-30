@@ -212,7 +212,7 @@
 import {computed, onMounted, ref} from "vue";
 import {Document, Download, Search, User, View,} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
-import request from "../../utils/request.js";
+import { getAllNotices, getNoticeById, updateViews, markAsRead as apiMarkAsRead } from "@/api";
 import {formatDateTime, parseDate} from "../../utils/date.js";
 
 const user = JSON.parse(localStorage.getItem("local_user"));
@@ -299,7 +299,7 @@ const mapNoticeToAnnouncement = (notice) => {
 
 const loadNotices = async () => {
     try {
-        const res = await request.get("/notice/selectAllNotice");
+        const res = await getAllNotices();
         if (res && (res.code === "200")) {
             const arr = Array.isArray(res.data) ? res.data : [];
             announcements.value = arr.map(mapNoticeToAnnouncement);
@@ -393,7 +393,7 @@ const viewDetail = async (item) => {
     // 优先从后端获取完整详情
     try {
         if (item && item.id) {
-            const res = await request.get(`/notice/selectByNid/${item.id}`);
+            const res = await getNoticeById(item.id);
             if (res && (res.code === "200")) {
                 const n = res.data || {};
                 selectedAnnouncement.value = mapNoticeToAnnouncement(n);
@@ -416,7 +416,7 @@ const viewDetail = async (item) => {
     try {
         const userId = user?.uid;
         if (userId) {
-            await request.post("/notice/markAsRead", {
+            await apiMarkAsRead({
                 noticeId: item.id,
                 userId: userId,
             });
@@ -435,7 +435,7 @@ const viewDetail = async (item) => {
             nid: item.id,
             uid: user?.uid,
         };
-        const res = await request.post(`/notice/updateViews`, payload);
+        const res = await updateViews(payload);
         if (res && (res.code === "200")) {
             // 同步更新本地列表中的阅读数
             const idx = announcements.value.findIndex((a) => a.id === item.id);

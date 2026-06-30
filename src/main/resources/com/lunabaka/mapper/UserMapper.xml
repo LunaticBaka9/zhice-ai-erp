@@ -5,7 +5,7 @@
 <mapper namespace="com.lunabaka.mapper.UserMapper">
 
     <update id="updateAvatarById">
-        UPDATE `user` SET avatar = #{path}, updateTime = NOW() WHERE uid = #{uid}
+        UPDATE `user` SET avatar = #{path}, update_time = NOW() WHERE uid = #{uid}
     </update>
 
 </mapper>

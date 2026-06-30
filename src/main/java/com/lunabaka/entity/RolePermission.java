@@ -4,32 +4,31 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
- * 用户角色关联表
- * @TableName user_role
+ * 
+ * @TableName role_permission
  */
-@TableName(value ="user_role")
+@TableName(value ="role_permission")
 @Data
-public class UserRole implements Serializable {
+public class RolePermission implements Serializable {
     /**
-     * 用户角色关联ID
+     * 
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 用户ID
+     * 
      */
-    private Long userId;
+    private Integer roleId;
 
     /**
-     * 角色ID
+     * 
      */
-    private Long roleId;
+    private Integer permisionId;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

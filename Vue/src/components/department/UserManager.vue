@@ -91,23 +91,30 @@
                 </el-table-column>
                 <el-table-column prop="username" label="用户名" width="120" />
                 <el-table-column prop="name" label="姓名" width="120" />
-                <el-table-column prop="role" label="角色" width="120">
+                <el-table-column prop="role" label="职位" width="120">
                     <template #default="{ row }">
                         <el-tag :type="getRoleType(row.role)" size="small">
                             {{ row.role }}
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="department" label="部门" width="150" />
+                <el-table-column prop="deptName" label="部门" width="150" />
+                <el-table-column prop="employed" label="在职状态" width="100">
+                    <template #default="{ row }">
+                        <el-tag :type="employedType(row.employed)" size="small">
+                            {{ employedLabel(row.employed) }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="phone" label="手机号" width="130" />
                 <el-table-column
                     prop="email"
                     label="邮箱"
-                    width="200"
+                    width="180"
                     show-overflow-tooltip
                 />
-                <el-table-column prop="joinDate" label="入职时间" sortable />
-                <el-table-column label="状态" width="100">
+                <el-table-column prop="joinDate" label="入职时间" sortable width="100"/>
+                <el-table-column label="账号状态" width="100">
                     <template #default="{ row }">
                         <el-switch
                             v-model="row.status"
@@ -256,10 +263,10 @@
                     </el-select>
                 </el-form-item>
 
-                <el-form-item label="部门" prop="department">
+                <el-form-item label="部门" prop="deptName">
                     <el-cascader
-                        v-model="dialog.form.department"
-                        :options="departmentOptions"
+                        v-model="dialog.form.deptName"
+                        :options="deptNameOptions"
                         :props="{
                             value: 'id',
                             label: 'name',
@@ -354,46 +361,47 @@
         <el-dialog v-model="viewDialog.visible" title="用户详情" width="500px">
             <el-descriptions :column="1" border>
                 <el-descriptions-item label="用户名">{{
-                    viewDialog.data.username
-                }}</el-descriptions-item>
+                        viewDialog.data.username
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="姓名">{{
-                    viewDialog.data.name
-                }}</el-descriptions-item>
+                        viewDialog.data.name
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="角色">{{
-                    viewDialog.data.role
-                }}</el-descriptions-item>
+                        viewDialog.data.role
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="部门">{{
-                    viewDialog.data.department
-                }}</el-descriptions-item>
+                        viewDialog.data.deptName
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="手机号">{{
-                    viewDialog.data.phone
-                }}</el-descriptions-item>
+                        viewDialog.data.phone
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="邮箱">{{
-                    viewDialog.data.email
-                }}</el-descriptions-item>
+                        viewDialog.data.email
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="入职时间">{{
-                    viewDialog.data.joinDate
-                }}</el-descriptions-item>
+                        viewDialog.data.joinDate
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="就职状态">
+                    <el-tag :type="employedType(viewDialog.data.employed)" size="small">
+                        {{ employedLabel(viewDialog.data.employed) }}
+                    </el-tag>
+                </el-descriptions-item>
                 <el-descriptions-item label="状态">
                     <el-tag
-                        :type="
-                            viewDialog.data.status === '启用'
-                                ? 'success'
-                                : 'danger'
-                        "
+                        :type="viewDialog.data.status === '启用' ? 'success': 'danger'"
                     >
                         {{ viewDialog.data.status }}
                     </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="个人简介">{{
-                    viewDialog.data.bio || "暂无"
-                }}</el-descriptions-item>
+                        viewDialog.data.bio || "暂无"
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="创建时间">{{
-                    viewDialog.data.createTime
-                }}</el-descriptions-item>
+                        viewDialog.data.createTime
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="更新时间">{{
-                    viewDialog.data.updateTime
-                }}</el-descriptions-item>
+                        viewDialog.data.updateTime
+                    }}</el-descriptions-item>
             </el-descriptions>
         </el-dialog>
 
@@ -448,7 +456,10 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Key, Plus, Refresh, Search, View,} from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getUserList as apiGetUserList, addUser, updateUser, deleteUser, updateUserStatus, updatePassword, exportUsers } from "@/api";
+import { useDeptStore } from "@/store/dept"
+
+const deptStore = useDeptStore();
 
 // 默认头像
 const defaultAvatar =
@@ -479,19 +490,46 @@ const searchForm = reactive({
 // 用户列表数据
 const userList = ref([]);
 const loading = ref(false);
-
 // 分页参数
 const pagination = reactive({
     pageNum: 1,
     pageSize: 10,
     total: 0,
 });
-
 // 选中的行
 const selectedRows = ref([]);
 
+const employedType = (val) => {
+    const map = {"0": "info", "1": "warning", "2": "success", "3": "danger"};
+    return map[val] || "info";
+};
+
+const employedLabel = (val) => {
+    const map = {"0": "实习", "1": "试用", "2": "转正", "3": "离职"};
+    return map[val] || "未知";
+};
+
+const allDeptTree = ref([]);
+
+// 获取部门列表
+const loadDeptTree = async () => {
+    try {
+        await deptStore.fetchDeptList();
+        const tree = deptStore.deptList;
+        const id = route.query.id;
+        if (id) {
+            const node = findDeptInTree(tree, Number(id));
+            if (node) {
+                subDeptList.value = node.children || [];
+            }
+        }
+    } catch (error) {
+        console.error("获取部门树失败");
+    }
+};
+
 // 部门选项
-const departmentOptions = ref([
+const deptNameOptions = ref([
     {
         id: "技术部",
         name: "技术部",
@@ -546,7 +584,7 @@ const dialog = reactive({
         password: "",
         confirmPassword: "",
         role: "",
-        department: [],
+        deptName: [],
         phone: "",
         email: "",
         joinDate: "",
@@ -595,7 +633,7 @@ const dialog = reactive({
             },
         ],
         role: [{ required: true, message: "请选择角色", trigger: "change" }],
-        department: [
+        deptName: [
             { required: true, message: "请选择部门", trigger: "change" },
         ],
         phone: [
@@ -684,7 +722,7 @@ const getUserList = async () => {
                 params[key] = value;
             }
         });
-        const res = await request.get("/user/list", { params });
+        const res = await apiGetUserList(params);
         if (res.code === "200") {
             userList.value = res.data.records || res.data.list || [];
             pagination.total = res.data.total || 0;
@@ -742,7 +780,8 @@ const handleAdd = () => {
         password: "",
         confirmPassword: "",
         role: "",
-        department: [],
+        deptName: [],
+        employed: "",
         phone: "",
         email: "",
         joinDate: "",
@@ -765,9 +804,9 @@ const handleEdit = (row) => {
         password: "",
         confirmPassword: "",
         role: row.role || "",
-        department:
-            row.department && typeof row.department === "string"
-                ? row.department.split("/")
+        deptName:
+            row.deptName && typeof row.deptName === "string"
+                ? row.deptName.split("/")
                 : [],
         phone: row.phone || "",
         email: row.email || "",
@@ -794,15 +833,15 @@ const submitUser = async () => {
             try {
                 const submitData = { ...dialog.form };
                 if (
-                    submitData.department &&
-                    Array.isArray(submitData.department)
+                    submitData.deptName &&
+                    Array.isArray(submitData.deptName)
                 ) {
-                    submitData.department = submitData.department.join("/");
+                    submitData.deptName = submitData.deptName.join("/");
                 }
 
                 if (dialog.isAdd) {
                     delete submitData.confirmPassword;
-                    const res = await request.post("/user/add", submitData);
+                    const res = await addUser(submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增用户成功");
                             dialog.visible = false;
@@ -813,10 +852,7 @@ const submitUser = async () => {
                 } else {
                     delete submitData.password;
                     delete submitData.confirmPassword;
-                    const res = await request.post(
-                        "/user/updateInfo",
-                        submitData,
-                    );
+                    const res = await updateUser(submitData);
                     if (res.code === "200") {
                         ElMessage.success("更新用户成功");
                         dialog.visible = false;
@@ -843,7 +879,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post(`/user/delete`, row);
+                const res = await deleteUser(row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getUserList();
@@ -860,7 +896,7 @@ const handleDelete = (row) => {
 // // 修改状态
 const handleStatusChange = async (row) => {
     try {
-        const res = await request.post(`/user/updateStatus`, row);
+        const res = await updateUserStatus(row);
         if (res.code !== "200") {
             ElMessage.error("状态修改失败");
             // 回滚状态
@@ -890,7 +926,7 @@ const submitResetPassword = async () => {
         if (valid) {
             resetPasswordDialog.loading = true;
             try {
-                const res = await request.post("/user/updatePassword", {
+                const res = await updatePassword({
                     uid: resetPasswordDialog.userId,
                     newPassword: resetPasswordDialog.form.newPassword,
                 });
@@ -925,7 +961,7 @@ const handleDialogClose = () => {
 
 const exportData = async () => {
     try {
-        const res = await request.get("/user/exportData", { responseType: "blob" });
+        const res = await exportUsers();
         const blob = new Blob([res], { type: "application/vnd.ms-excel" });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");

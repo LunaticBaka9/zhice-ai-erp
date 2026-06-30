@@ -538,7 +538,7 @@ import {
     Warning,
     WarningFilled,
 } from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getInventoryList, addInventory, updateInventory, completeInventory, cancelInventory } from "@/api";
 import { formatDateTime } from "../../utils/date.js";
 
 // 搜索表单
@@ -754,7 +754,7 @@ const getOperationList = async () => {
         console.log("请求参数:", params); // 调试日志
 
         // 调用后端 API
-        const res = await request.get("/inventoryOperation/list", { params });
+        const res = await getInventoryList(params);
 
         console.log("API响应:", res); // 调试日志
 
@@ -1005,10 +1005,7 @@ const submitOperation = async () => {
                 let res;
                 if (dialog.isAdd) {
                     // 调用后端新增 API
-                    res = await request.post(
-                        "/inventoryOperation/add",
-                        submitData,
-                    );
+                    res = await addInventory(submitData);
                     if (
                         res &&
                         (res.code === 0 ||
@@ -1026,10 +1023,7 @@ const submitOperation = async () => {
                     }
                 } else {
                     // 调用后端更新 API
-                    res = await request.post(
-                        "/inventoryOperation/update",
-                        submitData,
-                    );
+                    res = await updateInventory(submitData);
                     if (
                         res &&
                         (res.code === 0 ||
@@ -1103,9 +1097,7 @@ const handleComplete = async (row) => {
         );
 
         // 调用后端更新状态 API
-        const res = await request.post(
-            `/inventoryOperation/updateStatus/${row.id}/completed`,
-        );
+        const res = await completeInventory(row.id);
         if (
             res &&
             (res.code === 0 ||
@@ -1138,9 +1130,7 @@ const handleCancel = async (row) => {
         );
 
         // 调用后端更新状态 API
-        const res = await request.post(
-            `/inventoryOperation/updateStatus/${row.id}/cancelled`,
-        );
+        const res = await cancelInventory(row.id);
         if (
             res &&
             (res.code === 0 ||

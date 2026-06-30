@@ -159,7 +159,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Plus} from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import { getMenuList as apiGetMenuList, addMenu, updateMenu, deleteMenu } from "@/api";
 
 // 搜索表单
 const searchForm = reactive({
@@ -219,7 +219,7 @@ const getMenuList = async () => {
         if (searchForm.name) {
             params.name = searchForm.name;
         }
-        const res = await request.get("/menu/list", { params });
+        const res = await apiGetMenuList(params);
         if (res.code === "200") {
             const data = Array.isArray(res.data) ? res.data : (res.data.records || []);
             menuList.value = data;
@@ -273,7 +273,7 @@ const submitmenu = async () => {
             try {
                 const submitData = { ...dialog.form };
                 if (dialog.isAdd) {
-                    const res = await request.post("/menu/add", submitData);
+                    const res = await addMenu(submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增菜单成功");
                         dialog.visible = false;
@@ -282,10 +282,7 @@ const submitmenu = async () => {
                         ElMessage.error(res.msg || "新增菜单失败");
                     }
                 } else {
-                    const res = await request.post(
-                        "/menu/updateInfo",
-                        submitData,
-                    );
+                    const res = await updateMenu(submitData);
                     if (res.code === "200") {
                         ElMessage.success("更新菜单成功");
                         dialog.visible = false;
@@ -312,7 +309,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post(`/menu/delete`, row);
+                const res = await deleteMenu(row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getMenuList();

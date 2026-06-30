@@ -153,6 +153,9 @@
                 <el-menu-item index="/system/user">
                     <span>用户列表</span>
                 </el-menu-item>
+                <el-menu-item index="/system/post">
+                    <span>职位列表</span>
+                </el-menu-item>
                 <el-menu-item index="/system/role">
                     <span>角色列表</span>
                 </el-menu-item>

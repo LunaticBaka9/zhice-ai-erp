@@ -27,14 +27,26 @@ public class User {
     @Alias("邮箱")
     private String email;
 
+    @PropIgnore
+    private String roleId;
+
     @Alias("角色")
-    private String role;
+    private String roleName;
 
     @PropIgnore
     private Long deptId;
 
     @Alias("部门")
     private String deptName;
+
+    @PropIgnore
+    private Long postId;
+
+    @Alias("职位")
+    private String postName;
+
+    @Alias("在职状态")
+    private Integer employed;
 
     @Alias("电话")
     private String phone;

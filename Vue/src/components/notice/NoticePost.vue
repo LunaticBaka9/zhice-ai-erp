@@ -209,7 +209,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Document, Download } from "@element-plus/icons-vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import "@wangeditor/editor/dist/css/style.css";
-import request from "../../utils/request.js";
+import { updateNotice, postNotice, saveDraft } from "@/api";
 
 // 路由
 const router = useRouter();
@@ -487,7 +487,7 @@ const handleConfirmPublish = async () => {
         console.log("提交数据:", submitData);
 
         if (isEditor.value) {
-            request.post("/notice/update", submitData).then((res) => {
+            updateNotice(submitData).then((res) => {
                 if (res.code === "200") {
                     ElMessage.success("公告修改成功");
                     isFormDirty.value = false; // 重置脏状态
@@ -496,7 +496,7 @@ const handleConfirmPublish = async () => {
                 }
             });
         } else {
-            request.post("/notice/postNotice", submitData).then((res) => {
+            postNotice(submitData).then((res) => {
                 if (res.code === "200") {
                     ElMessage.success("公告发布成功");
                     isFormDirty.value = false; // 重置脏状态
@@ -539,7 +539,7 @@ const handleSaveDraft = async () => {
         };
         formData.publishDate = Date.now();
         if (isEditor.value) {
-            request.post("/notice/update", draftData).then((res) => {
+            updateNotice(draftData).then((res) => {
                 if (res.code === "200") {
                     ElMessage.success("草稿修改成功");
                 } else {
@@ -547,7 +547,7 @@ const handleSaveDraft = async () => {
                 }
             });
         } else {
-            request.post("/notice/saveDraft", draftData).then((res) => {
+            saveDraft(draftData).then((res) => {
                 if (res.code === "200") {
                     ElMessage.success("草稿保存成功");
                 } else {

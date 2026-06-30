@@ -285,10 +285,10 @@
                 </el-select>
             </el-form-item>
 
-            <el-form-item label="部门" prop="department">
+            <el-form-item label="部门" prop="deptName">
                 <el-cascader
-                    v-model="profileDialog.form.department"
-                    :options="departmentOptions"
+                    v-model="profileDialog.form.deptName"
+                    :options="deptNameOptions"
                     :props="{
                         value: 'id',
                         label: 'name',
@@ -337,8 +337,8 @@
 import {onBeforeMount, reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
 import {Message, Phone, Plus} from "@element-plus/icons-vue";
-import request from "../utils/request";
-import axios from "axios";
+import { getUserById, updateUser, updatePassword, sendUserEmailCode, changeEmail, sendPhoneCode as apiSendPhoneCode, changePhone } from "@/api";
+import { uploadAvatar } from "@/api/file";
 
 const defaultAvatar = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
 
@@ -361,7 +361,7 @@ const data = reactive({
 console.log(data.user);
 
 const load = () => {
-    request.get("user/selectById/" + data.user.uid).then((res) => {
+    getUserById(data.user.uid).then((res) => {
         if (res.code == "200") {
             data.userInfo = res.data;
         } else {
@@ -370,11 +370,6 @@ const load = () => {
     });
 };
 load();
-
-const logout = () => {
-    localStorage.removeItem("local_user");
-    location.href = "/login";
-};
 
 // 统计数据
 const stats = reactive({
@@ -563,7 +558,7 @@ const sendPhoneCode = async () => {
     phoneDialog.codeSending = true;
     try {
         // 这里调用发送验证码的API
-        await request.post("/api/send-phone-code", {
+        await apiSendPhoneCode({
             phone: phoneDialog.form.newPhone,
             type: "change_phone",
         });
@@ -601,7 +596,7 @@ const sendEmailCode = async () => {
     emailDialog.codeSending = true;
     try {
         // 这里调用发送验证码的API
-        await request.post("/user/send-email-code", {
+        await sendUserEmailCode({
             email: emailDialog.form.newEmail,
             type: "change_email",
         });
@@ -632,7 +627,7 @@ const submitPassword = async () => {
             passwordDialog.loading = true;
             try {
                 // 这里调用修改密码的API
-                await request.post("/user/updatePassword", {
+                await updatePassword({
                     userId: data.user.uid,
                     oldPassword: passwordDialog.form.oldPassword,
                     newPassword: passwordDialog.form.newPassword,
@@ -657,7 +652,7 @@ const submitPhone = async () => {
             phoneDialog.loading = true;
             try {
                 // 这里调用修改手机的API
-                await request.post("/api/change-phone", {
+                await changePhone({
                     userId: data.user.uid,
                     newPhone: phoneDialog.form.newPhone,
                     code: phoneDialog.form.code,
@@ -685,7 +680,7 @@ const submitEmail = async () => {
             emailDialog.loading = true;
             try {
                 // 这里调用修改邮箱的API
-                await request.post("/user/changeEmail", {
+                await changeEmail({
                     userId: data.user.uid,
                     newEmail: emailDialog.form.newEmail,
                     code: emailDialog.form.code,
@@ -705,7 +700,7 @@ const submitEmail = async () => {
 };
 
 // 在 data 对象后面添加部门选项数据
-const departmentOptions = ref([
+const deptNameOptions = ref([
     {
         id: "技术部",
         name: "技术部",
@@ -814,9 +809,7 @@ const beforeAvatarUpload = async (file) => {
     form.append("uid", data.user.uid);
 
     try {
-        const resp = await axios.post("/api/file/uploadAvatar", form, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
+        const resp = await uploadAvatar(form);
         const result = resp.data;
         if (result && result.code === "200") {
             profileDialog.form.avatar = result.data;
@@ -854,7 +847,7 @@ const submitProfile = async () => {
 
             try {
                 // 调用更新用户信息的API
-                const res = await request.post("/user/updateInfo", submitData);
+                const res = await updateUser(submitData);
                 if (res.code === "200") {
                     ElMessage.success("资料更新成功");
 

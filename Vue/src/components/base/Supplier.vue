@@ -223,7 +223,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Search, Refresh, Edit, Delete, Download } from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getSupplierList as apiGetSupplierList, addSupplier, updateSupplier, deleteSupplier } from "@/api";
 
 const searchForm = reactive({
     code: "",
@@ -300,7 +300,7 @@ const getSupplierList = async () => {
             params.status = searchForm.status;
         }
 
-        const res = await request.get("/supplier/list", { params });
+        const res = await apiGetSupplierList(params);
         if (res.code === "200") {
             supplierList.value = res.data?.records || res.data?.list || [];
             pagination.total = res.data?.total || 0;
@@ -381,7 +381,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.delete(`/supplier/delete/${row.id}`);
+                const res = await deleteSupplier(row.id);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getSupplierList();
@@ -403,10 +403,7 @@ const submitForm = async () => {
             dialog.loading = true;
             try {
                 const submitData = { ...dialog.form };
-                const api = dialog.isEdit ? "/supplier/update" : "/supplier/add";
-                const method = dialog.isEdit ? "post" : "post";
-
-                const res = await request[method](api, submitData);
+                const res = await (dialog.isEdit ? updateSupplier(submitData) : addSupplier(submitData));
                 if (res.code === "200") {
                     ElMessage.success(dialog.isEdit ? "更新成功" : "新增成功");
                     dialog.visible = false;

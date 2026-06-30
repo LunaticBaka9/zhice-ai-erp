@@ -122,7 +122,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Plus} from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import { getEligibleInbound, getInboundList, createInbound, getInboundDetail, confirmInbound, deleteDraftInbound } from "@/api";
 
 const loading = ref(false);
 const tableData = ref([]);
@@ -153,21 +153,19 @@ const detail = reactive({
 });
 
 async function loadEligible() {
-    const res = await request.get("/purchase/order/eligibleInbound");
+    const res = await getEligibleInbound();
     if (res.code === "200") eligibleList.value = res.data || [];
 }
 
 async function loadList() {
     loading.value = true;
     try {
-        const res = await request.get("/purchase/inbound/list", {
-            params: {
-                pageNum: pagination.pageNum,
-                pageSize: pagination.pageSize,
-                billNo: searchForm.billNo || undefined,
-                purchaseBillNo: searchForm.purchaseBillNo || undefined,
-                status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
-            },
+        const res = await getInboundList({
+            pageNum: pagination.pageNum,
+            pageSize: pagination.pageSize,
+            billNo: searchForm.billNo || undefined,
+            purchaseBillNo: searchForm.purchaseBillNo || undefined,
+            status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
         });
         if (res.code === "200" && res.data) {
             tableData.value = res.data.list || [];
@@ -206,7 +204,7 @@ async function submitCreate() {
     }
     createDlg.submitting = true;
     try {
-        const res = await request.post("/purchase/inbound/create", {
+        const res = await createInbound({
             purchaseId: createDlg.purchaseId,
             remark: createDlg.remark || null,
         });
@@ -223,7 +221,7 @@ async function submitCreate() {
 }
 
 async function openDetail(row) {
-    const res = await request.get(`/purchase/inbound/detail/${row.id}`);
+    const res = await getInboundDetail(row.id);
     if (res.code === "200") {
         detail.data = res.data;
         detail.visible = true;
@@ -235,7 +233,7 @@ async function openDetail(row) {
 function handleConfirm(row) {
     ElMessageBox.confirm("确认后将按明细增加库存，且不可撤销。是否继续？", "确认入库", { type: "warning" })
         .then(async () => {
-            const res = await request.post(`/purchase/inbound/confirm/${row.id}`);
+            const res = await confirmInbound(row.id);
             if (res.code === "200") {
                 ElMessage.success("入库已入账");
                 loadList();
@@ -249,7 +247,7 @@ function handleConfirm(row) {
 function handleDeleteDraft(row) {
     ElMessageBox.confirm("删除草稿入库单后，可重新从采购订单生成。", "删除", { type: "warning" })
         .then(async () => {
-            const res = await request.post(`/purchase/inbound/deleteDraft/${row.id}`);
+            const res = await deleteDraftInbound(row.id);
             if (res.code === "200") {
                 ElMessage.success("已删除");
                 loadList();

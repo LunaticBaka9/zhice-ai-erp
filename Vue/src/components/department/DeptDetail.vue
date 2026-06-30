@@ -14,7 +14,7 @@
                 <div class="card-header">
                     <div class="card-header-left">
                         <el-tag v-if="dept.status === 1" type="success" effect="dark" size="small">启用</el-tag>
-                        <el-tag v-else type="danger" effect="dark" size="small">禁用</el-tag>
+                        <el-tag v-else type="danger" effect="dark" size="small">停用</el-tag>
                         <span class="dept-title">{{ dept.name }}</span>
                     </div>
                     <div>
@@ -39,7 +39,10 @@
                 <el-descriptions-item label="部门负责人">{{ dept.userName || '暂无' }}</el-descriptions-item>
                 <el-descriptions-item label="联系电话">{{ dept.phone || '暂无' }}</el-descriptions-item>
                 <el-descriptions-item label="办公地点">{{ dept.address || '暂无' }}</el-descriptions-item>
-                <el-descriptions-item label="成立时间">{{ dept.createTime || '暂无' }}</el-descriptions-item>
+                <el-descriptions-item label="成立时间">{{
+                        formatDate(dept.createTime) || '暂无'
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="部门状态">
                     <el-tag :type="dept.status === 1 ? 'success' : 'danger'" size="small">
                         {{ dept.status === 1 ? '正常运营' : '停用' }}
@@ -49,7 +52,8 @@
             </el-descriptions>
         </el-card>
 
-        <el-card shadow="never" class="detail-card">
+        <!-- 子部门列表 -->
+        <el-card shadow="never" class="detail-card" v-if="subDeptList.length !== 0">
             <template #header>
                 <div class="card-header">
                     <span>子部门列表（{{ subDeptList.length }}个）</span>
@@ -100,24 +104,26 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="status" label="用户状态" width="100" />
+                <el-table-column prop="status" label="用户状态" width="100"/>
                 <el-table-column label="操作" width="160" fixed="right">
                     <template #default="{ row }">
-                        <el-button link type="primary" size="small" @click="viewEmployee(row)">查看</el-button>
+                        <el-button link type="primary" size="small" @click="handleView(row)">查看</el-button>
                         <el-button link type="warning" size="small" @click="handleTransfer(row)">调岗</el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </el-card>
 
+        <!-- 部门编辑表格 -->
         <el-dialog v-model="editDialog.visible" title="编辑部门" width="650px" :close-on-click-modal="false"
                    @close="editFormRef.value?.clearValidate()">
             <el-form ref="editFormRef" :model="editDialog.form" :rules="editDialog.rules" label-width="120px">
                 <el-form-item label="上级部门" prop="parentId">
                     <el-tree-select
                         v-model="editDialog.form.parentId"
-                        :data="allDeptTree"
+                        :data="deptStore.deptTree"
                         :props="{ label: 'name', value: 'id', children: 'children' }"
+                        check-strictly=true
                         placeholder="请选择上级部门（留空为顶级）"
                         clearable filterable style="width: 100%"
                     />
@@ -147,7 +153,7 @@
                         <el-form-item label="部门负责人" prop="userId">
                             <el-select v-model="editDialog.form.userId" placeholder="请选择负责人" clearable filterable
                                        style="width: 100%">
-                                <el-option v-for="u in allUsers" :key="u.uid" :label="u.name + ' - ' + (u.role || '')"
+                                <el-option v-for="u in userStore.allUsers" :key="u.uid" :label="u.name + ' - ' + (u.role || '')"
                                            :value="u.uid"/>
                             </el-select>
                         </el-form-item>
@@ -176,29 +182,25 @@
             </template>
         </el-dialog>
 
+        <!-- 员工调岗 -->
         <el-dialog v-model="transferDialog.visible" title="员工调岗" width="500px" :close-on-click-modal="false">
             <el-form ref="transferFormRef" :model="transferDialog.form" label-width="120px">
                 <el-form-item label="当前员工">
-                    <el-tag type="info">{{ transferDialog.form.userName }}</el-tag>
+                    {{ transferDialog.form.userName }}
                 </el-form-item>
                 <el-form-item label="目标部门" prop="targetDeptId">
                     <el-tree-select
                         v-model="transferDialog.form.targetDeptId"
-                        :data="allDeptTree"
+                        :data="deptStore.deptTree"
                         :props="{ label: 'name', value: 'id', children: 'children' }"
                         placeholder="请选择目标部门"
+                        check-strictly=true
                         clearable filterable style="width: 100%"
                     />
                 </el-form-item>
                 <el-form-item label="职位" prop="role">
-                    <el-input v-model="transferDialog.form.role" placeholder="请输入职位"/>
-                </el-form-item>
-                <el-form-item label="在职状态" prop="empolyed">
-                    <el-select v-model="transferDialog.form.empolyed" placeholder="请选择在职状态" style="width: 100%">
-                        <el-option label="实习" value="0"/>
-                        <el-option label="试用" value="1"/>
-                        <el-option label="转正" value="2"/>
-                        <el-option label="离职" value="3"/>
+                    <el-select v-model="transferDialog.form.role" placeholder="请选择职位" clearable filterable style="width: 100%">
+                        <el-option v-for="r in roleOptions" :key="r.id" :label="r.name" :value="r.name"/>
                     </el-select>
                 </el-form-item>
             </el-form>
@@ -207,15 +209,69 @@
                 <el-button type="primary" :loading="transferDialog.loading" @click="submitTransfer">确认</el-button>
             </template>
         </el-dialog>
+
+        <!-- 查看用户详情对话框 -->
+        <el-dialog v-model="viewDialog.visible" title="用户详情" width="500px">
+            <el-descriptions :column="1" border>
+                <el-descriptions-item label="用户名">{{
+                        viewDialog.data.username
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="姓名">{{
+                        viewDialog.data.name
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="职位">{{
+                        viewDialog.data.role
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="部门">{{
+                        viewDialog.data.deptName
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="手机号">{{
+                        viewDialog.data.phone
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="邮箱">{{
+                        viewDialog.data.email
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="入职时间">{{
+                        viewDialog.data.joinDate
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="就职状态">
+                    <el-tag :type="employedType(viewDialog.data.employed)" size="small">
+                        {{ employedLabel(viewDialog.data.employed) }}
+                    </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="状态">
+                    <el-tag
+                        :type="viewDialog.data.status === '启用' ? 'success': 'danger'"
+                    >
+                        {{ viewDialog.data.status }}
+                    </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="个人简介">{{
+                        viewDialog.data.bio || "暂无"
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="创建时间">{{
+                        viewDialog.data.createTime
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="更新时间">{{
+                        viewDialog.data.updateTime
+                    }}</el-descriptions-item>
+            </el-descriptions>
+        </el-dialog>
     </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { ArrowLeft, Edit, Search } from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import {onMounted, reactive, ref, watch} from "vue";
+import {useRoute, useRouter} from "vue-router";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {ArrowLeft, Edit, Search} from "@element-plus/icons-vue";
+import { getDeptDetail, getDeptMembers, updateDept, deleteDept, updateUser, getAllRoles } from "@/api";
+import { useDeptStore } from "@/store/dept"
+import { useUserStore } from "@/store/user"
+import {formatDate} from "../../utils/date.js";
+
+const deptStore = useDeptStore();
+const userStore = useUserStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -228,8 +284,20 @@ const searchQuery = ref("");
 const dept = ref({});
 const subDeptList = ref([]);
 const userList = ref([]);
-const allDeptTree = ref([]);
-const allUsers = ref([]);
+const roleOptions = ref([]);
+
+
+// 查看详情对话框
+const viewDialog = reactive({
+    visible: false,
+    data: {},
+});
+
+// 查看用户
+const handleView = (row) => {
+    viewDialog.data = { ...row };
+    viewDialog.visible = true;
+};
 
 const findDeptInTree = (nodes, id) => {
     for (const node of nodes) {
@@ -256,7 +324,7 @@ const loadDeptDetail = async () => {
     }
     loading.value = true;
     try {
-        const res = await request.get(`/dept/detail/${id}`);
+        const res = await getDeptDetail(id);
         if (res.code === "200") {
             dept.value = res.data || {};
         } else {
@@ -271,16 +339,13 @@ const loadDeptDetail = async () => {
 
 const loadDeptTree = async () => {
     try {
-        const res = await request.get("/dept/list");
-        if (res.code === "200") {
-            const tree = Array.isArray(res.data) ? res.data : (res.data.records || []);
-            allDeptTree.value = tree;
-            const id = route.query.id;
-            if (id) {
-                const node = findDeptInTree(tree, Number(id));
-                if (node) {
-                    subDeptList.value = node.children || [];
-                }
+        await deptStore.fetchDeptList();
+        const tree = deptStore.deptTree;
+        const id = route.query.id;
+        if (id) {
+            const node = findDeptInTree(tree, Number(id));
+            if (node) {
+                subDeptList.value = node.children || [];
             }
         }
     } catch (error) {
@@ -297,7 +362,7 @@ const loadMembers = async () => {
         if (searchQuery.value) {
             params.searchQuery = searchQuery.value;
         }
-        const res = await request.get(`/dept/members/${id}`, { params });
+        const res = await getDeptMembers(id, params);
         if (res.code === "200") {
             const data = Array.isArray(res.data) ? res.data : (res.data.records || []);
             userList.value = data.map(u => ({
@@ -315,13 +380,17 @@ const loadMembers = async () => {
 };
 
 const loadAllUsers = async () => {
+    await userStore.fetchAllUsers();
+};
+
+const loadRoles = async () => {
     try {
-        const res = await request.get("/user/selectAllUsers");
+        const res = await getAllRoles();
         if (res.code === "200") {
-            allUsers.value = Array.isArray(res.data) ? res.data : [];
+            roleOptions.value = Array.isArray(res.data) ? res.data : [];
         }
     } catch (error) {
-        console.error("获取用户列表失败");
+        console.error("获取角色列表失败");
     }
 };
 
@@ -331,12 +400,12 @@ const goBack = () => {
 
 const viewParentDept = () => {
     if (dept.value.parentId) {
-        router.push({ path: "/dept/detail", query: { id: dept.value.parentId } });
+        router.push({path: "/dept/detail", query: {id: dept.value.parentId}});
     }
 };
 
 const viewDept = (id) => {
-    router.push({ path: "/dept/detail", query: { id } });
+    router.push({path: "/dept/detail", query: {id}});
 };
 
 const deleteSubDept = (row) => {
@@ -347,7 +416,7 @@ const deleteSubDept = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post("/dept/delete", row);
+                const res = await deleteDept(row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     loadDeptTree();
@@ -358,24 +427,21 @@ const deleteSubDept = (row) => {
                 ElMessage.error("删除失败");
             }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
 };
 
 const handleSearch = () => {
     loadMembers();
 };
 
-const viewEmployee = (row) => {
-    router.push({ path: "/system/user", query: { uid: row.uid } });
-};
-
 const employedType = (val) => {
-    const map = { "0": "info", "1": "warning", "2": "success", "3": "danger" };
+    const map = {"0": "info", "1": "warning", "2": "success", "3": "danger"};
     return map[val] || "info";
 };
 
 const employedLabel = (val) => {
-    const map = { "0": "实习", "1": "试用", "2": "转正", "3": "离职" };
+    const map = {"0": "实习", "1": "试用", "2": "转正", "3": "离职"};
     return map[val] || "未知";
 };
 
@@ -396,11 +462,11 @@ const editDialog = reactive({
     },
     rules: {
         name: [
-            { required: true, message: "请输入部门名称", trigger: "blur" },
-            { min: 2, max: 20, message: "长度在 2 到 20 个字符", trigger: "blur" },
+            {required: true, message: "请输入部门名称", trigger: "blur"},
+            {min: 2, max: 20, message: "长度在 2 到 20 个字符", trigger: "blur"},
         ],
         code: [
-            { required: true, message: "请输入部门编码", trigger: "blur" },
+            {required: true, message: "请输入部门编码", trigger: "blur"},
         ],
     },
 });
@@ -426,7 +492,7 @@ const submitEdit = async () => {
         if (valid) {
             editDialog.loading = true;
             try {
-                const res = await request.post("/dept/updateInfo", editDialog.form);
+                const res = await updateDept(editDialog.form);
                 if (res.code === "200") {
                     ElMessage.success("更新部门成功");
                     editDialog.visible = false;
@@ -453,7 +519,7 @@ const transferDialog = reactive({
         userName: "",
         targetDeptId: null,
         role: "",
-        empolyed: "",
+        employed: "",
     },
 });
 
@@ -463,13 +529,13 @@ const handleTransfer = (row) => {
         userName: row.name || "",
         targetDeptId: null,
         role: row.role || "",
-        empolyed: row.employed || "",
+        employed: row.employed || "",
     };
     transferDialog.visible = true;
 };
 
 const submitTransfer = async () => {
-    const targetDeptName = findDeptName(allDeptTree.value, transferDialog.form.targetDeptId);
+    const targetDeptName = findDeptName(deptStore.deptTree, transferDialog.form.targetDeptId);
     if (!targetDeptName) {
         ElMessage.error("请选择目标部门");
         return;
@@ -480,10 +546,11 @@ const submitTransfer = async () => {
             uid: transferDialog.form.uid,
             role: transferDialog.form.role,
             deptName: targetDeptName,
+            employed: transferDialog.form.employed,
             bio: "",
             joinDate: "",
         };
-        const res = await request.post("/user/updateInfo", submitData);
+        const res = await updateUser(submitData);
         if (res.code === "200") {
             ElMessage.success("调岗成功");
             transferDialog.visible = false;
@@ -498,12 +565,26 @@ const submitTransfer = async () => {
     }
 };
 
+// 挂载时加载数据
 onMounted(() => {
     loadDeptDetail();
     loadDeptTree();
     loadMembers();
     loadAllUsers();
+    loadRoles();
 });
+
+// 监控地址栏的ID变化
+watch(() => route.query.id, (newId) => {
+    if (newId) {
+        loadDeptDetail();
+        loadDeptTree();
+        loadMembers();
+        loadAllUsers();
+        loadRoles();
+    }
+});
+
 </script>
 
 <style scoped>

@@ -129,6 +129,15 @@
                             />
                         </el-form-item>
                     </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="部门代码" prop="code">
+                            <el-input
+                                v-model="dialog.form.code"
+                                placeholder="请输入部门代码"
+                                :disabled="dialog.isView"
+                            />
+                        </el-form-item>
+                    </el-col>
                 </el-row>
 
                 <el-row :gutter="20">
@@ -141,26 +150,27 @@
                                 placeholder="请选择父级部门（留空为顶级）"
                                 clearable
                                 filterable
+                                check-strictly=true
                                 style="width: 100%"
                                 :disabled="dialog.isView"
                             />
                         </el-form-item>
                     </el-col>
-                </el-row>
 
-                <el-col :span="12">
-                    <el-form-item label="状态" prop="status">
-                        <el-select
-                            v-model="dialog.form.status"
-                            placeholder="请选择状态"
-                            style="width: 100%"
-                            :disabled="dialog.isView"
-                        >
-                            <el-option label="启用" :value="1" />
-                            <el-option label="禁用" :value="0" />
-                        </el-select>
-                    </el-form-item>
-                </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="状态" prop="status">
+                            <el-select
+                                v-model="dialog.form.status"
+                                placeholder="请选择状态"
+                                style="width: 100%"
+                                :disabled="dialog.isView"
+                            >
+                                <el-option label="启用" :value="1" />
+                                <el-option label="禁用" :value="0" />
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
                 <el-form-item label="部门简介" prop="intro">
                     <el-input
@@ -193,11 +203,16 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
+import {useRouter} from "vue-router";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Plus, Refresh, Search} from "@element-plus/icons-vue";
-import request from "../../utils/request";
-import router from "../../router/index.js";
+import { addDept, updateDept, updateDeptStatus, deleteDept } from "@/api";
+import { useDeptStore } from "@/store/dept"
+
+const router = useRouter();
+
+const deptStore = useDeptStore();
 
 // 搜索表单
 const searchForm = reactive({
@@ -219,8 +234,8 @@ const resetSearch = () => {
 };
 
 // 部门列表数据（树形）
-const deptList = ref([]);
-const loading = ref(false);
+const deptList = computed(() => deptStore.deptTree);
+const loading = computed(() => deptStore.loading);
 
 // 新增/编辑对话框
 const deptFormRef = ref();
@@ -250,40 +265,11 @@ const dialog = reactive({
     },
 });
 
-// 所有部门平面列表（用于父部门选择）
-const allDepts = ref([]);
 
-const flatDepts = (depts, result = []) => {
-    for (const m of depts) {
-        result.push(m);
-        if (m.children && m.children.length) {
-            flatDepts(m.children, result);
-        }
-    }
-    return result;
-};
 
 // 获取部门树
 const getDeptList = async () => {
-    loading.value = true;
-    try {
-        const params = {};
-        if (searchForm.name) {
-            params.name = searchForm.name;
-        }
-        const res = await request.get("/dept/list", { params });
-        if (res.code === "200") {
-            const data = Array.isArray(res.data) ? res.data : (res.data.records || []);
-            deptList.value = data;
-            allDepts.value = flatDepts(data);
-        } else {
-            ElMessage.error(res.msg || "获取部门列表失败");
-        }
-    } catch (error) {
-        ElMessage.error("获取部门列表失败");
-    } finally {
-        loading.value = false;
-    }
+    await deptStore.fetchDeptList();
 };
 
 // 查看部门详情
@@ -293,12 +279,13 @@ const handleCheck=(row) =>{
 
 // 新增部门
 const handleAdd = (row) => {
-    dialog.title = row ? "新增子部门" : "新增部门";
+    dialog.title = "新增部门";
     dialog.isAdd = true;
     dialog.isView = false;
     dialog.form = {
         id: null,
         parentId: row ? row.id : null,
+        code: "",
         name: "",
         status: 1,
         intro: "",
@@ -330,23 +317,20 @@ const submitDept = async () => {
             try {
                 const submitData = { ...dialog.form };
                 if (dialog.isAdd) {
-                    const res = await request.post("/dept/add", submitData);
+                    const res = await addDept(submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增部门成功");
                         dialog.visible = false;
-                        getDeptList();
+                        deptStore.fetchDeptList(true);
                     } else {
                         ElMessage.error(res.msg || "新增部门失败");
                     }
                 } else {
-                    const res = await request.post(
-                        "/dept/updateInfo",
-                        submitData,
-                    );
+                    const res = await updateDept(submitData);
                     if (res.code === "200") {
                         ElMessage.success("更新部门成功");
                         dialog.visible = false;
-                        getDeptList();
+                        deptStore.fetchDeptList(true);
                     } else {
                         ElMessage.error(res.msg || "更新部门失败");
                     }
@@ -363,7 +347,7 @@ const submitDept = async () => {
 // // 修改状态
 const handleStatusChange = async (row) => {
     try {
-        const res = await request.post(`/dept/updateStatus`, row);
+        const res = await updateDeptStatus(row);
         if (res.code !== "200") {
             ElMessage.error("状态修改失败");
             // 回滚状态
@@ -384,10 +368,10 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post(`/dept/delete`, row);
+                const res = await deleteDept(row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
-                    getDeptList();
+                    deptStore.fetchDeptList(true);
                 } else {
                     ElMessage.error(res.msg || "删除失败");
                 }
@@ -404,7 +388,7 @@ const handleImport = (res, file, fileList) => {
     } else {
         ElMessage.error(res.msg);
     }
-    getDeptList();
+    deptStore.fetchDeptList(true);
 };
 
 const handleDialogClose = () => {

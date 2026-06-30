@@ -188,7 +188,14 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Plus} from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import { getPurchaseOrderList, getPurchaseOrderDetail, savePurchaseOrder, confirmPurchaseOrder, cancelPurchaseOrder } from "@/api";
+import { useSupplierStore } from "@/store/supplier";
+import { useGoodsStore } from "@/store/goods";
+import { useWarehouseStore } from "@/store/warehouse";
+
+const supplierStore = useSupplierStore();
+const goodsStore = useGoodsStore();
+const warehouseStore = useWarehouseStore();
 
 const loading = ref(false);
 const tableData = ref([]);
@@ -237,26 +244,24 @@ function poStatusType(s) {
 }
 
 async function loadBase() {
-    const [sup, wh, goods] = await Promise.all([
-        request.get("/supplier/selectAllCustomer"),
-        request.get("/warehouse/selectAll"),
-        request.get("/goods/selectAllGoods"),
+    await Promise.all([
+        supplierStore.fetchAllSuppliers(),
+        warehouseStore.fetchAllWarehouses(),
+        goodsStore.fetchAllGoods(),
     ]);
-    if (sup.code === "200") suppliers.value = sup.data || [];
-    if (wh.code === "200") warehouses.value = wh.data || [];
-    if (goods.code === "200") goodsList.value = goods.data || [];
+    suppliers.value = supplierStore.allSuppliers;
+    warehouses.value = warehouseStore.allWarehouses;
+    goodsList.value = goodsStore.allGoods;
 }
 
 async function loadList() {
     loading.value = true;
     try {
-        const res = await request.get("/purchase/order/list", {
-            params: {
-                pageNum: pagination.pageNum,
-                pageSize: pagination.pageSize,
-                billNo: searchForm.billNo || undefined,
-                status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
-            },
+        const res = await getPurchaseOrderList({
+            pageNum: pagination.pageNum,
+            pageSize: pagination.pageSize,
+            billNo: searchForm.billNo || undefined,
+            status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
         });
         if (res.code === "200" && res.data) {
             tableData.value = res.data.list || [];
@@ -284,7 +289,7 @@ function openAdd() {
 }
 
 async function openEdit(row) {
-    const res = await request.get(`/purchase/order/detail/${row.id}`);
+    const res = await getPurchaseOrderDetail(row.id);
     if (res.code !== "200" || !res.data) {
         ElMessage.error(res.msg || "加载失败");
         return;
@@ -309,7 +314,7 @@ async function openEdit(row) {
 }
 
 async function openDetail(row) {
-    const res = await request.get(`/purchase/order/detail/${row.id}`);
+    const res = await getPurchaseOrderDetail(row.id);
     if (res.code === "200") {
         detail.data = res.data;
         detail.visible = true;
@@ -366,7 +371,7 @@ async function submitSave() {
                 unitPrice: it.unitPrice,
             })),
         };
-        const res = await request.post("/purchase/order/save", payload);
+        const res = await savePurchaseOrder(payload);
         if (res.code === "200") {
             ElMessage.success("保存成功");
             dialog.visible = false;
@@ -388,7 +393,7 @@ function handleConfirm(row) {
         type: "warning",
     })
         .then(async () => {
-            const res = await request.post(`/purchase/order/confirm/${row.id}`);
+            const res = await confirmPurchaseOrder(row.id);
             if (res.code === "200") {
                 ElMessage.success("已确认");
                 loadList();
@@ -403,7 +408,7 @@ function handleConfirm(row) {
 function handleCancel(row) {
     ElMessageBox.confirm("确定作废该采购订单？", "作废", {type: "warning"})
         .then(async () => {
-            const res = await request.post(`/purchase/order/cancel/${row.id}`);
+            const res = await cancelPurchaseOrder(row.id);
             if (res.code === "200") {
                 ElMessage.success("已作废");
                 loadList();

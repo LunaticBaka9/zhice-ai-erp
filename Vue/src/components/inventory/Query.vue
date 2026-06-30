@@ -633,8 +633,12 @@ import {
     WarningFilled,
     Document,
 } from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getGoodsList as apiGetGoodsList, addGoods, updateGoods, deleteGoods } from "@/api";
+import { getInventoryList } from "@/api";
+import { useCategoryStore } from "@/store/category";
 import { formatDateTime } from "../../utils/date.js";
+
+const categoryStore = useCategoryStore();
 
 // 搜索表单
 const searchForm = reactive({
@@ -650,18 +654,11 @@ const searchForm = reactive({
 const goodsList = ref([]);
 const loading = ref(false);
 // 商品分类树
-const categoryTree = ref([]);
+const categoryTree = computed(() => categoryStore.categoryTree);
 
 // 获取分类列表
 const getCategoryList = async () => {
-    try {
-        const res = await request.get("/category/tree");
-        if (res.code === "200") {
-            categoryTree.value = res.data || [];
-        }
-    } catch (error) {
-        console.error("获取分类列表失败:", error);
-    }
+    await categoryStore.fetchCategoryTree();
 };
 // 获取分类名称
 const getCategoryName = (categoryId) => {
@@ -927,7 +924,7 @@ const getGoodsList = async () => {
             delete params.categoryId;
         }
 
-        const res = await request.get("/goods/list", { params });
+        const res = await apiGetGoodsList(params);
         if (res.code === "200") {
             let data = res.data.records || res.data.list || [];
             const originalTotal = res.data.total || data.length;
@@ -981,7 +978,7 @@ const getStockFlow = async (skuCode = null) => {
             params.skuCode = skuCode;
         }
 
-        const res = await request.get("/inventoryOperation/list", { params });
+        const res = await getInventoryList(params);
         if (res.code === "200") {
             return res.data.records || res.data.list || [];
         } else {
@@ -1099,7 +1096,7 @@ const submitGoods = async () => {
                 const submitData = { ...dialog.form };
 
                 if (dialog.isAdd) {
-                    const res = await request.post("/goods/add", submitData);
+                    const res = await addGoods(submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增商品成功");
                         dialog.visible = false;
@@ -1110,7 +1107,7 @@ const submitGoods = async () => {
                 } else {
                     delete submitData.password;
                     delete submitData.confirmPassword;
-                    const res = await request.post("/goods/update", submitData);
+                    const res = await updateGoods(submitData);
                     if (res.code === "200") {
                         ElMessage.success("更新商品成功");
                         dialog.visible = false;
@@ -1137,7 +1134,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post(`/goods/delete`, row);
+                const res = await deleteGoods(row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getGoodsList();

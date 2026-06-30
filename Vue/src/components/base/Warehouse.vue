@@ -226,7 +226,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Search, Refresh, Edit, Delete } from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getWarehouseList, addWarehouse, updateWarehouse, deleteWarehouse } from "@/api";
 
 // 搜索表单
 const searchForm = reactive({
@@ -313,7 +313,7 @@ const getWareHouseList = async () => {
             }
         });
 
-        const res = await request.get("/warehouse/list", { params });
+        const res = await getWarehouseList(params);
         if (res.code === "200") {
             wList.value = res.data.records || res.data.list || [];
             pagination.total = res.data.total || 0;
@@ -402,7 +402,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post(`/warehouse/delete`, row);
+                const res = await deleteWarehouse(row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getWareHouseList();
@@ -427,10 +427,7 @@ const submitForm = async () => {
                 const submitData = { ...dialog.form };
 
                 if (dialog.isEdit) {
-                    const res = await request.post(
-                        "/warehouse/update",
-                        submitData,
-                    );
+                    const res = await updateWarehouse(submitData);
                     if (res.code === "200") {
                         ElMessage.success("更新仓库成功");
                         dialog.visible = false;
@@ -439,10 +436,7 @@ const submitForm = async () => {
                         ElMessage.error(res.msg || "更新仓库失败");
                     }
                 } else {
-                    const res = await request.post(
-                        "/warehouse/add",
-                        submitData,
-                    );
+                    const res = await addWarehouse(submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增仓库成功");
                         dialog.visible = false;

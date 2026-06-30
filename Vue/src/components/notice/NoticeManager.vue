@@ -151,7 +151,7 @@ import {reactive, ref} from "vue";
 import {useRouter} from "vue-router";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Refresh, Search} from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getNoticeList, deleteNotice } from "@/api";
 import {formatDateTime, parseDate} from "../../utils/date.js";
 
 const user = JSON.parse(localStorage.getItem("local_user"));
@@ -174,36 +174,31 @@ const router = useRouter();
 
 const load = () => {
     const isAdmin = user && user.role && String(user.role).includes("管理员");
-    request
-        .get("/notice/list", {
-            params: {
-                pageNum: data.pageNum,
-                pageSize: data.pageSize,
-                title: data.title,
-                author: data.author,
-                type: data.type,
-                // 非管理员传 uid 给后端过滤
-                uid: isAdmin
-                    ? undefined
-                    : user && user.uid
-                      ? user.uid
-                      : undefined,
-            },
-        })
-        .then((res) => {
-            if (res.code === "200") {
-                data.tableData = (res.data.list || []).map((it) => ({
-                    ...it,
-                    publishDate: it.publishDate
-                        ? parseDate(it.publishDate)
-                        : null,
-                }));
-                data.total = res.data.total;
-                console.log(data);
-            } else {
-                ElMessage.error(res.msg);
-            }
-        });
+    getNoticeList({
+        pageNum: data.pageNum,
+        pageSize: data.pageSize,
+        title: data.title,
+        author: data.author,
+        type: data.type,
+        uid: isAdmin
+            ? undefined
+            : user && user.uid
+              ? user.uid
+              : undefined,
+    }).then((res) => {
+        if (res.code === "200") {
+            data.tableData = (res.data.list || []).map((it) => ({
+                ...it,
+                publishDate: it.publishDate
+                    ? parseDate(it.publishDate)
+                    : null,
+            }));
+            data.total = res.data.total;
+            console.log(data);
+        } else {
+            ElMessage.error(res.msg);
+        }
+    });
 };
 load();
 
@@ -231,7 +226,7 @@ const handleSelectionChange = (rows) => {
 const handleDelete = (row) => {
     ElMessageBox.confirm("确认删除此公告", "删除确认", { type: "warning" })
         .then((res) => {
-            request.post("/notice/delete", row).then((res) => {
+            deleteNotice(row).then((res) => {
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     load();

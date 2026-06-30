@@ -94,7 +94,7 @@
 <script setup>
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
-import request from "../../utils/request";
+import { getPurchaseOrderList, getInboundList } from "@/api";
 
 const activeTab = ref("order");
 
@@ -116,13 +116,11 @@ function orderStatusText(s) {
 async function loadOrders() {
     orderLoading.value = true;
     try {
-        const res = await request.get("/purchase/order/list", {
-            params: {
-                pageNum: orderPage.pageNum,
-                pageSize: orderPage.pageSize,
-                billNo: orderSearch.billNo || undefined,
-                status: orderSearch.status != null ? orderSearch.status : undefined,
-            },
+        const res = await getPurchaseOrderList({
+            pageNum: orderPage.pageNum,
+            pageSize: orderPage.pageSize,
+            billNo: orderSearch.billNo || undefined,
+            status: orderSearch.status != null ? orderSearch.status : undefined,
         });
         if (res.code === "200" && res.data) {
             orderList.value = res.data.list || [];
@@ -138,13 +136,11 @@ async function loadOrders() {
 async function loadInbounds() {
     inLoading.value = true;
     try {
-        const res = await request.get("/purchase/inbound/list", {
-            params: {
-                pageNum: inPage.pageNum,
-                pageSize: inPage.pageSize,
-                billNo: inSearch.billNo || undefined,
-                purchaseBillNo: inSearch.purchaseBillNo || undefined,
-            },
+        const res = await getInboundList({
+            pageNum: inPage.pageNum,
+            pageSize: inPage.pageSize,
+            billNo: inSearch.billNo || undefined,
+            purchaseBillNo: inSearch.purchaseBillNo || undefined,
         });
         if (res.code === "200" && res.data) {
             inboundList.value = res.data.list || [];

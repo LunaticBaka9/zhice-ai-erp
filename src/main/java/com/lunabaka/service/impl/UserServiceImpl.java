@@ -193,7 +193,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaUpdateWrapper<User> wrapper = Wrappers.<User>lambdaUpdate()
                 .eq(User::getUid, user.getUid())
                 .set(User::getName, user.getName())
-                .set(User::getRole, user.getRole())
+                .set(User::getRoleName, user.getRoleName())
                 .set(User::getDeptName, user.getDeptName())
                 .set(User::getBio, user.getBio())
                 .set(User::getJoinDate, user.getJoinDate())

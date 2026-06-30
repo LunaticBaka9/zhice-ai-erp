@@ -13,10 +13,18 @@ import java.util.List;
 */
 public interface DeptService extends IService<Dept> {
 
+    // 获取部门树列表
     List<Dept> getTreeList();
 
+    // 查询指定部门及其所有子部门下的全部成员
+    List<User> getDeptMemberList(Long deptId, String searchQuery);
+
+    // 更新部门状态
     void updateStatus(Dept dept);
 
-//  查询指定部门及其所有子部门下的全部成员
-    List<User> getDeptMemberList(Long deptId, String searchQuery);
+    // 更新部门信息
+    void updateInfo(Dept dept);
+
+    // 删除子部门
+    void deleteSubDepts(Long parentId);
 }

@@ -218,7 +218,7 @@ import {computed, onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import {ElMessage} from "element-plus";
 import {Document, Download,} from "@element-plus/icons-vue";
-import request from "../utils/request";
+import { getAlertList, getAlertStatistics, getNoticeList, getNoticeById, updateViews, markAsRead as apiMarkAsRead } from "@/api";
 import {formatDateTime, parseDate} from "../utils/date";
 
 const router = useRouter();
@@ -320,9 +320,7 @@ const inventoryWarnings = ref([]);
 // 获取库存预警数据
 async function fetchInventoryWarnings() {
     try {
-        const res = await request.get("/inventoryAlert/list", {
-            params: { pageNum: 1, pageSize: 5 },
-        });
+        const res = await getAlertList({ pageNum: 1, pageSize: 5 });
         if (res && (res.code === "200" || res.code === 200)) {
             const list = res.data?.list || res.data?.records || [];
             inventoryWarnings.value = list.map((item) => {
@@ -355,7 +353,7 @@ async function fetchInventoryWarnings() {
 // 获取预警统计数量
 async function fetchAlertStatistics() {
     try {
-        const res = await request.get("/inventoryAlert/statistics");
+        const res = await getAlertStatistics();
         if (res && (res.code === "200" || res.code === 200)) {
             const total = res.data?.totalAlerts || 0;
             // 更新统计卡片中的库存预警数量
@@ -500,9 +498,7 @@ function isNoticeRead(noticeId) {
 // 获取最近公告
 async function fetchRecentNotices() {
     try {
-        const res = await request.get("/notice/list", {
-            params: { pageNum: 1, pageSize: 5 },
-        });
+        const res = await getNoticeList({ pageNum: 1, pageSize: 5 });
         if (res && (res.code === "200" || res.code === 200)) {
             recentNotices.value = res.data?.list || [];
         }
@@ -558,7 +554,7 @@ const mapNoticeToAnnouncement = (notice) => {
 const viewNotice = async (item) => {
     try {
         if (item && item.nid) {
-            const res = await request.get(`/notice/selectByNid/${item.nid}`);
+            const res = await getNoticeById(item.nid);
             if (res && (res.code === "200" || res.code === 200)) {
                 const n = res.data || {};
                 selectedAnnouncement.value = mapNoticeToAnnouncement(n);
@@ -585,9 +581,9 @@ const viewNotice = async (item) => {
     try {
         const userId = getLocalUserId();
         const payload = { nid: item.nid, uid: userId };
-        await request.post(`/notice/updateViews`, payload);
+        await updateViews(payload);
         if (userId) {
-            await request.post("/notice/markAsRead", {
+            await apiMarkAsRead({
                 noticeId: item.nid,
                 userId: userId,
             });

@@ -451,7 +451,8 @@ import {
     Setting,
     Download,
 } from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getAlertList as apiGetAlertList, getAlertStatistics, replenishAlert, generateAlert, acknowledgeAlert } from "@/api";
+import { updateGoods } from "@/api";
 import { formatDateTime } from "../../utils/date.js";
 
 // 搜索表单
@@ -609,7 +610,7 @@ const getAlertList = async () => {
             ...searchForm,
         };
 
-        const res = await request.get("/inventoryAlert/list", { params });
+        const res = await apiGetAlertList(params);
         if (res.code === "200") {
             const data = res.data.records || res.data.list || [];
             const originalTotal = res.data.total || data.length;
@@ -766,7 +767,7 @@ const handleReplenish = (row) => {
 // 提交补货
 const submitReplenishment = async () => {
     try {
-        const res = await request.post("/inventoryAlert/replenish", {
+        const res = await replenishAlert({
             alertId: replenishDialog.form.id,
             actualQty: replenishDialog.form.actualQty,
             remarks: replenishDialog.form.remarks,
@@ -787,7 +788,7 @@ const submitReplenishment = async () => {
 // 生成预警
 const generateAlerts = async () => {
     try {
-        const res = await request.post("/inventoryAlert/generate");
+        const res = await generateAlert();
         if (res.code === "200") {
             ElMessage.success("预警生成成功");
             getAlertList();
@@ -802,7 +803,7 @@ const generateAlerts = async () => {
 // 获取统计信息
 const getStatistics = async () => {
     try {
-        const res = await request.get("/inventoryAlert/statistics");
+        const res = await getAlertStatistics();
         if (res.code === "200") {
             return res.data;
         }
@@ -837,7 +838,7 @@ const handleAdjust = (row) => {
 
 const submitAdjust = async () => {
     try {
-        const res = await request.post("/goods/update", {
+        const res = await updateGoods({
             id: adjustDialog.form.id,
             stockLow: adjustDialog.form.stockLow,
             stockHigh: adjustDialog.form.stockHigh,
@@ -862,7 +863,7 @@ const handleAcknowledge = (row) => {
         type: "info",
     }).then(async () => {
         try {
-            const res = await request.post(`/inventoryAlert/acknowledge/${row.id}`);
+            const res = await acknowledgeAlert(row.id);
             if (res.code === "200") {
                 ElMessage.success("预警已确认");
                 getAlertList(); // 重新加载列表

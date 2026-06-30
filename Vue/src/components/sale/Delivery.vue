@@ -169,7 +169,7 @@
 import { reactive, ref, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Document, Edit, Check } from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import { getOutboundStatistics, getEligibleOutbound, getOutboundList, createOutbound, getOutboundDetail, confirmOutbound, deleteDraftOutbound } from "@/api";
 
 const loading = ref(false);
 const tableData = ref([]);
@@ -178,7 +178,7 @@ const eligibleList = ref([]);
 const statistics = reactive({ total: 0, draft: 0, confirmed: 0 });
 
 async function loadStatistics() {
-    const res = await request.get("/sale/outbound/statistics");
+    const res = await getOutboundStatistics();
     if (res.code === "200" && res.data) {
         statistics.total = res.data.total || 0;
         statistics.draft = res.data.draft || 0;
@@ -193,21 +193,19 @@ const createDlg = reactive({ visible: false, saleOrderId: null, remark: "", subm
 const detail = reactive({ visible: false, data: null });
 
 async function loadEligible() {
-    const res = await request.get("/sale/eligibleOutbound");
+    const res = await getEligibleOutbound();
     if (res.code === "200") eligibleList.value = res.data || [];
 }
 
 async function loadList() {
     loading.value = true;
     try {
-        const res = await request.get("/sale/outbound/list", {
-            params: {
-                pageNum: pagination.pageNum,
-                pageSize: pagination.pageSize,
-                billNo: searchForm.billNo || undefined,
-                orderNo: searchForm.orderNo || undefined,
-                status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
-            },
+        const res = await getOutboundList({
+            pageNum: pagination.pageNum,
+            pageSize: pagination.pageSize,
+            billNo: searchForm.billNo || undefined,
+            orderNo: searchForm.orderNo || undefined,
+            status: searchForm.status != null && searchForm.status !== "" ? searchForm.status : undefined,
         });
         if (res.code === "200" && res.data) {
             tableData.value = res.data.list || [];
@@ -246,7 +244,7 @@ async function submitCreate() {
     }
     createDlg.submitting = true;
     try {
-        const res = await request.post("/sale/outbound/create", {
+        const res = await createOutbound({
             saleOrderId: createDlg.saleOrderId,
             remark: createDlg.remark || null,
         });
@@ -263,7 +261,7 @@ async function submitCreate() {
 }
 
 async function openDetail(row) {
-    const res = await request.get(`/sale/outbound/detail/${row.id}`);
+    const res = await getOutboundDetail(row.id);
     if (res.code === "200") {
         detail.data = res.data;
         detail.visible = true;
@@ -275,7 +273,7 @@ async function openDetail(row) {
 function handleConfirm(row) {
     ElMessageBox.confirm("确认后将按明细扣减库存，不可撤销。", "确认出库", { type: "warning" })
         .then(async () => {
-            const res = await request.post(`/sale/outbound/confirm/${row.id}`);
+            const res = await confirmOutbound(row.id);
             if (res.code === "200") {
                 ElMessage.success("出库已确认");
                 loadList();
@@ -289,7 +287,7 @@ function handleConfirm(row) {
 function handleDeleteDraft(row) {
     ElMessageBox.confirm("删除后可重新从销售订单生成出库单。", "删除草稿", { type: "warning" })
         .then(async () => {
-            const res = await request.post(`/sale/outbound/deleteDraft/${row.id}`);
+            const res = await deleteDraftOutbound(row.id);
             if (res.code === "200") {
                 ElMessage.success("已删除");
                 loadList();

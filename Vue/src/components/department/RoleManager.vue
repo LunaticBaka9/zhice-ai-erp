@@ -1,3 +1,4 @@
+<!-- 用户角色表 -->
 <template>
     <div class="user-management">
         <!-- 搜索栏 -->
@@ -182,7 +183,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Plus, Refresh, Search,} from "@element-plus/icons-vue";
-import request from "../../utils/request.js";
+import { getRoleList as apiGetRoleList, addRole, updateRole, deleteRole, updateRoleStatus, exportRoles } from "@/api";
 
 // 搜索表单
 const searchForm = reactive({
@@ -244,7 +245,7 @@ const getRoleList = async () => {
                 params[key] = value;
             }
         });
-        const res = await request.get("/role/list", { params });
+        const res = await apiGetRoleList(params);
         if (res.code === "200") {
             roleList.value = res.data.records;
             pagination.total = res.data.total;
@@ -326,7 +327,7 @@ const submitRole = async () => {
             try {
                 const submitData = { ...dialog.form };
                 if (dialog.isAdd) {
-                    const res = await request.post("/role/add", submitData);
+                    const res = await addRole(submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增用户角色成功");
                         dialog.visible = false;
@@ -335,10 +336,7 @@ const submitRole = async () => {
                         ElMessage.error(res.msg || "新增用户角色失败");
                     }
                 } else {
-                    const res = await request.post(
-                        "/role/updateInfo",
-                        submitData,
-                    );
+                    const res = await updateRole(submitData);
                     if (res.code === "200") {
                         ElMessage.success("更新用户角色成功");
                         dialog.visible = false;
@@ -365,7 +363,7 @@ const handleDelete = (row) => {
     })
         .then(async () => {
             try {
-                const res = await request.post(`/role/delete`, row);
+                const res = await deleteRole(row);
                 if (res.code === "200") {
                     ElMessage.success("删除成功");
                     getRoleList();
@@ -381,7 +379,7 @@ const handleDelete = (row) => {
 
 const handleStatusChange = async (row) => {
     try {
-        const res = await request.post(`/role/updateStatus`, { id: row.id, status: row.status });
+        const res = await updateRoleStatus({ id: row.id, status: row.status });
         if (res.code !== "200") {
             ElMessage.error("状态修改失败");
             row.status = row.status === 1 ? 0 : 1;
@@ -409,7 +407,7 @@ const handleDialogClose = () => {
 
 const exportData = async () => {
     try {
-        const res = await request.get("/role/exportData", { responseType: "blob" });
+        const res = await exportRoles();
         const blob = new Blob([res], { type: "application/vnd.ms-excel" });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");

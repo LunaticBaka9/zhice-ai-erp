@@ -36,7 +36,7 @@
 
                     <el-cascader
                         v-model="searchForm.categoryId"
-                        :options="categoryTree"
+                        :options="categoryStore.categoryTree"
                         :props="{
                             value: 'id',
                             label: 'name',
@@ -269,7 +269,7 @@
                         <el-form-item label="商品分类" prop="categoryId">
                             <el-cascader
                                 v-model="dialog.form.categoryId"
-                                :options="categoryTree"
+                                :options="categoryStore.categoryTree"
                                 :props="{
                                     value: 'id',
                                     label: 'name',
@@ -407,7 +407,10 @@ import {
     Shop,
     View,
 } from "@element-plus/icons-vue";
-import request from "../../utils/request";
+import { getGoodsList, addGoods, updateGoods, deleteGoods, uploadFile } from "@/api";
+import { useCategoryStore } from "@/store/category";
+
+const categoryStore = useCategoryStore();
 
 const searchForm = reactive({
     keyword: "",
@@ -435,7 +438,7 @@ const pagination = reactive({
 });
 
 const productList = ref([]);
-const categoryTree = ref([]);
+
 const loading = ref(false);
 const showFilter = ref(false);
 
@@ -492,9 +495,7 @@ const beforeUpload = async (file) => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await request.post("/file/upload", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
+        const res = await uploadFile(formData);
 
         if (res.code === "200") {
             dialog.form.img = res.data.url;
@@ -514,10 +515,7 @@ const beforeUpload = async (file) => {
 
 const getCategoryList = async () => {
     try {
-        const res = await request.get("/category/tree");
-        if (res.code === "200") {
-            categoryTree.value = res.data || [];
-        }
+        await categoryStore.fetchCategoryTree();
     } catch (error) {
         console.error("获取分类列表失败:", error);
     }
@@ -525,7 +523,7 @@ const getCategoryList = async () => {
 
 const getCategoryName = (categoryId) => {
     if (!categoryId) return "-";
-    for (const parent of categoryTree.value) {
+    for (const parent of categoryStore.categoryTree) {
         if (parent.id === categoryId) return parent.name;
         const child = parent.children?.find((c) => c.id === categoryId);
         if (child) return `${parent.name} / ${child.name}`;
@@ -548,7 +546,7 @@ const getProductList = async () => {
             spec: searchForm.spec,
             unit: searchForm.unit,
         };
-        const res = await request.get("/goods/list", { params });
+        const res = await getGoodsList(params);
         if (res.code === "200") {
             productList.value = res.data.records || res.data.list || [];
             pagination.total = res.data.total || productList.value.length;
@@ -618,7 +616,7 @@ const handleAdd = () => {
 const handleEdit = (item) => {
     dialog.title = "编辑商品";
     let categoryPath = null;
-    for (const parent of categoryTree.value) {
+    for (const parent of categoryStore.categoryTree) {
         if (parent.id === item.categoryId) {
             categoryPath = [parent.id];
             break;
@@ -660,7 +658,7 @@ const handleDelete = (item) => {
         type: "warning",
     }).then(async () => {
         try {
-            const res = await request.post(`/goods/delete`);
+            const res = await deleteGoods();
             if (res.code === "200") {
                 ElMessage.success("删除成功");
                 getProductList();
@@ -687,8 +685,7 @@ const submitGoods = async () => {
             ...dialog.form,
             categoryId: categoryId,
         };
-        const api = dialog.form.id ? "/goods/update" : "/goods/add";
-        const res = await request.post(api, payload);
+        const res = await (dialog.form.id ? updateGoods(payload) : addGoods(payload));
 
         if (res.code === "200") {
             ElMessage.success(dialog.form.id ? "更新成功" : "添加成功");

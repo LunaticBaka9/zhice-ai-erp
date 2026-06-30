@@ -1,6 +1,6 @@
 <script setup name="Login" lang="ts">
 import { reactive, ref } from "vue";
-import request from "../utils/request";
+import { login as apiLogin, emailLogin as apiEmailLogin, sendEmailCode } from "@/api";
 import { ElMessage } from "element-plus";
 import { Check } from "@element-plus/icons-vue";
 
@@ -63,8 +63,7 @@ const login = () => {
     formRef.value.validate((valid: any) => {
         if (valid) {
             loading.value = true;
-            request
-                .post("/login", data.form)
+            apiLogin(data.form)
                 .then((res: any) => {
                     handleLoginSuccess(res);
                 })
@@ -79,8 +78,7 @@ const sendCode = () => {
     emailFormRef.value.validateField("email", (valid: any) => {
         if (valid) {
             codeLoading.value = true;
-            request
-                .post("/sendEmailCode", { email: emailData.form.email })
+            sendEmailCode({ email: emailData.form.email })
                 .then((res: any) => {
                     if (res.code === "200") {
                         ElMessage.success("验证码已发送");
@@ -112,8 +110,7 @@ const emailLogin = () => {
     emailFormRef.value.validate((valid: any) => {
         if (valid) {
             loading.value = true;
-            request
-                .post("/emailLogin", emailData.form)
+            apiEmailLogin(emailData.form)
                 .then((res: any) => {
                     handleLoginSuccess(res);
                 })
