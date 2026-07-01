@@ -73,14 +73,21 @@ public class UserController {
     }
 
     @PostMapping("/deptTransfer")
-    public Result deptTransfer(@RequestBody User user,
-                               @RequestParam("deptID") Long deptId){
-        Dept dept = deptService.getById(deptId);
+    public Result deptTransfer(@RequestBody User user){
+        if (user.getDeptId() == null) {
+            return Result.error("部门ID不能为空");
+        }
+        Dept dept = deptService.getById(user.getDeptId());
+        if (dept == null) {
+            return Result.error("部门不存在");
+        }
         LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(User::getUid, user.getUid())
                 .set(User::getRoleId, user.getRoleId())
                 .set(User::getRoleName, user.getRoleName())
-                .set(User::getDeptId, deptId)
+                .set(User::getPostId, user.getPostId())
+                .set(User::getPostName, user.getPostName())
+                .set(User::getDeptId, user.getDeptId())
                 .set(User::getDeptName, dept.getName());
         userService.update(wrapper);
         return Result.success();

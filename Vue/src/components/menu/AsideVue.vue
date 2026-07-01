@@ -43,7 +43,7 @@
             </el-sub-menu>
 
             <!-- 基础资料 -->
-            <el-sub-menu v-if="showBaseMenu" index="base">
+            <el-sub-menu index="base">
                 <template #title>
                     <el-icon><Goods /></el-icon>
                     <span>基础资料</span>
@@ -63,7 +63,7 @@
             </el-sub-menu>
 
             <!-- 销售管理 -->
-            <el-sub-menu v-if="showSaleMenu" index="sale">
+            <el-sub-menu index="sale">
                 <template #title>
                     <el-icon><ShoppingBag /></el-icon>
                     <span>销售管理</span>
@@ -77,7 +77,7 @@
             </el-sub-menu>
 
             <!-- 采购管理 -->
-            <el-sub-menu v-if="showPurchaseMenu" index="purchase">
+            <el-sub-menu index="purchase">
                 <template #title>
                     <el-icon><ShoppingCart /></el-icon>
                     <span>采购管理</span>
@@ -94,7 +94,7 @@
             </el-sub-menu>
 
             <!-- 库存管理 -->
-            <el-sub-menu v-if="showInventoryMenu" index="inventory">
+            <el-sub-menu index="inventory">
                 <template #title>
                     <el-icon><Box /></el-icon>
                     <span>库存管理</span>
@@ -125,7 +125,7 @@
             </el-sub-menu>
 
             <!-- 报表分析 -->
-            <el-sub-menu v-if="showReportMenu" index="report">
+            <el-sub-menu index="report">
                 <template #title>
                     <el-icon><PieChart /></el-icon>
                     <span>报表分析</span>
@@ -142,7 +142,7 @@
             </el-sub-menu>
 
             <!-- 部门管理 -->
-            <el-sub-menu v-if="isAdmin" index="/dept">
+            <el-sub-menu index="/dept">
                 <template #title>
                     <el-icon><OfficeBuilding /></el-icon>
                     <span>部门管理</span>
@@ -162,7 +162,7 @@
             </el-sub-menu>
 
             <!-- 系统管理 -->
-            <el-sub-menu v-if="isAdmin" index="/system">
+            <el-sub-menu index="/system">
                 <template #title>
                     <el-icon><Setting /></el-icon>
                     <span>系统管理</span>

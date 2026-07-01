@@ -171,11 +171,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user.getName() != null && !user.getName().isEmpty()) {
             wrapper.like(User::getName, user.getName());
         }
-        if (user.getPhone() != null && !user.getPhone().isEmpty()) {
-            wrapper.like(User::getPhone, user.getPhone());
+        if (user.getRoleName() != null && !user.getRoleName().isEmpty()) {
+            wrapper.like(User::getRoleName, user.getRoleName());
         }
-        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            wrapper.like(User::getEmail, user.getEmail());
+        if (user.getPostName() != null && !user.getPostName().isEmpty()) {
+            wrapper.like(User::getPostName, user.getPostName());
+        }
+        if (user.getDeptName() != null && !user.getDeptName().isEmpty()) {
+            wrapper.like(User::getDeptName, user.getDeptName());
         }
         return baseMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
     }
@@ -198,7 +201,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .set(User::getBio, user.getBio())
                 .set(User::getJoinDate, user.getJoinDate())
                 .set(User::getAvatar, user.getAvatar())
-                .setSql("updateTime = NOW()");
+                .setSql("update_time = NOW()");
         baseMapper.update(null, wrapper);
     }
 
@@ -207,7 +210,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaUpdateWrapper<User> wrapper = Wrappers.<User>lambdaUpdate()
                 .eq(User::getUid, user.getUid())
                 .set(User::getStatus, user.getStatus())
-                .setSql("updateTime = NOW()");
+                .setSql("update_time = NOW()");
         baseMapper.update(null, wrapper);
     }
 
@@ -217,7 +220,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaUpdateWrapper<User> wrapper = Wrappers.<User>lambdaUpdate()
                 .eq(User::getUid, user.getUid())
                 .set(User::getPassword, user.getPassword())
-                .setSql("updateTime = NOW()");
+                .setSql("update_time = NOW()");
         baseMapper.update(null, wrapper);
     }
 

@@ -9,6 +9,11 @@ const routeMeeting = [
         name: "meetingCreate",
         component: ()=>import("../components/meeting/create.vue"),
     },
+    {
+        path: "/meeting/detail",
+        name: "meetingDetail",
+        component:()=>import("../components/meeting/detail.vue")
+    },
 ];
 
 export default routeMeeting;

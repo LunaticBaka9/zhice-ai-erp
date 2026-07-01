@@ -1,15 +1,52 @@
 <script setup>
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { computed, onMounted, provide, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElNotification } from "element-plus";
 import AsideVue from "./components/menu/AsideVue.vue";
 import HeaderVue from "./components/menu/HeaderVue.vue";
+import { useNoticeWebSocket } from "./utils/useWebSocket.js";
 
 const route = useRoute();
+const router = useRouter();
 
-// 判断是否为登录/注册页面
 const isAuthPage = computed(() => {
     return route.path === "/login" || route.path === "/register";
 });
+
+const noticeRefreshKey = ref(0)
+
+const { connect, disconnect } = useNoticeWebSocket((data) => {
+    if (data.action === "new") {
+        noticeRefreshKey.value++
+        ElNotification({
+            title: "新公告",
+            message: data.title || "有一条新公告",
+            type: "success",
+            duration: 5000,
+            onClick: () => {
+                router.push("/notice/index");
+            },
+        });
+    }
+});
+
+onMounted(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        connect();
+    }
+});
+
+watch(isAuthPage, (val) => {
+    if (val) {
+        disconnect();
+    } else {
+        const token = localStorage.getItem("token");
+        if (token) connect();
+    }
+});
+
+provide("noticeRefreshKey", noticeRefreshKey)
 </script>
 
 <template>

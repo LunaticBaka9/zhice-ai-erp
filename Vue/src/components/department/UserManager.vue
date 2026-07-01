@@ -21,31 +21,39 @@
                         @keyup.enter="handleSearch"
                     />
                 </el-form-item>
-                <el-form-item label="手机号">
-                    <el-input
-                        v-model="searchForm.phone"
-                        placeholder="请输入手机号"
-                        clearable
-                        @clear="handleSearch"
-                        @keyup.enter="handleSearch"
+                <el-form-item label="部门">
+                    <el-tree-select
+                        v-model="searchForm.deptName"
+                        :data="deptStore.deptTree"
+                        :props="{ label: 'name', value: 'name', children: 'children' }"
+                        placeholder="请选择部门"
+                        clearable filterable style="width: 160px"
+                        @change="handleSearch"
                     />
                 </el-form-item>
-                <el-form-item label="邮箱">
-                    <el-input
-                        v-model="searchForm.email"
-                        placeholder="请输入邮箱"
-                        clearable
-                        @clear="handleSearch"
-                        @keyup.enter="handleSearch"
-                    />
+                <el-form-item label="职位">
+                    <el-select v-model="searchForm.postName" placeholder="请选择职位" clearable filterable
+                               style="width: 160px" @change="handleSearch">
+                        <el-option v-for="p in postOptions" :key="p.id" :label="p.name" :value="p.name"/>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="角色">
+                    <el-select v-model="searchForm.roleName" placeholder="请选择角色" clearable filterable
+                               style="width: 160px" @change="handleSearch">
+                        <el-option v-for="r in roleOptions" :key="r.id" :label="r.name" :value="r.name"/>
+                    </el-select>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="handleSearch">
-                        <el-icon><Search /></el-icon>
+                        <el-icon>
+                            <Search/>
+                        </el-icon>
                         搜索
                     </el-button>
                     <el-button @click="resetSearch">
-                        <el-icon><Refresh /></el-icon>
+                        <el-icon>
+                            <Refresh/>
+                        </el-icon>
                         重置
                     </el-button>
                 </el-form-item>
@@ -54,10 +62,12 @@
 
         <div class="card" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px">
             <el-button type="primary" @click="handleAdd">
-                <el-icon><Plus /></el-icon>
+                <el-icon>
+                    <Plus/>
+                </el-icon>
                 新增用户
             </el-button>
-            <el-button type="primary" @click="exportData"> 导出表格 </el-button>
+            <el-button type="primary" @click="exportData"> 导出表格</el-button>
             <el-upload
                 action="/user/importData"
                 :on-success="handleImport"
@@ -79,8 +89,8 @@
                 :table-layout="fixed"
                 @selection-change="handleSelectionChange"
             >
-                <el-table-column type="selection" width="55" />
-                <el-table-column prop="uid" label="ID" width="80" />
+                <el-table-column type="selection" width="55"/>
+                <el-table-column prop="uid" label="ID" width="80"/>
                 <el-table-column prop="avatar" label="头像" width="80">
                     <template #default="{ row }">
                         <el-avatar
@@ -89,16 +99,11 @@
                         />
                     </template>
                 </el-table-column>
-                <el-table-column prop="username" label="用户名" width="120" />
-                <el-table-column prop="name" label="姓名" width="120" />
-                <el-table-column prop="role" label="职位" width="120">
-                    <template #default="{ row }">
-                        <el-tag :type="getRoleType(row.role)" size="small">
-                            {{ row.role }}
-                        </el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="deptName" label="部门" width="150" />
+                <el-table-column prop="username" label="用户名" width="120"/>
+                <el-table-column prop="name" label="姓名" width="120"/>
+                <el-table-column prop="deptName" label="部门" width="150"/>
+                <el-table-column prop="postName" label="职位" width="120"/>
+                <el-table-column prop="roleName" label="角色" width="120"/>
                 <el-table-column prop="employed" label="在职状态" width="100">
                     <template #default="{ row }">
                         <el-tag :type="employedType(row.employed)" size="small">
@@ -106,14 +111,14 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="phone" label="手机号" width="130" />
+                <el-table-column prop="phone" label="手机号" width="130"/>
                 <el-table-column
                     prop="email"
                     label="邮箱"
                     width="180"
                     show-overflow-tooltip
                 />
-                <el-table-column prop="joinDate" label="入职时间" sortable width="100"/>
+                <el-table-column prop="joinDate" label="入职时间" sortable width="120"/>
                 <el-table-column label="账号状态" width="100">
                     <template #default="{ row }">
                         <el-switch
@@ -132,7 +137,9 @@
                             size="small"
                             @click="handleView(row)"
                         >
-                            <el-icon><View /></el-icon>
+                            <el-icon>
+                                <View/>
+                            </el-icon>
                             查看
                         </el-button>
                         <el-button
@@ -141,7 +148,9 @@
                             size="small"
                             @click="handleEdit(row)"
                         >
-                            <el-icon><Edit /></el-icon>
+                            <el-icon>
+                                <Edit/>
+                            </el-icon>
                             编辑
                         </el-button>
                         <el-button
@@ -150,7 +159,9 @@
                             size="small"
                             @click="handleDelete(row)"
                         >
-                            <el-icon><Delete /></el-icon>
+                            <el-icon>
+                                <Delete/>
+                            </el-icon>
                             删除
                         </el-button>
                         <el-button
@@ -159,7 +170,9 @@
                             size="small"
                             @click="handleResetPassword(row)"
                         >
-                            <el-icon><Key /></el-icon>
+                            <el-icon>
+                                <Key/>
+                            </el-icon>
                             修改密码
                         </el-button>
                     </template>
@@ -249,33 +262,25 @@
 
                 <el-form-item label="角色" prop="role">
                     <el-select
-                        v-model="dialog.form.role"
+                        v-model="dialog.form.roleName"
                         placeholder="请选择角色"
                         style="width: 100%"
                         :disabled="dialog.isView"
                     >
-                        <el-option label="超级管理员" value="超级管理员" />
-                        <el-option label="高级管理员" value="高级管理员" />
-                        <el-option label="普通管理员" value="普通管理员" />
-                        <el-option label="开发工程师" value="开发工程师" />
-                        <el-option label="测试工程师" value="测试工程师" />
-                        <el-option label="产品经理" value="产品经理" />
+                        <el-option v-for="r in roleOptions" :key="r.id" :label="r.name" :value="r.name"/>
                     </el-select>
                 </el-form-item>
 
                 <el-form-item label="部门" prop="deptName">
-                    <el-cascader
+                    <el-tree-select
                         v-model="dialog.form.deptName"
-                        :options="deptNameOptions"
-                        :props="{
-                            value: 'id',
-                            label: 'name',
-                            children: 'children',
-                            checkStrictly: true,
-                        }"
+                        :data="deptStore.deptTree"
+                        :props="{ label: 'name', value: 'name', children: 'children' }"
                         placeholder="请选择部门"
                         style="width: 100%"
                         clearable
+                        filterable
+                        :disabled="dialog.isView"
                     />
                 </el-form-item>
 
@@ -322,8 +327,8 @@
                                 style="width: 100%"
                                 :disabled="dialog.isView"
                             >
-                                <el-option label="启用" value="启用" />
-                                <el-option label="禁用" value="禁用" />
+                                <el-option label="启用" value="启用"/>
+                                <el-option label="禁用" value="禁用"/>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -362,46 +367,60 @@
             <el-descriptions :column="1" border>
                 <el-descriptions-item label="用户名">{{
                         viewDialog.data.username
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="姓名">{{
                         viewDialog.data.name
-                    }}</el-descriptions-item>
-                <el-descriptions-item label="角色">{{
-                        viewDialog.data.role
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="部门">{{
                         viewDialog.data.deptName
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
+                <el-descriptions-item label="职位">{{
+                        viewDialog.data.postName
+                    }}
+                </el-descriptions-item>
+                <el-descriptions-item label="角色">{{
+                        viewDialog.data.roleName
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="手机号">{{
                         viewDialog.data.phone
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="邮箱">{{
                         viewDialog.data.email
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="入职时间">{{
                         viewDialog.data.joinDate
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
+                <el-descriptions-item label="个人简介">{{
+                        viewDialog.data.bio || "暂无"
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="就职状态">
                     <el-tag :type="employedType(viewDialog.data.employed)" size="small">
                         {{ employedLabel(viewDialog.data.employed) }}
                     </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="状态">
+                <el-descriptions-item label="账号状态">
                     <el-tag
                         :type="viewDialog.data.status === '启用' ? 'success': 'danger'"
                     >
                         {{ viewDialog.data.status }}
                     </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="个人简介">{{
-                        viewDialog.data.bio || "暂无"
-                    }}</el-descriptions-item>
                 <el-descriptions-item label="创建时间">{{
                         viewDialog.data.createTime
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
                 <el-descriptions-item label="更新时间">{{
                         viewDialog.data.updateTime
-                    }}</el-descriptions-item>
+                    }}
+                </el-descriptions-item>
             </el-descriptions>
         </el-dialog>
 
@@ -437,7 +456,7 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="resetPasswordDialog.visible = false"
-                        >取消</el-button
+                    >取消</el-button
                     >
                     <el-button
                         type="primary"
@@ -456,8 +475,18 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Key, Plus, Refresh, Search, View,} from "@element-plus/icons-vue";
-import { getUserList as apiGetUserList, addUser, updateUser, deleteUser, updateUserStatus, updatePassword, exportUsers } from "@/api";
-import { useDeptStore } from "@/store/dept"
+import {
+    addUser,
+    deleteUser,
+    exportUsers,
+    getAllPosts,
+    getAllRoles,
+    getUserList as apiGetUserList,
+    updatePassword,
+    updateUser,
+    updateUserStatus
+} from "@/api";
+import {useDeptStore} from "@/store/dept"
 
 const deptStore = useDeptStore();
 
@@ -482,9 +511,9 @@ const resolveAvatar = (avatar) => {
 const searchForm = reactive({
     username: "",
     name: "",
-    phone: "",
-    email: "",
-    role: "",
+    roleName: "",
+    postName: "",
+    deptName: "",
 });
 
 // 用户列表数据
@@ -509,64 +538,15 @@ const employedLabel = (val) => {
     return map[val] || "未知";
 };
 
-const allDeptTree = ref([]);
 
 // 获取部门列表
 const loadDeptTree = async () => {
     try {
         await deptStore.fetchDeptList();
-        const tree = deptStore.deptList;
-        const id = route.query.id;
-        if (id) {
-            const node = findDeptInTree(tree, Number(id));
-            if (node) {
-                subDeptList.value = node.children || [];
-            }
-        }
     } catch (error) {
         console.error("获取部门树失败");
     }
 };
-
-// 部门选项
-const deptNameOptions = ref([
-    {
-        id: "技术部",
-        name: "技术部",
-        children: [
-            { id: "研发组", name: "研发组" },
-            { id: "测试组", name: "测试组" },
-            { id: "运维组", name: "运维组" },
-        ],
-    },
-    {
-        id: "产品部",
-        name: "产品部",
-        children: [
-            { id: "产品组", name: "产品组" },
-            { id: "设计组", name: "设计组" },
-            { id: "交互组", name: "交互组" },
-        ],
-    },
-    {
-        id: "市场部",
-        name: "市场部",
-        children: [
-            { id: "运营组", name: "运营组" },
-            { id: "销售组", name: "销售组" },
-            { id: "公关组", name: "公关组" },
-        ],
-    },
-    {
-        id: "admin",
-        name: "行政部",
-        children: [
-            { id: "admin-hr", name: "人力资源" },
-            { id: "admin-finance", name: "财务组" },
-            { id: "admin-office", name: "办公室" },
-        ],
-    },
-]);
 
 // 新增/编辑对话框
 const userFormRef = ref();
@@ -583,7 +563,7 @@ const dialog = reactive({
         name: "",
         password: "",
         confirmPassword: "",
-        role: "",
+        roleName: "",
         deptName: [],
         phone: "",
         email: "",
@@ -593,7 +573,7 @@ const dialog = reactive({
     },
     rules: {
         username: [
-            { required: true, message: "请输入用户名", trigger: "blur" },
+            {required: true, message: "请输入用户名", trigger: "blur"},
             {
                 min: 3,
                 max: 20,
@@ -602,7 +582,7 @@ const dialog = reactive({
             },
         ],
         name: [
-            { required: true, message: "请输入姓名", trigger: "blur" },
+            {required: true, message: "请输入姓名", trigger: "blur"},
             {
                 min: 2,
                 max: 20,
@@ -611,7 +591,7 @@ const dialog = reactive({
             },
         ],
         password: [
-            { required: true, message: "请输入密码", trigger: "blur" },
+            {required: true, message: "请输入密码", trigger: "blur"},
             {
                 min: 6,
                 max: 20,
@@ -620,7 +600,7 @@ const dialog = reactive({
             },
         ],
         confirmPassword: [
-            { required: true, message: "请确认密码", trigger: "blur" },
+            {required: true, message: "请确认密码", trigger: "blur"},
             {
                 validator: (rule, value, callback) => {
                     if (value !== dialog.form.password) {
@@ -632,12 +612,12 @@ const dialog = reactive({
                 trigger: "blur",
             },
         ],
-        role: [{ required: true, message: "请选择角色", trigger: "change" }],
+        roleName: [{required: true, message: "请选择角色", trigger: "change"}],
         deptName: [
-            { required: true, message: "请选择部门", trigger: "change" },
+            {required: true, message: "请选择部门", trigger: "change"},
         ],
         phone: [
-            { required: true, message: "请输入手机号", trigger: "blur" },
+            {required: true, message: "请输入手机号", trigger: "blur"},
             {
                 pattern: /^1[3-9]\d{9}$/,
                 message: "请输入正确的手机号",
@@ -645,11 +625,11 @@ const dialog = reactive({
             },
         ],
         email: [
-            { required: true, message: "请输入邮箱", trigger: "blur" },
-            { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" },
+            {required: true, message: "请输入邮箱", trigger: "blur"},
+            {type: "email", message: "请输入正确的邮箱地址", trigger: "blur"},
         ],
         joinDate: [
-            { required: true, message: "请选择入职时间", trigger: "change" },
+            {required: true, message: "请选择入职时间", trigger: "change"},
         ],
     },
 });
@@ -672,7 +652,7 @@ const resetPasswordDialog = reactive({
     },
     rules: {
         newPassword: [
-            { required: true, message: "请输入新密码", trigger: "blur" },
+            {required: true, message: "请输入新密码", trigger: "blur"},
             {
                 min: 6,
                 max: 20,
@@ -681,7 +661,7 @@ const resetPasswordDialog = reactive({
             },
         ],
         confirmPassword: [
-            { required: true, message: "请确认密码", trigger: "blur" },
+            {required: true, message: "请确认密码", trigger: "blur"},
             {
                 validator: (rule, value, callback) => {
                     if (value !== resetPasswordDialog.form.newPassword) {
@@ -695,19 +675,6 @@ const resetPasswordDialog = reactive({
         ],
     },
 });
-
-// 获取角色标签类型
-const getRoleType = (role) => {
-    const typeMap = {
-        超级管理员: "danger",
-        高级管理员: "warning",
-        普通管理员: "info",
-        开发工程师: "primary",
-        测试工程师: "success",
-        产品经理: "",
-    };
-    return typeMap[role] || "info";
-};
 
 // 获取用户列表
 const getUserList = async () => {
@@ -779,8 +746,8 @@ const handleAdd = () => {
         name: "",
         password: "",
         confirmPassword: "",
-        role: "",
-        deptName: [],
+        roleName: "",
+        deptName: "",
         employed: "",
         phone: "",
         email: "",
@@ -803,11 +770,8 @@ const handleEdit = (row) => {
         name: row.name || "",
         password: "",
         confirmPassword: "",
-        role: row.role || "",
-        deptName:
-            row.deptName && typeof row.deptName === "string"
-                ? row.deptName.split("/")
-                : [],
+        roleName: row.roleName || "",
+        deptName: row.deptName || "",
         phone: row.phone || "",
         email: row.email || "",
         joinDate: row.joinDate || "",
@@ -819,7 +783,7 @@ const handleEdit = (row) => {
 
 // 查看用户
 const handleView = (row) => {
-    viewDialog.data = { ...row };
+    viewDialog.data = {...row};
     viewDialog.visible = true;
 };
 
@@ -831,20 +795,14 @@ const submitUser = async () => {
         if (valid) {
             dialog.loading = true;
             try {
-                const submitData = { ...dialog.form };
-                if (
-                    submitData.deptName &&
-                    Array.isArray(submitData.deptName)
-                ) {
-                    submitData.deptName = submitData.deptName.join("/");
-                }
+                const submitData = {...dialog.form};
 
                 if (dialog.isAdd) {
                     delete submitData.confirmPassword;
                     const res = await addUser(submitData);
                     if (res.code === "200") {
                         ElMessage.success("新增用户成功");
-                            dialog.visible = false;
+                        dialog.visible = false;
                         getUserList();
                     } else {
                         ElMessage.error(res.msg || "新增用户失败");
@@ -890,7 +848,8 @@ const handleDelete = (row) => {
                 ElMessage.error("删除失败");
             }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
 };
 
 // // 修改状态
@@ -928,7 +887,7 @@ const submitResetPassword = async () => {
             try {
                 const res = await updatePassword({
                     uid: resetPasswordDialog.userId,
-                    newPassword: resetPasswordDialog.form.newPassword,
+                    password: resetPasswordDialog.form.newPassword,
                 });
                 if (res.code === "200") {
                     ElMessage.success("密码修改成功");
@@ -962,7 +921,7 @@ const handleDialogClose = () => {
 const exportData = async () => {
     try {
         const res = await exportUsers();
-        const blob = new Blob([res], { type: "application/vnd.ms-excel" });
+        const blob = new Blob([res], {type: "application/vnd.ms-excel"});
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -976,9 +935,37 @@ const exportData = async () => {
     }
 };
 
+const roleOptions = ref([]);
+const postOptions = ref([]);
+
+const loadRoles = async () => {
+    try {
+        const res = await getAllRoles();
+        if (res.code === "200") {
+            roleOptions.value = Array.isArray(res.data) ? res.data : [];
+        }
+    } catch (error) {
+        console.error("获取角色列表失败");
+    }
+};
+
+const loadPosts = async () => {
+    try {
+        const res = await getAllPosts();
+        if (res.code === "200") {
+            postOptions.value = Array.isArray(res.data) ? res.data : [];
+        }
+    } catch (error) {
+        console.error("获取职位列表失败");
+    }
+};
+
 // 页面加载时获取数据
 onMounted(() => {
     getUserList();
+    loadRoles();
+    loadPosts();
+    loadDeptTree();
 });
 </script>
 

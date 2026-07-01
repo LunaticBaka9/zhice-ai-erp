@@ -17,4 +17,5 @@ export * from "./notice";
 export * from "./meeting";
 export * from "./report";
 export * from "./operationLog";
+export * from "./post";
 export * from "./file";

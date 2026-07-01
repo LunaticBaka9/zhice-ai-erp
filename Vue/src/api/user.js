@@ -16,6 +16,10 @@ export function addUser(data) {
     return request.post("/user/add", data);
 }
 
+export function transferUser(data) {
+    return request.post("/user/deptTransfer", data)
+}
+
 export function updateUser(data) {
     return request.post("/user/updateInfo", data);
 }

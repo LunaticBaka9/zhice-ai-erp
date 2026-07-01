@@ -1,87 +1,84 @@
 <template>
-    <div class="meeting-management">
+    <div class="meeting-page">
+        <!-- 顶部 -->
+        <el-card class="header-card" shadow="never">
+            <div class="header">
+                <div class="title">
+                    <el-icon><Grid /></el-icon>
+                    <span>会议系统管理</span>
+                </div>
+                <el-button type="primary" :icon="Plus" round @click="goCreate"> 发布会议 </el-button>
+            </div>
+        </el-card>
+
+        <!-- 搜索 -->
         <el-card class="search-card" shadow="never">
-            <el-form :inline="true" :model="searchForm" class="search-form">
+            <el-form :inline="true">
                 <el-form-item label="搜索会议">
                     <el-input
-                        v-model="searchForm.searchQuery"
-                        placeholder="请输入会议标题"
+                        v-model="query.keyword"
+                        placeholder="请输入会议标题..."
                         clearable
+                        style="width: 500px"
                         @clear="handleSearch"
                         @keyup.enter="handleSearch"
                     />
                 </el-form-item>
                 <el-form-item label="会议状态">
-                    <el-select
-                        v-model="searchForm.statusFilter"
-                        placeholder="全部状态"
-                        clearable
-                        @change="handleSearch"
-                        style="width: 120px"
-                    >
-                        <el-option label="全部状态" value="-1"/>
-                        <el-option label="未开始" value="0"/>
-                        <el-option label="正在进行" value="1"/>
-                        <el-option label="已结束" value="2"/>
+                    <el-select v-model="query.status" style="width: 220px" @change="handleSearch">
+                        <el-option label="全部状态" value="" />
+                        <el-option label="未开始" :value="0" />
+                        <el-option label="进行中" :value="1" />
+                        <el-option label="已结束" :value="2" />
                     </el-select>
                 </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">
-                        <el-icon>
-                            <Search/>
-                        </el-icon>
-                        搜索
-                    </el-button>
-                    <el-button @click="resetSearch">
-                        <el-icon>
-                            <Refresh/>
-                        </el-icon>
-                        重置
-                    </el-button>
-                </el-form-item>
+                <el-button type="primary" :icon="Search" @click="handleSearch"> 搜索 </el-button>
             </el-form>
         </el-card>
 
-        <el-card class="table-card" shadow="never">
-            <el-table :data="meetingList" v-loading="loading" stripe border style="width: 100%">
-                <el-table-column type="index" label="序号" width="60"/>
-                <el-table-column prop="title" label="会议标题" min-width="200"/>
-                <el-table-column prop="deptName" label="部门" width="150"/>
-                <el-table-column prop="startTime" label="开始时间" width="180"/>
-                <el-table-column prop="status" label="状态" width="120">
-                    <template #default="{ row }">
-                        <el-tag :type="statusTypeMap[row.status] || 'info'">
-                            {{ getStatusText(row.status) }}
-                        </el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="180" fixed="right">
-                    <template #default="{ row }">
-                        <el-button link type="primary" size="small" @click="handleEdit(row)">
-                            <el-icon>
-                                <Edit/>
-                            </el-icon>
-                            编辑
-                        </el-button>
-                        <el-button link type="danger" size="small" @click="handleDelete(row)">
-                            <el-icon>
-                                <Delete/>
-                            </el-icon>
-                            删除
-                        </el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+        <!-- 列表 -->
+        <el-card class="list-card" shadow="never" v-loading="loading">
+            <template #header>
+                <div class="card-title">
+                    <el-icon><Tickets /></el-icon>
+                    <span>会议列表</span>
+                </div>
+            </template>
+            <div class="meeting-item" v-for="item in meetingList" :key="item.id" @click="goDetail(item.id)" style="cursor: pointer">
+                <div class="top">
+                    <div class="name">
+                        <el-icon><ChatDotRound /></el-icon>
+                        {{ item.title }}
+                    </div>
 
-            <div class="pagination-container">
+                    <el-tag round :type="statusType(item.status)">
+                        {{ statusText(item.status) }}
+                    </el-tag>   
+                </div>
+                <div class="info">
+                    <span>
+                        <el-icon><OfficeBuilding /></el-icon>
+                        部门：{{ item.deptName }}
+                    </span>
+                    <span>
+                        <el-icon><Clock /></el-icon>
+                        开始时间：{{ item.startTime }}
+                    </span>
+                </div>
+                <div class="content">
+                    {{ stripHtml(item.content) }}
+                </div>
+            </div>
+            <div class="pagination">
                 <el-pagination
+                    background
                     v-model:current-page="pagination.pageNum"
                     v-model:page-size="pagination.pageSize"
-                    :page-sizes="[5, 10, 20, 50]"
-                    :total="pagination.total"
                     layout="total, sizes, prev, pager, next, jumper"
-                    @size-change="handleSizeChange"
+                    :total="pagination.total"
+                    :page-sizes="[5, 10, 20, 50]"
                     @current-change="handleCurrentChange"
+                    @size-change="handleSizeChange"
                 />
             </div>
         </el-card>
@@ -89,78 +86,44 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from "vue";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {Delete, Edit, Plus, Refresh, Search} from "@element-plus/icons-vue";
-import { getMeetingList as apiGetMeetingList, deleteMeeting } from "@/api";
+import { Plus, Search, Grid, Tickets, ChatDotRound, Clock, OfficeBuilding } from "@element-plus/icons-vue";
+import { reactive, ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import {getMeetingList} from "../../api/index.js";
 
-const statusTypeMap = {
-    0: "warning",
-    1: "success",
-    2: "info",
-};
+const router = useRouter();
 
-//搜索表单
-const searchForm = reactive({
-    searchQuery: "",
-    statusFilter: "",
+const query = reactive({
+    keyword: "",
+    status: "",
 });
 
-const meetingList = ref([]);
 const loading = ref(false);
-
+const meetingList = ref([]);
 const pagination = reactive({
     pageNum: 1,
     pageSize: 10,
     total: 0,
 });
 
-const formRef = ref();
-const dialog = reactive({
-    visible: false,
-    title: "",
-    isEdit: false,
-    loading: false,
-    form: {
-        id: null,
-        title: "",
-        deptName: "",
-        startTime: "",
-        content: "",
-        status: 0,
-    },
-    rules: {
-        title: [{required: true, message: "请输入会议标题", trigger: "blur"}],
-        deptName: [{required: true, message: "请输入部门", trigger: "blur"}],
-        startTime: [{required: true, message: "请选择开始时间", trigger: "change"}],
-    },
-});
-
-const getStatusText = (status) => {
-    const map = {0: "未开始", 1: "正在进行", 2: "已结束"};
-    return map[status] || "未知";
-};
-
-const getMeetingList = async () => {
+const fetchMeetingList = async () => {
     loading.value = true;
     try {
         const params = {
             currentPage: pagination.pageNum,
             pageSize: pagination.pageSize,
         };
-        Object.entries(searchForm).forEach(([key, value]) => {
-            if (value !== '' && value !== '-1') {
-                params[key] = value;
-            }
-        });
-        const res = await apiGetMeetingList(params);
+        if (query.keyword) params.searchQuery = query.keyword;
+        if (query.status !== "") params.statusFilter = query.status;
+        const res = await getMeetingList(params);
         if (res.code === "200") {
-            meetingList.value = res.data.records;
+            meetingList.value = res.data.records || [];
             pagination.total = res.data.total || 0;
         } else {
             ElMessage.error(res.msg || "获取会议列表失败");
         }
-    } catch (error) {
+    } catch {
         ElMessage.error("获取会议列表失败");
     } finally {
         loading.value = false;
@@ -169,127 +132,144 @@ const getMeetingList = async () => {
 
 const handleSearch = () => {
     pagination.pageNum = 1;
-    getMeetingList();
-};
-
-const resetSearch = () => {
-    Object.keys(searchForm).forEach((key) => {
-        searchForm[key] = "";
-    });
-    handleSearch();
-};
-
-const handleSizeChange = (val) => {
-    pagination.pageSize = val;
-    getMeetingList();
+    fetchMeetingList();
 };
 
 const handleCurrentChange = (val) => {
     pagination.pageNum = val;
-    getMeetingList();
+    fetchMeetingList();
 };
 
-const handleDelete = (row) => {
-    ElMessageBox.confirm(`确定要删除会议"${row.title}"吗？`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-    })
-        .then(async () => {
-            try {
-                const res = await deleteMeeting({id: row.id});
-                if (res.code === "200") {
-                    ElMessage.success("删除成功");
-                    getMeetingList();
-                } else {
-                    ElMessage.error(res.msg || "删除失败");
-                }
-            } catch {
-                ElMessage.error("删除失败");
-            }
-        })
-        .catch(() => {
-        });
+const handleSizeChange = (val) => {
+    pagination.pageSize = val;
+    pagination.pageNum = 1;
+    fetchMeetingList();
 };
 
-const handleDialogClose = () => {
-    dialog.visible = false;
+const goCreate = () => {
+    router.push("/meeting/create");
 };
+
+const goDetail = (id) => {
+    router.push(`/meeting/detail?id=${id}`);
+};
+
+const statusType = (status) => {
+    switch (status) {
+        case 0:
+            return "warning";
+        case 1:
+            return "primary";
+        case 2:
+            return "success";
+        default:
+            return "info";
+    }
+};
+
+const statusText = (status) => {
+    switch (status) {
+        case 0:
+            return "未开始"
+        case 1:
+            return "进行中"
+        case 2:
+            return "已结束"
+        default:
+            return "未知"
+    }
+}
+
+const stripHtml = (html) => {
+    if (!html) return ""
+    const doc = new DOMParser().parseFromString(html, "text/html")
+    return doc.body.textContent || ""
+}
 
 onMounted(() => {
-    getMeetingList();
+    fetchMeetingList();
 });
 </script>
 
 <style scoped>
-.meeting-management {
+.meeting-page {
     padding: 20px;
     background-color: #f5f7fa;
-    min-height: 100vh;
+    min-height: calc(100vh - 60px);
 }
 
-.search-card {
-    margin-bottom: 10px;
+.header-card,
+.search-card,
+.list-card {
+    margin-bottom: 20px;
 }
 
-.search-form {
+.header {
     display: flex;
-    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
 }
 
-.search-form .el-form-item {
-    margin-bottom: 0;
-    margin-right: 20px;
-}
-
-.table-card {
-    position: relative;
-}
-
-.pagination-container {
-    margin-top: 20px;
+.title {
     display: flex;
-    justify-content: flex-end;
-}
-
-.dialog-footer {
-    display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #303133;
     gap: 12px;
 }
 
-:deep(.el-table) {
+.card-title {
+    display: flex;
+    gap: 10px;
+    color: #303133;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.meeting-item {
+    padding: 20px 0;
+    border-bottom: 1px solid #ebeef5;
+
+    &:last-child {
+        border: none;
+    }
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.name {
+    color: #303133;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.info {
+    display: flex;
+    gap: 30px;
+    margin: 12px 0;
+    color: #909399;
     font-size: 14px;
 }
 
-:deep(.el-table th) {
-    background-color: #f5f7fa;
+.content {
     color: #606266;
-    font-weight: 500;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
 }
 
-:deep(.el-table__row) {
-    transition: background-color 0.2s;
-}
-
-:deep(.el-table__row:hover) {
-    background-color: #f5f7fa;
-}
-
-@media (max-width: 768px) {
-    .meeting-management {
-        padding: 12px;
-    }
-
-    .search-form {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-form .el-form-item {
-        margin-bottom: 12px;
-        margin-right: 0;
-    }
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
 }
 </style>

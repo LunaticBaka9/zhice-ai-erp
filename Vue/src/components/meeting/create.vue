@@ -66,22 +66,22 @@
                     </el-col>
                 </el-row>
 
-                <el-form-item label="抄送人员">
+                <el-form-item label="参会人员">
                     <el-select
                         v-model="formData.ccUserIds"
-                        placeholder="请选择抄送人员"
+                        placeholder="请选择参会人员"
                         multiple
                         filterable
                         style="width: 100%"
                     >
                         <el-option
                             v-for="user in userStore.allUsers"
-                            :key="user.id"
-                            :label="`${user.realName} - ${user.job} - ${user.deptName}`"
-                            :value="user.id"
+                            :key="user.uid"
+                            :label="`${user.name} - ${user.postName || user.roleName || ''} - ${user.deptName || ''}`"
+                            :value="user.uid"
                         />
                     </el-select>
-                    <div class="form-tip">选择需要抄送的相关人员，可多选</div>
+                    <div class="form-tip">选择需要参加会议的相关人员，可多选</div>
                 </el-form-item>
 
                 <!-- 时间设置 -->
@@ -167,9 +167,9 @@ import { ElMessage } from "element-plus";
 import { ArrowLeft, InfoFilled, Clock, Document, Refresh, Promotion } from "@element-plus/icons-vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import "@wangeditor/editor/dist/css/style.css";
-import { createMeeting } from "@/api";
-import { useDeptStore } from "@/store/dept"
-import { useUserStore } from "@/store/user"
+import {createMeeting} from "../../api/index.js";
+import {useDeptStore} from "../../store/dept.js";
+import {useUserStore} from "../../store/user.js";
 
 const deptStore = useDeptStore();
 const userStore = useUserStore();
@@ -280,7 +280,15 @@ const submitForm = async () => {
             }
             submitting.value = true;
             try {
-                const res = await createMeeting(formData);
+                const ccUsers = userStore.allUsers.filter(u =>
+                    formData.ccUserIds.includes(u.uid)
+                );
+                const submitData = {
+                    ...formData,
+                    makeUser: ccUsers.map(u => u.name).join(","),
+                };
+                delete submitData.ccUserIds;
+                const res = await createMeeting(submitData);
                 if (res.code === "200") {
                     ElMessage.success("会议发布成功");
                     router.push("/meeting/index");
@@ -297,7 +305,8 @@ const submitForm = async () => {
 };
 
 onMounted(() => {
-
+    fetchDeptList();
+    fetchUserList();
 });
 
 onBeforeUnmount(() => {
@@ -339,7 +348,6 @@ onBeforeUnmount(() => {
 }
 
 .form-card {
-    max-width: 1000px;
     margin: 0 auto;
 }
 

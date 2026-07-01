@@ -33,7 +33,7 @@
             </el-button>
             <el-button type="primary" @click="exportData"> 导出表格 </el-button>
             <el-upload
-                action="/role/importData"
+                action="/post/importData"
                 :on-success="handleImport"
                 style="display: inline-block; margin-left: 10px"
                 :show-file-list="false"
@@ -183,6 +183,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Plus, Refresh, Search,} from "@element-plus/icons-vue";
+import {addPost, deletePost, exportPosts, getPostsList, updatePost, updatePostStatus} from "../../api/index.js";
 
 // 搜索表单
 const searchForm = reactive({
@@ -244,7 +245,7 @@ const getPostList = async () => {
                 params[key] = value;
             }
         });
-        const res = await apiGetPostList(params);
+        const res = await getPostsList(params);
         if (res.code === "200") {
             roleList.value = res.data.records;
             pagination.total = res.data.total;
@@ -390,7 +391,7 @@ const handleStatusChange = async (row) => {
 };
 
 
-const handleImport = (res, file, filelist) => {
+const handleImport = (res, file, fileList) => {
     if (res.code === "200") {
         ElMessage.success("数据导入成功");
     } else {

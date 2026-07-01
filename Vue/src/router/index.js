@@ -41,7 +41,7 @@ const router = createRouter({
 });
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
     // 白名单路径（不需要登录）
     const whiteList = ["/login", "/register"];
 
@@ -52,23 +52,15 @@ router.beforeEach((to, from, next) => {
     const isWhiteListed = whiteList.includes(to.path);
 
     if (isWhiteListed) {
-        // 白名单路径
         if (isAuthenticated) {
-            // 如果已登录，重定向到首页
-            next({ path: "/" });
-        } else {
-            // 如果未登录，允许访问
-            next();
+            return { path: "/" };
         }
+        return true;
     } else {
-        // 非白名单路径需要认证
         if (isAuthenticated) {
-            // 已登录，允许访问
-            next();
-        } else {
-            // 未登录，重定向到登录页
-            next({ path: "/login", query: { redirect: to.fullPath } });
+            return true;
         }
+        return { path: "/login", query: { redirect: to.fullPath } };
     }
 });
 

@@ -17,7 +17,6 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-        
         // 配置所有模块的缓存名称
         cacheManager.setCacheNames(java.util.Arrays.asList(
             "goods", "goodsList", "goodsDetail",
@@ -29,10 +28,8 @@ public class CacheConfig {
             "user", "userList",
             "operationLog", "notice"
         ));
-        
         // 启用动态创建缓存（如果缓存名称不存在）
         cacheManager.setAllowNullValues(false); // 不缓存null值
-        
         return cacheManager;
     }
 
@@ -62,7 +59,6 @@ public class CacheConfig {
                 // 移除最后一个下划线
                 key.deleteCharAt(key.length() - 1);
             }
-            
             return key.toString();
         };
     }

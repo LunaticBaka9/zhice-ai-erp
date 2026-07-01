@@ -209,13 +209,19 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref, watch} from "vue";
 import {Document, Download, Search, User, View,} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
 import { getAllNotices, getNoticeById, updateViews, markAsRead as apiMarkAsRead } from "@/api";
 import {formatDateTime, parseDate} from "../../utils/date.js";
 
 const user = JSON.parse(localStorage.getItem("local_user"));
+
+const noticeRefreshKey = inject("noticeRefreshKey", ref(0))
+
+watch(noticeRefreshKey, () => {
+    loadNotices()
+})
 
 // 公告数据（从后端加载）
 const announcements = ref([]);

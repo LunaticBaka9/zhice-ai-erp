@@ -21,7 +21,7 @@
         WHERE nid = #{nid}
     </select>
 
-    <insert id="insertNotice" parameterType="com.lunabaka.entity.Notice">
+    <insert id="insertNotice" parameterType="com.lunabaka.entity.Notice" useGeneratedKeys="true" keyProperty="nid">
         INSERT into notice(title,type,summary,attachments,content,publishDate,uid,author,status)
         values (#{title},#{type},#{summary},#{attachments},#{content},#{publishDate},#{uid},#{author},#{status})
     </insert>

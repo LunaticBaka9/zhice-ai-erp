@@ -780,7 +780,7 @@ onUnmounted(() => {
     //height: 100%;
     //min-height: 100vh;
     background-color: #f5f7fa;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Microsoft YaHei", "微软雅黑", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .message-header {

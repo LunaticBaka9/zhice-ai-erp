@@ -17,8 +17,8 @@
                         <div class="user-info">
                             <el-avatar :src="data.userInfo.avatar || defaultAvatar" :size="100" shape="square" />
                             <h1 class="user-name">{{ data.userInfo.name }}</h1>
-                            <h3 class="user-role">{{ data.userInfo.role }}</h3>
-                            <p class="user-department">{{ data.userInfo.department }}</p>
+                            <h3 class="user-role">{{ data.userInfo.roleName }}</h3>
+                            <p class="user-department">{{ data.userInfo.deptName }}</p>
                             <div class="user-contact">
                                 <el-icon><Message /></el-icon>
                                 <span>{{ data.userInfo.email }}</span>
@@ -120,9 +120,9 @@
                             <el-tab-pane label="个人资料" name="profile">
                                 <el-descriptions :column="1" border>
                                     <el-descriptions-item label="姓名">{{ data.userInfo.name }}</el-descriptions-item>
-                                    <el-descriptions-item label="角色">{{ data.userInfo.role }}</el-descriptions-item>
+                                    <el-descriptions-item label="角色">{{ data.userInfo.roleName }}</el-descriptions-item>
                                     <el-descriptions-item label="部门">{{
-                                        data.userInfo.department
+                                        data.userInfo.deptName
                                     }}</el-descriptions-item>
                                     <el-descriptions-item label="入职时间">{{
                                         data.userInfo.joinDate
@@ -628,9 +628,8 @@ const submitPassword = async () => {
             try {
                 // 这里调用修改密码的API
                 await updatePassword({
-                    userId: data.user.uid,
-                    oldPassword: passwordDialog.form.oldPassword,
-                    newPassword: passwordDialog.form.newPassword,
+                    uid: data.user.uid,
+                    password: passwordDialog.form.newPassword,
                 });
                 ElMessage.success("密码修改成功");
                 passwordDialog.visible = false;
@@ -914,115 +913,6 @@ const handleEnable2FA = () => {
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-}
-
-/* 侧边栏样式 */
-.aside {
-    background-color: #304156;
-    transition: width 0.3s ease;
-    overflow: hidden;
-    height: 100vh;
-}
-
-.logo-container {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    background-color: #1f2d3d;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.logo {
-    width: 32px;
-    height: 32px;
-    margin-right: 8px;
-    flex-shrink: 0;
-}
-
-.logo-text {
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    transition: opacity 0.3s ease;
-}
-
-.aside-menu {
-    border-right: none;
-    height: calc(100vh - 60px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.aside-menu:not(.el-menu--collapse) {
-    width: 240px;
-}
-
-.aside-menu.el-menu--collapse {
-    width: 64px;
-}
-
-.aside-menu .el-menu-item,
-.aside-menu .el-sub-menu__title {
-    white-space: nowrap;
-}
-
-/* 主容器样式 */
-.main-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-}
-
-/* Header样式 */
-.header {
-    background-color: #fff;
-    border-bottom: 1px solid #e6e9f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    height: 60px;
-    flex-shrink: 0;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.collapse-icon {
-    font-size: 20px;
-    cursor: pointer;
-    color: #606266;
-    transition: color 0.3s;
-}
-
-.collapse-icon:hover {
-    color: #409eff;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-.notification-badge {
-    cursor: pointer;
-}
-
-.header-icon {
-    font-size: 20px;
-    color: #606266;
-    transition: color 0.3s;
-}
-
-.header-icon:hover {
-    color: #409eff;
 }
 
 .user-dropdown {

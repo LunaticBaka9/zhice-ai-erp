@@ -9,6 +9,7 @@ import com.lunabaka.common.Result;
 import com.lunabaka.entity.Notice;
 import com.lunabaka.service.NoticeReadRecordService;
 import com.lunabaka.service.NoticeService;
+import com.lunabaka.service.NoticeWebSocketService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +37,9 @@ public class NoticeController {
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Resource
+    private NoticeWebSocketService noticeWebSocketService;
+
     @GetMapping("/selectByNid/{nid}")
     public Result getUserById(@PathVariable Long nid){
         Notice notice = noticeService.selectByNid(nid);
@@ -60,6 +64,7 @@ public class NoticeController {
     @PostMapping("/postNotice")
     public Result postNotice(@RequestBody Notice notice){
         noticeService.insertNotice(notice);
+        noticeWebSocketService.notifyNewNotice(notice);
         return Result.success();
     }
 
@@ -73,6 +78,7 @@ public class NoticeController {
     @PostMapping("/update")
     public Result updateNotice(@RequestBody Notice notice){
         noticeService.updateNotice(notice);
+        noticeWebSocketService.notifyUpdateNotice(notice);
         return Result.success();
     }
 
@@ -98,6 +104,7 @@ public class NoticeController {
     @PostMapping("/delete")
     public Result deleteById(@RequestBody Notice notice){
         noticeService.deleteByNid(notice);
+        noticeWebSocketService.notifyDeleteNotice(notice.getNid());
         return Result.success();
     }
 

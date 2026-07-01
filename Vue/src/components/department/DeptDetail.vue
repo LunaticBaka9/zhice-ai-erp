@@ -75,6 +75,7 @@
             </el-table>
         </el-card>
 
+        <!-- 部门员工 -->
         <el-card shadow="never" class="detail-card">
             <template #header>
                 <div class="card-header">
@@ -93,8 +94,9 @@
             </template>
             <el-table :data="userList" stripe border v-loading="userLoading">
                 <el-table-column prop="name" label="姓名"/>
-                <el-table-column prop="role" label="职位"/>
                 <el-table-column prop="department" label="所属部门"/>
+                <el-table-column prop="postName" label="职位" />
+                <el-table-column prop="roleName" label="角色"/>
                 <el-table-column prop="phone" label="联系电话"/>
                 <el-table-column prop="email" label="邮箱"/>
                 <el-table-column prop="employed" label="在职状态" width="100">
@@ -198,9 +200,14 @@
                         clearable filterable style="width: 100%"
                     />
                 </el-form-item>
-                <el-form-item label="职位" prop="role">
-                    <el-select v-model="transferDialog.form.role" placeholder="请选择职位" clearable filterable style="width: 100%">
-                        <el-option v-for="r in roleOptions" :key="r.id" :label="r.name" :value="r.name"/>
+                <el-form-item label="职位" prop="postId">
+                    <el-select v-model="transferDialog.form.postId" placeholder="请选择职位" clearable filterable style="width: 100%" @change="onPostChange">
+                        <el-option v-for="p in postOptions" :key="p.id" :label="p.name" :value="p.id"/>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="角色" prop="roleId">
+                    <el-select v-model="transferDialog.form.roleId" placeholder="请选择角色" clearable filterable style="width: 100%" @change="onRoleChange">
+                        <el-option v-for="r in roleOptions" :key="r.id" :label="r.name" :value="r.id"/>
                     </el-select>
                 </el-form-item>
             </el-form>
@@ -210,8 +217,8 @@
             </template>
         </el-dialog>
 
-        <!-- 查看用户详情对话框 -->
-        <el-dialog v-model="viewDialog.visible" title="用户详情" width="500px">
+        <!-- 查看员工详情对话框 -->
+        <el-dialog v-model="viewDialog.visible" title="员工详情" width="500px">
             <el-descriptions :column="1" border>
                 <el-descriptions-item label="用户名">{{
                         viewDialog.data.username
@@ -219,11 +226,14 @@
                 <el-descriptions-item label="姓名">{{
                         viewDialog.data.name
                     }}</el-descriptions-item>
-                <el-descriptions-item label="职位">{{
-                        viewDialog.data.role
-                    }}</el-descriptions-item>
                 <el-descriptions-item label="部门">{{
                         viewDialog.data.deptName
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="职位">{{
+                        viewDialog.data.postName
+                    }}</el-descriptions-item>
+                <el-descriptions-item label="角色">{{
+                        viewDialog.data.roleName
                     }}</el-descriptions-item>
                 <el-descriptions-item label="手机号">{{
                         viewDialog.data.phone
@@ -234,21 +244,21 @@
                 <el-descriptions-item label="入职时间">{{
                         viewDialog.data.joinDate
                     }}</el-descriptions-item>
+                <el-descriptions-item label="个人简介">{{
+                        viewDialog.data.bio || "暂无"
+                    }}</el-descriptions-item>
                 <el-descriptions-item label="就职状态">
                     <el-tag :type="employedType(viewDialog.data.employed)" size="small">
                         {{ employedLabel(viewDialog.data.employed) }}
                     </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="状态">
+                <el-descriptions-item label="账号状态">
                     <el-tag
                         :type="viewDialog.data.status === '启用' ? 'success': 'danger'"
                     >
                         {{ viewDialog.data.status }}
                     </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="个人简介">{{
-                        viewDialog.data.bio || "暂无"
-                    }}</el-descriptions-item>
                 <el-descriptions-item label="创建时间">{{
                         viewDialog.data.createTime
                     }}</el-descriptions-item>
@@ -265,10 +275,10 @@ import {onMounted, reactive, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {ArrowLeft, Edit, Search} from "@element-plus/icons-vue";
-import { getDeptDetail, getDeptMembers, updateDept, deleteDept, updateUser, getAllRoles } from "@/api";
 import { useDeptStore } from "@/store/dept"
 import { useUserStore } from "@/store/user"
 import {formatDate} from "../../utils/date.js";
+import {transferUser, getDeptDetail, getDeptMembers, updateDept, deleteDept, updateUser, getAllRoles, getAllPosts} from "../../api/index.js";
 
 const deptStore = useDeptStore();
 const userStore = useUserStore();
@@ -285,6 +295,7 @@ const dept = ref({});
 const subDeptList = ref([]);
 const userList = ref([]);
 const roleOptions = ref([]);
+const postOptions = ref([]);
 
 
 // 查看详情对话框
@@ -391,6 +402,17 @@ const loadRoles = async () => {
         }
     } catch (error) {
         console.error("获取角色列表失败");
+    }
+};
+
+const loadPosts = async () => {
+    try {
+        const res = await getAllPosts();
+        if (res.code === "200") {
+            postOptions.value = Array.isArray(res.data) ? res.data : [];
+        }
+    } catch (error) {
+        console.error("获取职位列表失败");
     }
 };
 
@@ -518,17 +540,35 @@ const transferDialog = reactive({
         uid: null,
         userName: "",
         targetDeptId: null,
-        role: "",
+        roleId: null,
+        roleName: "",
+        postId: null,
+        postName: "",
         employed: "",
     },
 });
 
+const onRoleChange = (val) => {
+    const role = roleOptions.value.find(r => r.id === val);
+    transferDialog.form.roleName = role ? role.name : "";
+};
+
+const onPostChange = (val) => {
+    const post = postOptions.value.find(p => p.id === val);
+    transferDialog.form.postName = post ? post.name : "";
+};
+
 const handleTransfer = (row) => {
+    const role = roleOptions.value.find(r => r.name === row.roleName);
+    const post = postOptions.value.find(p => p.name === row.postName);
     transferDialog.form = {
         uid: row.uid || null,
         userName: row.name || "",
         targetDeptId: null,
-        role: row.role || "",
+        roleId: role ? role.id : null,
+        roleName: row.roleName || "",
+        postId: post ? post.id : null,
+        postName: row.postName || "",
         employed: row.employed || "",
     };
     transferDialog.visible = true;
@@ -544,13 +584,17 @@ const submitTransfer = async () => {
     try {
         const submitData = {
             uid: transferDialog.form.uid,
-            role: transferDialog.form.role,
+            roleId: transferDialog.form.roleId,
+            roleName: transferDialog.form.roleName,
+            postId: transferDialog.form.postId,
+            postName: transferDialog.form.postName,
+            deptId: transferDialog.form.targetDeptId,
             deptName: targetDeptName,
             employed: transferDialog.form.employed,
             bio: "",
             joinDate: "",
         };
-        const res = await updateUser(submitData);
+        const res = await transferUser(submitData);
         if (res.code === "200") {
             ElMessage.success("调岗成功");
             transferDialog.visible = false;
@@ -572,6 +616,7 @@ onMounted(() => {
     loadMembers();
     loadAllUsers();
     loadRoles();
+    loadPosts();
 });
 
 // 监控地址栏的ID变化
@@ -582,6 +627,7 @@ watch(() => route.query.id, (newId) => {
         loadMembers();
         loadAllUsers();
         loadRoles();
+        loadPosts();
     }
 });
 
