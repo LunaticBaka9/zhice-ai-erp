@@ -134,7 +134,7 @@ CREATE TABLE `dept` (
   UNIQUE KEY `uk_dept_code` (`code`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='部门表';
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='部门表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -145,7 +145,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `dept` WRITE;
 /*!40000 ALTER TABLE `dept` DISABLE KEYS */;
 INSERT INTO `dept` VALUES
-(2,'总经理办公室','GM',0,'公司','公司经营管理',NULL,NULL,'2026-06-29 18:07:15',1,NULL,NULL),
+(2,'总经理办公室','GM',0,'公司','公司经营管理','','','2026-06-29 18:07:15',1,1,'管理员'),
 (3,'综合管理中心','ADMIN',0,'公司','行政、人事、IT管理','','','2026-06-29 18:07:15',1,1,'管理员'),
 (4,'财务中心','FINANCE',0,'公司','财务管理',NULL,NULL,'2026-06-29 18:07:15',1,NULL,NULL),
 (5,'采购中心','PURCHASE',0,'公司','农产品采购',NULL,NULL,'2026-06-29 18:07:15',1,NULL,NULL),
@@ -187,7 +187,8 @@ INSERT INTO `dept` VALUES
 (41,'司机管理','DELIVERY_DRIVER',9,'配送中心','司机管理',NULL,NULL,'2026-06-29 18:07:16',1,NULL,NULL),
 (42,'配送员','DELIVERY_STAFF',9,'配送中心','配送人员',NULL,NULL,'2026-06-29 18:07:16',1,NULL,NULL),
 (43,'第三方物流','DELIVERY_3PL',9,'配送中心','物流合作',NULL,NULL,'2026-06-29 18:07:16',1,NULL,NULL),
-(44,'回单管理','DELIVERY_RECEIPT',9,'配送中心','签收回单',NULL,NULL,'2026-06-29 18:07:16',1,NULL,NULL);
+(44,'回单管理','DELIVERY_RECEIPT',9,'配送中心','签收回单',NULL,NULL,'2026-06-29 18:07:16',1,NULL,NULL),
+(47,'真理部','TURTH',2,NULL,'真理部，即是真理',NULL,NULL,'2026-07-01 10:29:31',1,NULL,NULL);
 /*!40000 ALTER TABLE `dept` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -447,13 +448,14 @@ CREATE TABLE `meeting` (
   `end_time` varchar(100) DEFAULT NULL COMMENT '结束时间',
   `status` int(11) DEFAULT NULL COMMENT '会议状态 0:未开始 1:进行中 2:已结束',
   `make_user` varchar(100) DEFAULT NULL COMMENT '参加人员',
+  `actual_user` varchar(100) DEFAULT NULL COMMENT '实到人员',
   `address` varchar(100) DEFAULT NULL COMMENT '会议地点',
   `dept_name` varchar(100) DEFAULT NULL COMMENT '部门名称',
   `dept_id` int(11) DEFAULT NULL COMMENT '部门ID',
   `user_id` bigint(20) DEFAULT NULL COMMENT '会议主持人ID',
   `user_name` varchar(100) DEFAULT NULL COMMENT '会议主持人名称',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -463,6 +465,8 @@ CREATE TABLE `meeting` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `meeting` WRITE;
 /*!40000 ALTER TABLE `meeting` DISABLE KEYS */;
+INSERT INTO `meeting` VALUES
+(1,'审判异端','<p><span style=\"font-size: 29px;\"><strong>异端审判执行</strong></span></p>','2026-07-01 15:43:19','2026-07-01 15:40:26','2026-07-01 16:40:29',2,'管理员,test','管理员,test','真理部审判室','真理部',47,1,'管理员');
 /*!40000 ALTER TABLE `meeting` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -593,7 +597,7 @@ CREATE TABLE `notice` (
   `attachments` text DEFAULT NULL,
   PRIMARY KEY (`nid`) USING BTREE,
   KEY `idx_publishDate_status` (`publishDate`,`status`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='公告表';
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='公告表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -626,7 +630,9 @@ INSERT INTO `notice` VALUES
 (25,2,'Notice Test for normal user','test','其他公告','测试一下','<p>测试一下</p>','2026-04-07 09:56:12',1,'已发布','[]'),
 (27,2,'测试公告已读未读功能','test','功能上线','','<h1>测试公告已读未读功能</h1>','2026-04-07 11:01:43',4,'已发布','[]'),
 (28,1,'测试系统日志','管理员','功能上线','','<p>测试更改</p>','2026-04-07 11:46:30',1,'已发布','[{\"name\":\"124397002.jpg\",\"url\":\"/api/static/upload/picture/1775543068731_124397002.jpg\",\"size\":8537}]'),
-(29,1,'Test','管理员','系统更新','Test','<p>testststststst</p>','2026-06-11 17:36:30',8,'已发布','[{\"name\":\"A_small_cup_of_coffee.JPG\",\"url\":\"http://localhost:8080/static/upload/picture/1781170586313_A_small_cup_of_coffee.JPG\",\"size\":32886}]');
+(29,1,'Test','管理员','系统更新','Test','<p>testststststst</p>','2026-06-11 17:36:30',12,'已发布','[{\"name\":\"A_small_cup_of_coffee.JPG\",\"url\":\"http://localhost:8080/static/upload/picture/1781170586313_A_small_cup_of_coffee.JPG\",\"size\":32886}]'),
+(31,1,'测试WebSocket','管理员','其他公告','test','<p>teststststststst</p>','2026-07-01 17:16:22',2,'已发布','[]'),
+(32,1,'再次测试公告页面','管理员','其他公告','teststststs','<p>ststststetsatetasetaset</p>','2026-07-01 17:19:40',3,'已发布','[]');
 /*!40000 ALTER TABLE `notice` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -647,7 +653,7 @@ CREATE TABLE `notice_read_record` (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `unique_notice_user` (`notice_id`,`user_id`) USING BTREE,
   KEY `idx_user_id` (`user_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='公告阅读记录表';
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='公告阅读记录表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -685,7 +691,13 @@ INSERT INTO `notice_read_record` VALUES
 (58,5,1,'2026-04-07 14:28:03'),
 (59,4,1,'2026-04-07 14:28:06'),
 (60,3,1,'2026-04-07 14:28:08'),
-(61,29,1,'2026-06-11 17:36:35');
+(61,29,1,'2026-06-11 17:36:35'),
+(62,29,2,'2026-07-01 14:31:15'),
+(63,30,1,'2026-07-01 17:15:49'),
+(64,31,1,'2026-07-01 17:26:06'),
+(65,32,1,'2026-07-01 17:26:08'),
+(66,31,2,'2026-07-01 17:26:20'),
+(67,32,2,'2026-07-01 17:26:23');
 /*!40000 ALTER TABLE `notice_read_record` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -712,7 +724,7 @@ CREATE TABLE `operation_log` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_username` (`username`) USING BTREE,
   KEY `idx_create_time` (`create_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=142 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='系统操作日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=174 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='系统操作日志表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -863,7 +875,39 @@ INSERT INTO `operation_log` VALUES
 (138,'系统','新增部门','com.lunabaka.controller.DeptController.add()','[{\"id\":46,\"name\":\"testtest\",\"code\":\"testtest\",\"intro\":\"testtest\",\"parentId\":45,\"status\":1}]',9,'0:0:0:0:0:0:0:1','2026-06-30 16:06:39','部门管理','新增'),
 (139,'系统','删除部门','com.lunabaka.controller.DeptController.delete()','[{\"id\":45,\"name\":\"test\",\"code\":\"test\",\"intro\":\"test\",\"parentId\":0,\"createTime\":1782806791000,\"status\":1,\"children\":[{\"id\":46,\"name\":\"testtest\",\"code\":\"testtest\",\"intro\":\"testtest\",\"parentId\":45,\"createTime\":1782806799000,\"status\":1}]}]',25,'0:0:0:0:0:0:0:1','2026-06-30 16:06:42','部门管理','删除'),
 (140,'系统','修改用户角色状态','com.lunabaka.controller.RoleController.updateStatus()','[{\"id\":10,\"status\":0}]',19,'0:0:0:0:0:0:0:1','2026-06-30 17:05:03','用户角色管理','修改'),
-(141,'系统','修改用户角色状态','com.lunabaka.controller.RoleController.updateStatus()','[{\"id\":10,\"status\":1}]',5,'0:0:0:0:0:0:0:1','2026-06-30 17:05:20','用户角色管理','修改');
+(141,'系统','修改用户角色状态','com.lunabaka.controller.RoleController.updateStatus()','[{\"id\":10,\"status\":1}]',5,'0:0:0:0:0:0:0:1','2026-06-30 17:05:20','用户角色管理','修改'),
+(142,'系统','新增部门','com.lunabaka.controller.DeptController.add()','[{\"id\":47,\"name\":\"真理部\",\"code\":\"TURTH\",\"intro\":\"真理部，即是真理\",\"parentId\":2,\"status\":1}]',192,'0:0:0:0:0:0:0:1','2026-07-01 10:29:31','部门管理','新增'),
+(143,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"test\",\"密码\":\"test\"}]',102,'0:0:0:0:0:0:0:1','2026-07-01 14:30:51','用户管理','登录'),
+(144,'系统','修改用户密码','com.lunabaka.controller.UserController.updatePassword()','[{\"UID\":2}]',19,'0:0:0:0:0:0:0:1','2026-07-01 14:32:28','用户管理','修改'),
+(145,'系统','修改用户密码','com.lunabaka.controller.UserController.updatePassword()','[{\"UID\":2}]',63,'0:0:0:0:0:0:0:1','2026-07-01 14:33:21','用户管理','修改'),
+(146,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"test\",\"密码\":\"123456\"}]',63,'0:0:0:0:0:0:0:1','2026-07-01 14:34:39','用户管理','登录'),
+(147,'系统','修改用户密码','com.lunabaka.controller.UserController.updatePassword()','[{\"UID\":2,\"密码\":\"$2a$10$hryPztoTlHka87cXAfXnfuA0m9RrDPqplsbdr4CoCS6PKkw69bQUq\"}]',74,'0:0:0:0:0:0:0:1','2026-07-01 14:35:56','用户管理','修改'),
+(148,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"test\",\"密码\":\"testtest\"}]',60,'0:0:0:0:0:0:0:1','2026-07-01 14:36:19','用户管理','登录'),
+(149,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"admin\",\"密码\":\"123456\"}]',62,'0:0:0:0:0:0:0:1','2026-07-01 14:37:52','用户管理','登录'),
+(150,'系统','修改用户','com.lunabaka.controller.UserController.updateInfo()','[{\"UID\":1,\"用户名\":\"admin\",\"昵称\":\"管理员\",\"邮箱\":\"admin@test.com\",\"部门\":\"总经理办公室/真理部\",\"电话\":\"14325345231\",\"备注\":\"BioHazard 1\",\"入职时间\":\"2026-03-19 22:30:00\",\"状态\":\"启用\"}]',28,'0:0:0:0:0:0:0:1','2026-07-01 15:00:10','用户管理','修改'),
+(151,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"admin\",\"密码\":\"123456\"}]',169,'0:0:0:0:0:0:0:1','2026-07-01 15:08:11','用户管理','登录'),
+(152,'系统','修改用户','com.lunabaka.controller.UserController.updateInfo()','[{\"UID\":1,\"用户名\":\"admin\",\"昵称\":\"管理员\",\"邮箱\":\"admin@test.com\",\"角色\":\"超级管理员\",\"部门\":\"真理部\",\"电话\":\"14325345231\",\"备注\":\"BioHazard 1\",\"入职时间\":\"2026-03-19 22:30:00\",\"状态\":\"启用\"}]',21,'0:0:0:0:0:0:0:1','2026-07-01 15:08:21','用户管理','修改'),
+(153,'系统','修改用户职位状态','com.lunabaka.controller.PostController.updateStatus()','[{\"id\":10,\"status\":0}]',47,'0:0:0:0:0:0:0:1','2026-07-01 15:25:54','用户职位管理','修改'),
+(154,'系统','修改用户职位状态','com.lunabaka.controller.PostController.updateStatus()','[{\"id\":10,\"status\":1}]',14,'0:0:0:0:0:0:0:1','2026-07-01 15:26:09','用户职位管理','修改'),
+(155,'系统','创建新会议','com.lunabaka.controller.MeetingController.create()','[{\"id\":1,\"title\":\"审判异端\",\"content\":\"<p><span style=\\\"font-size: 29px;\\\"><strong>异端审判执行</strong></span></p>\",\"publishTime\":1782891799537,\"startTime\":1782891626000,\"endTime\":\"2026-07-01 16:40:29\",\"status\":0,\"makeUser\":\"管理员,test,特色t,test3,teststtst\",\"address\":\"真理部审判室\",\"deptId\":47}]',94,'0:0:0:0:0:0:0:1','2026-07-01 15:43:19','会议管理','创建'),
+(156,'系统','新增公告','com.lunabaka.controller.NoticeController.postNotice()','[{\"公告标题\":\"测试一下公告的同步\",\"公告类型\":\"其他公告\",\"公告摘要\":\"\",\"公告内容\":\"<p>TESTSETSETSETSTSETESTSET</p>\",\"发布时间\":1782896820703,\"发布作者\":\"管理员\",\"公告状态\":\"已发布\",\"附件\":\"[]\"}]',212,'0:0:0:0:0:0:0:1','2026-07-01 17:07:00','公告管理','新增'),
+(157,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"admin\",\"密码\":\"123456\"}]',169,'0:0:0:0:0:0:0:1','2026-07-01 17:15:39','用户管理','登录'),
+(158,'系统','删除公告','com.lunabaka.controller.NoticeController.deleteById()','[{\"公告标题\":\"测试一下公告的同步\",\"公告类型\":\"其他公告\",\"公告摘要\":\"\",\"公告内容\":\"<p>TESTSETSETSETSTSETESTSET</p>\",\"发布时间\":1782896820000,\"发布作者\":\"管理员\",\"公告状态\":\"已发布\",\"查看数量\":1,\"附件\":\"[]\"}]',35,'0:0:0:0:0:0:0:1','2026-07-01 17:15:54','公告管理','删除'),
+(159,'系统','新增公告','com.lunabaka.controller.NoticeController.postNotice()','[{\"公告标题\":\"测试WebSocket\",\"公告类型\":\"其他公告\",\"公告摘要\":\"test\",\"公告内容\":\"<p>teststststststst</p>\",\"发布时间\":1782897382826,\"发布作者\":\"管理员\",\"公告状态\":\"已发布\",\"附件\":\"[]\"}]',50,'0:0:0:0:0:0:0:1','2026-07-01 17:16:22','公告管理','新增'),
+(160,'系统','新增公告','com.lunabaka.controller.NoticeController.postNotice()','[{\"公告标题\":\"再次测试公告页面\",\"公告类型\":\"其他公告\",\"公告摘要\":\"teststststs\",\"公告内容\":\"<p>ststststetsatetasetaset</p>\",\"发布时间\":1782897580102,\"发布作者\":\"管理员\",\"公告状态\":\"已发布\",\"附件\":\"[]\"}]',182,'0:0:0:0:0:0:0:1','2026-07-01 17:19:40','公告管理','新增'),
+(161,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',4,'0:0:0:0:0:0:0:1','2026-07-01 17:56:29','会议管理','签到'),
+(162,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"admin\",\"密码\":\"123456\"}]',114,'0:0:0:0:0:0:0:1','2026-07-01 17:56:34','用户管理','登录'),
+(163,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',2,'0:0:0:0:0:0:0:1','2026-07-01 17:56:40','会议管理','签到'),
+(164,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',2,'0:0:0:0:0:0:0:1','2026-07-01 17:56:55','会议管理','签到'),
+(165,'系统','用户登录','com.lunabaka.controller.WebController.login()','[{\"用户名\":\"test\",\"密码\":\"testtest\"}]',62,'0:0:0:0:0:0:0:1','2026-07-01 17:57:24','用户管理','登录'),
+(166,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',2,'0:0:0:0:0:0:0:1','2026-07-01 17:57:34','会议管理','签到'),
+(167,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',2,'0:0:0:0:0:0:0:1','2026-07-01 17:57:46','会议管理','签到'),
+(168,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',1,'0:0:0:0:0:0:0:1','2026-07-01 17:58:01','会议管理','签到'),
+(169,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',2,'0:0:0:0:0:0:0:1','2026-07-01 17:58:10','会议管理','签到'),
+(170,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',17,'0:0:0:0:0:0:0:1','2026-07-01 18:00:35','会议管理','签到'),
+(171,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',38,'0:0:0:0:0:0:0:1','2026-07-01 18:00:41','会议管理','签到'),
+(172,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',3,'0:0:0:0:0:0:0:1','2026-07-01 18:01:51','会议管理','签到'),
+(173,'系统','参加会议签到','com.lunabaka.controller.MeetingController.checkin()','[1]',2,'0:0:0:0:0:0:0:1','2026-07-01 18:02:12','会议管理','签到');
 /*!40000 ALTER TABLE `operation_log` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -3115,8 +3159,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 INSERT INTO `user` VALUES
-(1,'admin','$2a$10$TAaQrJuqFfcc8qx.ClKWDedN7QPFQaRFTuo2oMskPZsUqljjXMpqm','管理员','admin@test.com',12,'信息技术部',1,'总经理',1,'超级管理员','14325345231','BioHazard 1',2,'2026-03-19 22:30:00','启用','2026-03-19 15:34:57','2026-06-30 17:28:31','http://192.168.1.138:8080/static/upload/avatars/1782791301723_avatar_1.jpg',0),
-(2,'test','$2a$10$S9dJRQmFd4FQatv//3QvN.Xi7zJoCXmSAgedfwspl2iZWbdOsPwkm','test','test@test.test',12,'信息技术部',2,'部门经理',2,'系统管理员','12312312321','testste',2,'2026-03-21 00:00:00','启用','2026-03-21 15:35:05','2026-06-30 17:28:31','',0),
+(1,'admin','$2a$10$TAaQrJuqFfcc8qx.ClKWDedN7QPFQaRFTuo2oMskPZsUqljjXMpqm','管理员','admin@test.com',47,'真理部',21,'系统管理员',1,'超级管理员','14325345231','BioHazard 1',2,'2026-03-19 22:30:00','启用','2026-03-19 15:34:57','2026-07-01 15:08:21','http://192.168.1.138:8080/static/upload/avatars/1782791301723_avatar_1.jpg',0),
+(2,'test','$2a$10$hryPztoTlHka87cXAfXnfuA0m9RrDPqplsbdr4CoCS6PKkw69bQUq','test','test@test.test',12,'信息技术部',2,'部门经理',2,'系统管理员','12312312321','testste',2,'2026-03-21 00:00:00','启用','2026-03-21 15:35:05','2026-07-01 14:35:56','',0),
 (3,'test2','$2a$10$f2p9.WE7vc3rG/cbrmJt2O0ziouhfd4Ae.VwiIgrMBICjPcr/wvDi','特色t','test@test.com',12,'信息技术部',3,'部门主管',2,'系统管理员','15432432413','123',2,'2026-03-21 00:00:00','启用','2026-03-22 15:35:13','2026-06-30 17:28:31',NULL,0),
 (4,'test3','$2a$10$v7u7uktDVddIUpH8WUj71uzUqVvPughgFNjEWIYTG5mRqpKnuSbvm','test3','test@qqq.qwe',12,'信息技术部',21,'系统管理员',2,'系统管理员','15432432413',NULL,2,NULL,'启用','2026-03-22 15:35:13','2026-06-30 17:28:31',NULL,0),
 (5,'teststtst','$2a$10$x9kzxxdqvlePpNs0dOWPzef5GbQwbBBCv7RSUxj5IpzNqBsOPjLBG','teststtst','asd@123.com',12,'信息技术部',21,'系统管理员',2,'系统管理员','15432432413',NULL,2,NULL,'启用','2026-03-22 15:35:13','2026-06-30 17:28:31',NULL,0),
@@ -3191,4 +3235,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-30 18:05:16
+-- Dump completed on 2026-07-01 18:04:19
