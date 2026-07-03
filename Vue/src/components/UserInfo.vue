@@ -120,16 +120,11 @@
                             <el-tab-pane label="个人资料" name="profile">
                                 <el-descriptions :column="1" border>
                                     <el-descriptions-item label="姓名">{{ data.userInfo.name }}</el-descriptions-item>
+                                    <el-descriptions-item label="部门">{{data.userInfo.deptName }}</el-descriptions-item>
+                                    <el-descriptions-item label="职责">{{data.userInfo.postName}}</el-descriptions-item>
                                     <el-descriptions-item label="角色">{{ data.userInfo.roleName }}</el-descriptions-item>
-                                    <el-descriptions-item label="部门">{{
-                                        data.userInfo.deptName
-                                    }}</el-descriptions-item>
-                                    <el-descriptions-item label="入职时间">{{
-                                        data.userInfo.joinDate
-                                    }}</el-descriptions-item>
-                                    <el-descriptions-item label="个人简介">{{
-                                        data.userInfo.bio
-                                    }}</el-descriptions-item>
+                                    <el-descriptions-item label="入职时间">{{data.userInfo.joinDate }}</el-descriptions-item>
+                                    <el-descriptions-item label="个人简介">{{data.userInfo.bio }}</el-descriptions-item>
                                 </el-descriptions>
                             </el-tab-pane>
                         </el-tabs>
@@ -276,19 +271,30 @@
 
             <el-form-item label="角色" prop="role">
                 <el-select v-model="profileDialog.form.role" placeholder="请选择角色" style="width: 100%">
-                    <el-option label="超级管理员" value="超级管理员" />
-                    <el-option label="高级管理员" value="高级管理员" />
-                    <el-option label="普通管理员" value="普通管理员" />
-                    <el-option label="开发工程师" value="开发工程师" />
-                    <el-option label="测试工程师" value="测试工程师" />
-                    <el-option label="产品经理" value="产品经理" />
+                    <el-option
+                        v-for="item in roleOptions"
+                        :key="item.id || item.roleId || item.name"
+                        :label="item.name || item.roleName"
+                        :value="item.name || item.roleName"
+                    />
                 </el-select>
             </el-form-item>
 
-            <el-form-item label="部门" prop="deptName">
+            <el-form-item label="岗位" prop="post">
+                <el-select v-model="profileDialog.form.post" placeholder="请选择岗位" style="width: 100%">
+                    <el-option
+                        v-for="p in postOptions"
+                        :key="p.id || p.postId || p.name"
+                        :label="p.name || p.postName"
+                        :value="p.name || p.postName"
+                    />
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="部门" prop="department">
                 <el-cascader
-                    v-model="profileDialog.form.deptName"
-                    :options="deptNameOptions"
+                    v-model="profileDialog.form.department"
+                    :options="deptTree"
                     :props="{
                         value: 'id',
                         label: 'name',
@@ -334,11 +340,11 @@
 </template>
 
 <script setup>
-import {onBeforeMount, reactive, ref} from "vue";
+import {onBeforeMount, reactive, ref, onMounted} from "vue";
 import {ElMessage} from "element-plus";
 import {Message, Phone, Plus} from "@element-plus/icons-vue";
 import { getUserById, updateUser, updatePassword, sendUserEmailCode, changeEmail, sendPhoneCode as apiSendPhoneCode, changePhone } from "@/api";
-import { uploadAvatar } from "@/api/file";
+import { uploadAvatar, getDeptList, getAllRoles,  getAllPosts} from "../api/index.js";
 
 const defaultAvatar = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
 
@@ -360,10 +366,23 @@ const data = reactive({
 });
 console.log(data.user);
 
+function normalizeAvatar(url) {
+    if (!url) return "";
+    try {
+        const u = new URL(url);
+        return u.pathname + u.search + u.hash;
+    } catch {
+        return url;
+    }
+}
+
 const load = () => {
     getUserById(data.user.uid).then((res) => {
         if (res.code == "200") {
             data.userInfo = res.data;
+            if (data.userInfo.avatar) {
+                data.userInfo.avatar = normalizeAvatar(data.userInfo.avatar);
+            }
         } else {
             ElMessage.error(res.msg);
         }
@@ -698,45 +717,64 @@ const submitEmail = async () => {
     });
 };
 
-// 在 data 对象后面添加部门选项数据
-const deptNameOptions = ref([
-    {
-        id: "技术部",
-        name: "技术部",
-        children: [
-            { id: "研发组", name: "研发组" },
-            { id: "测试组", name: "测试组" },
-            { id: "运维组", name: "运维组" },
-        ],
-    },
-    {
-        id: "产品部t",
-        name: "产品部",
-        children: [
-            { id: "产品组", name: "产品组" },
-            { id: "设计组", name: "设计组" },
-            { id: "交互组", name: "交互组" },
-        ],
-    },
-    {
-        id: "市场部",
-        name: "市场部",
-        children: [
-            { id: "运营组", name: "运营组" },
-            { id: "销售组", name: "销售组" },
-            { id: "公关组", name: "公关组" },
-        ],
-    },
-    {
-        id: "行政部",
-        name: "行政部",
-        children: [
-            { id: "人力资源", name: "人力资源" },
-            { id: "财务组", name: "财务组" },
-            { id: "办公室", name: "办公室" },
-        ],
-    },
-]);
+// 角色、岗位、部门选项（从后端获取）
+const roleOptions = ref([]);
+const postOptions = ref([]);
+const deptTree = ref([]);
+const deptNameMap = ref({}); // id -> name 映射
+
+function buildDeptNameMap(tree) {
+    const map = {};
+    function walk(nodes) {
+        for (const node of nodes) {
+            map[node.id] = node.name;
+            if (node.children) walk(node.children);
+        }
+    }
+    walk(tree);
+    return map;
+}
+
+const loadRoleOptions = async () => {
+    try {
+        const res = await getAllRoles();
+        if (res.code === "200") {
+            roleOptions.value = Array.isArray(res.data) ? res.data : [];
+        }
+    } catch (e) {
+        console.error("获取角色列表失败");
+    }
+};
+
+const loadPostOptions = async () => {
+    try {
+        const res = await getAllPosts();
+        if (res.code === "200") {
+            postOptions.value = Array.isArray(res.data) ? res.data : [];
+        }
+    } catch (e) {
+        console.error("获取岗位列表失败");
+    }
+};
+
+const loadDeptTree = async () => {
+    try {
+        const res = await getDeptList();
+        if (res.code === "200") {
+            const data = Array.isArray(res.data) ? res.data : (res.data.records || []);
+            deptTree.value = data;
+            deptNameMap.value = buildDeptNameMap(data);
+        }
+    } catch (e) {
+        console.error("获取部门列表失败");
+    }
+};
+
+onMounted(() => {
+    loadRoleOptions();
+    loadPostOptions();
+    loadDeptTree();
+});
 
 // 编辑资料对话框
 const profileDialog = reactive({
@@ -746,6 +784,7 @@ const profileDialog = reactive({
         avatar: "",
         name: "",
         role: "",
+        post: "",
         department: [],
         email: "",
         phone: "",
@@ -759,35 +798,35 @@ const profileDialog = reactive({
         ],
         role: [{ required: true, message: "请选择角色", trigger: "change" }],
         department: [{ required: true, message: "请选择部门", trigger: "change" }],
-        email: [
-            { required: true, message: "请输入邮箱", trigger: "blur" },
-            { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" },
-        ],
-        phone: [
-            { required: true, message: "请输入手机号", trigger: "blur" },
-            {
-                pattern: /^1[3-9]\d{9}$/,
-                message: "请输入正确的手机号",
-                trigger: "blur",
-            },
-        ],
         joinDate: [{ required: true, message: "请选择入职时间", trigger: "change" }],
         bio: [{ max: 200, message: "个人简介不能超过200个字符", trigger: "blur" }],
     },
 });
-console.log(data.form);
+
 
 // 表单引用
 const profileFormRef = ref();
+
+function findDeptPath(tree, name) {
+    for (const node of tree) {
+        if (node.name === name) return [node.id];
+        if (node.children) {
+            const childPath = findDeptPath(node.children, name);
+            if (childPath) return [node.id, ...childPath];
+        }
+    }
+    return [];
+}
 
 // 打开编辑资料对话框
 const handleEdit = () => {
     // 将当前用户信息填充到表单
     profileDialog.form = {
-        // avatar: data.userInfo.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+        avatar: data.userInfo.avatar || "",
         name: data.userInfo.name || "",
-        role: data.userInfo.role || "",
-        department: data.userInfo.department ? [data.userInfo.department] : [],
+        role: data.userInfo.roleName || "",
+        post: data.userInfo.postName || "",
+        department: findDeptPath(deptTree.value, data.userInfo.deptName),
         email: data.userInfo.email || "",
         phone: data.userInfo.phone || "",
         joinDate: data.userInfo.joinDate || "",
@@ -803,18 +842,16 @@ const handleProfileDialogClose = () => {
 
 const beforeAvatarUpload = async (file) => {
     const form = new FormData();
-    const fileName = `avatar_${data.user.uid}.jpg`;
-    form.append("photo", file, fileName);
+    form.append("photo", file);
     form.append("uid", data.user.uid);
 
     try {
-        const resp = await uploadAvatar(form);
-        const result = resp.data;
-        if (result && result.code === "200") {
-            profileDialog.form.avatar = result.data;
+        const res = await uploadAvatar(form);
+        if (res.code === "200") {
+            profileDialog.form.avatar = res.data;
             ElMessage.success("头像上传成功");
         } else {
-            ElMessage.error(result.msg || "头像上传失败");
+            ElMessage.error(res.msg || "头像上传失败");
         }
     } catch (err) {
         console.error(err);
@@ -832,14 +869,15 @@ const submitProfile = async () => {
             profileDialog.loading = true;
 
             // 准备提交的数据
+            const deptArr = profileDialog.form.department;
+            const deptId = Array.isArray(deptArr) ? deptArr[deptArr.length - 1] : deptArr;
             const submitData = {
                 uid: data.user.uid,
                 avatar: profileDialog.form.avatar,
                 name: profileDialog.form.name,
-                role: profileDialog.form.role,
-                department: Array.isArray(profileDialog.form.department)
-                    ? profileDialog.form.department[profileDialog.form.department.length - 1]
-                    : profileDialog.form.department,
+                roleName: profileDialog.form.role,
+                postName: profileDialog.form.post,
+                deptName: deptNameMap.value[deptId] || "",
                 joinDate: profileDialog.form.joinDate,
                 bio: profileDialog.form.bio,
             };
@@ -854,7 +892,9 @@ const submitProfile = async () => {
                     data.userInfo = {
                         ...data.userInfo,
                         ...submitData,
-                        department: submitData.department,
+                        deptName: submitData.deptName,
+                        roleName: submitData.roleName,
+                        postName: submitData.postName,
                     };
 
                     // 同步 local_user 中的 avatar

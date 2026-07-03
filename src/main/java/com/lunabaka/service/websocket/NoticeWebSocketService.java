@@ -1,4 +1,4 @@
-package com.lunabaka.service;
+package com.lunabaka.service.websocket;
 
 import com.lunabaka.entity.Notice;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

@@ -1,20 +1,9 @@
 package com.lunabaka.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lunabaka.entity.Notice;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 @Mapper
-public interface NoticeMapper {
-    List<Notice> selectAllNotice(Notice notice);
-
-    Notice selectByNid(@Param("nid") Long nid);
-
-    int insertNotice(Notice notice);
-
-    void updateNotice(Notice notice);
-
-    void deleteByNid(Notice notice);
+public interface NoticeMapper extends BaseMapper<Notice> {
 }

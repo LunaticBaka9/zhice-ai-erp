@@ -212,7 +212,7 @@
 import {computed, inject, onMounted, ref, watch} from "vue";
 import {Document, Download, Search, User, View,} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
-import { getAllNotices, getNoticeById, updateViews, markAsRead as apiMarkAsRead } from "@/api";
+import { getAllNotices, getNoticeById, updateViews, markAsRead as apiMarkAsRead } from "../../api";
 import {formatDateTime, parseDate} from "../../utils/date.js";
 
 const user = JSON.parse(localStorage.getItem("local_user"));

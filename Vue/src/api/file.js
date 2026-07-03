@@ -7,7 +7,7 @@ export function uploadFile(formData) {
 }
 
 export function uploadAvatar(formData) {
-    return request.post("/api/file/uploadAvatar", formData, {
+    return request.post("/file/uploadAvatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
     });
 }

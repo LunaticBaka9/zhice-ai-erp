@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lunabaka.common.OperationLogAnnotation;
 import com.lunabaka.common.Result;
+import com.lunabaka.entity.Dept;
 import com.lunabaka.entity.Meeting;
 import com.lunabaka.entity.User;
+import com.lunabaka.service.DeptService;
 import com.lunabaka.service.MeetingService;
 import com.lunabaka.service.UserService;
 import jakarta.annotation.Resource;
@@ -33,6 +35,9 @@ public class MeetingController {
 
     @Resource
     UserService userService;
+
+    @Resource
+    DeptService deptService;
 
     // 获取单个会议详情
     @GetMapping("/detail/{id}")
@@ -68,9 +73,21 @@ public class MeetingController {
     @PostMapping("/create")
     public Result create(@RequestBody Meeting meeting) {
         User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            String userId = (String) request.getAttribute("userId");
+            if (userId != null) {
+                loginUser = userService.getById(Long.parseLong(userId));
+            }
+        }
         if (loginUser != null) {
             meeting.setUserId(loginUser.getUid());
             meeting.setUserName(loginUser.getName());
+        }
+        if (meeting.getDeptId() != null) {
+            Dept dept = deptService.getById(meeting.getDeptId());
+            if (dept != null) {
+                meeting.setDeptName(dept.getName());
+            }
         }
         meeting.setPublishTime(new Date());
         if (meeting.getStatus() == null) meeting.setStatus(0);
@@ -94,6 +111,13 @@ public class MeetingController {
         if (meeting == null) {
             return Result.error("会议不存在");
         }
+        // 判断会议状态
+        if (meeting.getStatus() == 0) {
+            return Result.error("会议未开始");
+        }
+        if (meeting.getStatus() == 2) {
+            return Result.error("会议已结束");
+        }
         String userId = (String) request.getAttribute("userId");
         if (userId == null) {
             return Result.error("未登录");
@@ -104,7 +128,14 @@ public class MeetingController {
         }
         String currentName = loginUser.getName();
         String actualUser = meeting.getActualUser();
+        String makeUser = meeting.getMakeUser();
         if (actualUser != null && !actualUser.isEmpty()) {
+            // 判断是否在应到人员中
+            List<String> makeNames = Arrays.asList(makeUser.split(","));
+            if(makeNames.contains(currentName)){
+                return Result.error("你无权加入此会议");
+            }
+            // 判断是否已签到
             List<String> names = Arrays.asList(actualUser.split(","));
             if (names.contains(currentName)) {
                 return Result.error("已签到");

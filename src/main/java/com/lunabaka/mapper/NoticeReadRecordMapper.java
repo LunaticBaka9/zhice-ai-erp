@@ -1,5 +1,6 @@
 package com.lunabaka.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lunabaka.entity.NoticeReadRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -7,16 +8,9 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface NoticeReadRecordMapper {
-    // 插入阅读记录
-    int insertReadRecord(NoticeReadRecord record);
-    
-    // 查询用户是否已读某公告
-    NoticeReadRecord selectByNoticeIdAndUserId(@Param("noticeId") Long noticeId, @Param("userId") Long userId);
-    
-    // 获取用户未读公告数量
+public interface NoticeReadRecordMapper extends BaseMapper<NoticeReadRecord> {
+
     int countUnreadNotices(@Param("userId") Long userId);
-    
-    // 获取用户已读的公告ID列表
+
     List<Long> selectReadNoticeIdsByUserId(@Param("userId") Long userId);
 }

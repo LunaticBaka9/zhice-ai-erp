@@ -209,7 +209,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Document, Download } from "@element-plus/icons-vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import "@wangeditor/editor/dist/css/style.css";
-import { updateNotice, postNotice, saveDraft } from "@/api";
+import { updateNotice, postNotice, saveDraft } from "../../api";
 
 // 路由
 const router = useRouter();

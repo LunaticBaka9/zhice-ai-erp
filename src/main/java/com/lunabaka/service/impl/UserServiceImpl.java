@@ -197,6 +197,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getUid, user.getUid())
                 .set(User::getName, user.getName())
                 .set(User::getRoleName, user.getRoleName())
+                .set(User::getPostName, user.getPostName())
                 .set(User::getDeptName, user.getDeptName())
                 .set(User::getBio, user.getBio())
                 .set(User::getJoinDate, user.getJoinDate())

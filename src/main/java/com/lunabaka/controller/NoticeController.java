@@ -3,13 +3,13 @@ package com.lunabaka.controller;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.lunabaka.common.OperationLogAnnotation;
 import com.lunabaka.common.Result;
 import com.lunabaka.entity.Notice;
 import com.lunabaka.service.NoticeReadRecordService;
 import com.lunabaka.service.NoticeService;
-import com.lunabaka.service.NoticeWebSocketService;
+import com.lunabaka.service.websocket.NoticeWebSocketService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -56,7 +56,7 @@ public class NoticeController {
     public Result selectPage(@RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize,
                              Notice notice){
-        PageInfo<Notice> pageInfo = noticeService.selectPage(pageNum, pageSize, notice);
+        IPage<Notice> pageInfo = noticeService.selectPage(pageNum, pageSize, notice);
         return Result.success(pageInfo);
     }
 
@@ -64,7 +64,9 @@ public class NoticeController {
     @PostMapping("/postNotice")
     public Result postNotice(@RequestBody Notice notice){
         noticeService.insertNotice(notice);
-        noticeWebSocketService.notifyNewNotice(notice);
+        if (!"定时发布".equals(notice.getStatus())) {
+            noticeWebSocketService.notifyNewNotice(notice);
+        }
         return Result.success();
     }
 
@@ -78,7 +80,9 @@ public class NoticeController {
     @PostMapping("/update")
     public Result updateNotice(@RequestBody Notice notice){
         noticeService.updateNotice(notice);
-        noticeWebSocketService.notifyUpdateNotice(notice);
+        if (!"定时发布".equals(notice.getStatus())) {
+            noticeWebSocketService.notifyUpdateNotice(notice);
+        }
         return Result.success();
     }
 
@@ -169,9 +173,9 @@ public class NoticeController {
      * 获取用户未读公告数量
      */
     @GetMapping("/unreadCount")
-    public Result getUnreadCount(@RequestParam Long userId) {
+    public Result getUnreadCount(@RequestParam(required = false) Long userId) {
         if (userId == null) {
-            return Result.error("用户ID不能为空");
+            return Result.success(0);
         }
         int count = noticeReadRecordService.getUnreadCount(userId);
         return Result.success(count);
@@ -181,9 +185,9 @@ public class NoticeController {
      * 获取用户已读的公告ID列表
      */
     @GetMapping("/readNoticeIds")
-    public Result getReadNoticeIds(@RequestParam Long userId) {
+    public Result getReadNoticeIds(@RequestParam(required = false) Long userId) {
         if (userId == null) {
-            return Result.error("用户ID不能为空");
+            return Result.success(List.of());
         }
         List<Long> readIds = noticeReadRecordService.getReadNoticeIds(userId);
         return Result.success(readIds);

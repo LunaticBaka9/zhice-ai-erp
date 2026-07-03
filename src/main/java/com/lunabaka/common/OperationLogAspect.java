@@ -1,10 +1,8 @@
 package com.lunabaka.common;
 
-import cn.hutool.json.JSONUtil;
-import com.lunabaka.entity.OperationLog;
-import com.lunabaka.service.OperationLogService;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.util.Date;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,14 +12,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.lang.reflect.Method;
-import java.util.Date;
+import com.lunabaka.entity.OperationLog;
+import com.lunabaka.entity.User;
+import com.lunabaka.service.OperationLogService;
+import com.lunabaka.service.UserService;
+
+import cn.hutool.json.JSONUtil;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Aspect
 @Component
 public class OperationLogAspect {
     @Resource
     private OperationLogService operationLogService;
+
+    @Resource
+    private UserService userService;
 
     // 使用Hutool的JSON工具
 
@@ -79,33 +86,67 @@ public class OperationLogAspect {
             log.setParams("参数序列化失败");
         }
         
-        // 获取操作用户
+        // 获取操作用户和IP地址
         try {
-            // 从localStorage获取用户信息
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
-                // 这里可以根据token获取用户信息
-                log.setUsername("系统");
-                
-                // 获取IP地址
-                String ip = request.getHeader("X-Forwarded-For");
-                if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-                    ip = request.getHeader("X-Real-IP");
+                String username = "系统";
+
+                String userId = (String) request.getAttribute("userId");
+                if (userId != null) {
+                    User loginUser = userService.getById(Long.parseLong(userId));
+                    if (loginUser != null) {
+                        username = loginUser.getName();
+                    }
                 }
-                if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-                    ip = request.getRemoteAddr();
-                }
-                // 处理 "X-Forwarded-For" 可能包含多个IP的情况，取第一个
-                if (ip != null && ip.contains(",")) {
-                    ip = ip.split(",")[0].trim();
-                }
+                log.setUsername(username);
+
+                String ip = getClientIp(request);
                 log.setIp(ip);
+            } else {
+                log.setUsername("系统");
             }
         } catch (Exception e) {
             log.setUsername("系统");
         }
-        
+
         operationLogService.insertLog(log);
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (isInvalidIp(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (isInvalidIp(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (isInvalidIp(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (isInvalidIp(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (isInvalidIp(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (isInvalidIp(ip)) {
+            ip = request.getHeader("CF-Connecting-IP");
+        }
+        if (isInvalidIp(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        if ("0:0:0:0:0:0:0:1".equals(ip)) {
+            ip = "127.0.0.1";
+        }
+        return ip;
+    }
+
+    private boolean isInvalidIp(String ip) {
+        return ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip);
     }
 }

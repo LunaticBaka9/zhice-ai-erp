@@ -151,7 +151,7 @@ import {reactive, ref} from "vue";
 import {useRouter} from "vue-router";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit, Refresh, Search} from "@element-plus/icons-vue";
-import { getNoticeList, deleteNotice } from "@/api";
+import { getNoticeList, deleteNotice } from "../../api";
 import {formatDateTime, parseDate} from "../../utils/date.js";
 
 const user = JSON.parse(localStorage.getItem("local_user"));
@@ -187,7 +187,7 @@ const load = () => {
               : undefined,
     }).then((res) => {
         if (res.code === "200") {
-            data.tableData = (res.data.list || []).map((it) => ({
+            data.tableData = (res.data.records || []).map((it) => ({
                 ...it,
                 publishDate: it.publishDate
                     ? parseDate(it.publishDate)

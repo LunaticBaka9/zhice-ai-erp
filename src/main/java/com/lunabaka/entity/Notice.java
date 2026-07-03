@@ -2,45 +2,58 @@ package com.lunabaka.entity;
 
 import cn.hutool.core.annotation.Alias;
 import cn.hutool.core.annotation.PropIgnore;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Date;
 
+@TableName(value ="notice")
 @Data
-public class Notice {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Notice implements Serializable {
     @PropIgnore
-    Long nid;
+    @TableId(type = IdType.AUTO)
+    private Long nid;
 
     @PropIgnore
-    Long uid;
+    private Long uid;
 
     @Alias("公告标题")
-    String title;
+    private String title;
 
     @Alias("公告类型")
-    String type;
+    private String type;
 
     @Alias("公告摘要")
-    String summary;
+    private String summary;
 
     @Alias("公告内容")
-    String content;
+    private String content;
 
     @Alias("发布时间")
-    Date publishDate;
+    @TableField("publishDate")
+    private Date publishDate;
 
     @Alias("发布作者")
-    String author;
+    private String author;
 
     @Alias("公告状态")
-    String status;
+    private String status;
 
     @Alias("查看数量")
-    Long views;
+    private Long views;
 
     @Alias("附件")
-    String attachments;
+    private String attachments;
 
     @PropIgnore
-    private int delFlag;
+    @TableField(exist = false)
+    private Integer delFlag;
 }

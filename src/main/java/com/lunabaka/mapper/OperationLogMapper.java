@@ -15,11 +15,11 @@ public interface OperationLogMapper {
     List<OperationLog> selectAllLogs();
 
     List<OperationLog> selectByPage(@Param("pageNum") int pageNum, @Param("pageSize") int pageSize, @Param("username") String username, @Param("module") String module, @Param("type") String type);
-
     
     int selectCount(@Param("username") String username, @Param("module") String module, @Param("type") String type);
 
     //删除日志
     int deleteBatch(@Param("ids") List<Long> ids);
+
     int deleteAll();
 }

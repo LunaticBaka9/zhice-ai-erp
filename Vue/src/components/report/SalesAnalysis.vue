@@ -22,7 +22,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { ElMessage } from "element-plus";
 import * as echarts from "echarts";
-import { getSalesReport } from "@/api";
+import {getSalesReport} from "../../api/index.js";
 
 const loading = ref(false);
 const chartOrderRef = ref(null);

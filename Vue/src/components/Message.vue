@@ -25,7 +25,10 @@
             <div class="header-right">
                 <el-dropdown trigger="click" @command="handleBatchCommand" :disabled="selectedMessages.length === 0">
                     <el-button type="default">
-                        批量操作 <el-icon><ArrowDown /></el-icon>
+                        批量操作
+                        <el-icon>
+                            <ArrowDown/>
+                        </el-icon>
                     </el-button>
                     <template #dropdown>
                         <el-dropdown-menu>
@@ -35,11 +38,15 @@
                     </template>
                 </el-dropdown>
                 <el-button type="primary" plain @click="markAllAsRead" :disabled="unreadCount === 0">
-                    <el-icon><Check /></el-icon>
+                    <el-icon>
+                        <Check/>
+                    </el-icon>
                     全部已读
                 </el-button>
                 <el-button type="danger" plain @click="clearAllMessages" :disabled="messageList.length === 0">
-                    <el-icon><Delete /></el-icon>
+                    <el-icon>
+                        <Delete/>
+                    </el-icon>
                     清空消息
                 </el-button>
             </div>
@@ -56,11 +63,11 @@
                 class="search-input"
             />
             <el-select v-model="filterType" placeholder="消息类型" clearable size="default" class="filter-select">
-                <el-option label="系统通知" value="system" />
-                <el-option label="审批消息" value="approval" />
-                <el-option label="待办提醒" value="todo" />
-                <el-option label="财务通知" value="finance" />
-                <el-option label="人事通知" value="hr" />
+                <el-option label="系统通知" value="system"/>
+                <el-option label="审批消息" value="approval"/>
+                <el-option label="待办提醒" value="todo"/>
+                <el-option label="财务通知" value="finance"/>
+                <el-option label="人事通知" value="hr"/>
             </el-select>
             <el-select v-model="filterPriority" placeholder="优先级" clearable size="default" class="filter-select">
                 <el-option label="高优先级" value="high">
@@ -116,7 +123,7 @@
                             </div>
                             <div class="message-icon" :class="`icon-${message.type}`">
                                 <el-icon :size="20">
-                                    <component :is="getIconComponent(message.type)" />
+                                    <component :is="getIconComponent(message.type)"/>
                                 </el-icon>
                                 <span v-if="message.priority === 'high'" class="priority-badge">!</span>
                             </div>
@@ -145,7 +152,7 @@
                                             'deadline-urgent': isDeadlineUrgent(message.deadline),
                                         }"
                                     >
-                                        <el-icon><Clock /></el-icon>
+                                        <el-icon><Clock/></el-icon>
                                         截止: {{ formatDate(message.deadline) }}
                                     </span>
                                 </div>
@@ -185,7 +192,7 @@
                             </div>
                         </div>
                     </template>
-                    <el-empty v-else description="暂无消息" :image-size="100" />
+                    <el-empty v-else description="暂无消息" :image-size="100"/>
                 </div>
 
                 <!-- 分页组件 -->
@@ -220,7 +227,7 @@
                     </div>
                     <div class="detail-actions" v-if="selectedMessage">
                         <el-tooltip content="标记已读" placement="top" v-if="!selectedMessage.isRead">
-                            <el-button :icon="Check" circle size="small" @click="markAsRead(selectedMessage)" />
+                            <el-button :icon="Check" circle size="small" @click="markAsRead(selectedMessage)"/>
                         </el-tooltip>
                         <el-tooltip content="删除" placement="top">
                             <el-button
@@ -242,13 +249,15 @@
                             <el-tag v-if="selectedMessage.priority === 'high'" type="danger" size="small" effect="dark">
                                 高优先级
                             </el-tag>
-                            <el-tag v-if="selectedMessage.needAction" type="warning" size="small"> 需处理 </el-tag>
+                            <el-tag v-if="selectedMessage.needAction" type="warning" size="small"> 需处理</el-tag>
                             <el-tag v-if="!selectedMessage.isRead" type="info" size="small" effect="plain">
                                 未读
                             </el-tag>
                         </div>
                         <div class="detail-time">
-                            <el-icon><Clock /></el-icon>
+                            <el-icon>
+                                <Clock/>
+                            </el-icon>
                             {{ formatDateTime(selectedMessage.time) }}
                         </div>
                     </div>
@@ -275,7 +284,7 @@
                             <span class="info-label">关联单号：</span>
                             <span class="info-value link" @click="viewRelatedDoc(selectedMessage.relatedId)">
                                 {{ selectedMessage.relatedId }}
-                                <el-icon><TopRight /></el-icon>
+                                <el-icon><TopRight/></el-icon>
                             </span>
                         </div>
                     </div>
@@ -292,7 +301,9 @@
                         class="detail-attachments"
                     >
                         <div class="attachments-title">
-                            <el-icon><Paperclip /></el-icon>
+                            <el-icon>
+                                <Paperclip/>
+                            </el-icon>
                             附件 ({{ selectedMessage.attachments.length }})
                         </div>
                         <div class="attachments-list">
@@ -302,10 +313,14 @@
                                 class="attachment-item"
                                 @click="downloadAttachment(file)"
                             >
-                                <el-icon><Document /></el-icon>
+                                <el-icon>
+                                    <Document/>
+                                </el-icon>
                                 <span class="file-name">{{ file.name }}</span>
                                 <span class="file-size">{{ file.size }}</span>
-                                <el-icon class="download-icon"><Download /></el-icon>
+                                <el-icon class="download-icon">
+                                    <Download/>
+                                </el-icon>
                             </div>
                         </div>
                     </div>
@@ -315,7 +330,9 @@
                         v-if="selectedMessage.type === 'approval' && !selectedMessage.isProcessed"
                     >
                         <el-button type="primary" size="large" @click="handleApprovalFromDetail" style="width: 100%">
-                            <el-icon><Edit /></el-icon>
+                            <el-icon>
+                                <Edit/>
+                            </el-icon>
                             去审批
                         </el-button>
                     </div>
@@ -323,7 +340,9 @@
                 <div class="detail-empty" v-else>
                     <el-empty description="请选择一条消息查看详情" :image-size="120">
                         <template #image>
-                            <el-icon :size="80" color="#c0c4cc"><Message /></el-icon>
+                            <el-icon :size="80" color="#c0c4cc">
+                                <Message/>
+                            </el-icon>
                         </template>
                     </el-empty>
                 </div>
@@ -333,29 +352,27 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import {computed, onMounted, onUnmounted, ref} from "vue";
 import {
-    Bell,
-    Setting,
-    ChatDotRound,
-    Present,
-    Check,
-    Delete,
     ArrowDown,
-    Search,
-    Clock,
-    Edit,
-    Paperclip,
-    Document,
-    Money,
-    User,
-    Tickets,
     ArrowLeft,
-    TopRight,
+    Bell,
+    Check,
+    Clock,
+    Delete,
+    Document,
     Download,
+    Edit,
     Message,
+    Money,
+    Paperclip,
+    Search,
+    Setting,
+    Tickets,
+    TopRight,
+    User,
 } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 // 模拟ERP系统消息数据
 const generateMockMessages = () => {
@@ -449,9 +466,9 @@ const generateMockMessages = () => {
             attachments:
                 Math.random() > 0.85
                     ? [
-                          { name: `附件_${i}.pdf`, size: "128 KB" },
-                          { name: `相关文档_${i}.docx`, size: "256 KB" },
-                      ]
+                        {name: `附件_${i}.pdf`, size: "128 KB"},
+                        {name: `相关文档_${i}.docx`, size: "256 KB"},
+                    ]
                     : [],
         });
     }
@@ -618,7 +635,8 @@ const deleteMessage = async (message) => {
             selectedMessages.value = selectedMessages.value.filter((id) => id !== message.id);
             ElMessage.success("删除成功");
         }
-    } catch {}
+    } catch {
+    }
 };
 
 const markAllAsRead = () => {
@@ -642,7 +660,8 @@ const clearAllMessages = async () => {
         selectedMessage.value = null;
         selectedMessages.value = [];
         ElMessage.success("已清空所有消息");
-    } catch {}
+    } catch {
+    }
 };
 
 // 批量操作
@@ -678,7 +697,8 @@ const handleBatchCommand = async (command) => {
             }
             selectedMessages.value = [];
             ElMessage.success("批量删除成功");
-        } catch {}
+        } catch {
+        }
     }
 };
 
@@ -775,631 +795,5 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped lang="scss">
-.erp-message-center {
-    //height: 100%;
-    //min-height: 100vh;
-    background-color: #f5f7fa;
-    font-family: "Microsoft YaHei", "微软雅黑", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
 
-.message-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    background: #fff;
-    border-bottom: 1px solid #e9ecef;
-    flex-wrap: wrap;
-    gap: 12px;
-
-    .header-left {
-        display: flex;
-        align-items: baseline;
-        gap: 32px;
-        flex-wrap: wrap;
-
-        .title-section {
-            .title {
-                font-size: 18px;
-                font-weight: 600;
-                color: #1e2a3a;
-            }
-            .subtitle {
-                font-size: 12px;
-                color: #8a99aa;
-                margin-left: 12px;
-            }
-        }
-
-        .stats-section {
-            display: flex;
-            gap: 24px;
-
-            .stat-item {
-                display: flex;
-                align-items: baseline;
-                gap: 6px;
-
-                .stat-label {
-                    font-size: 13px;
-                    color: #6c757d;
-                }
-
-                .stat-value {
-                    font-size: 20px;
-                    font-weight: 600;
-
-                    &.danger {
-                        color: #dc3545;
-                    }
-                    &.warning {
-                        color: #fd7e14;
-                    }
-                }
-            }
-        }
-    }
-
-    .header-right {
-        display: flex;
-        gap: 12px;
-    }
-}
-
-.filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 24px;
-    background: #fff;
-    border-bottom: 1px solid #e9ecef;
-
-    .search-input {
-        width: 240px;
-    }
-
-    .filter-select {
-        width: 130px;
-    }
-
-    .date-picker {
-        width: 260px;
-    }
-
-    .priority-high {
-        color: #dc3545;
-    }
-    .priority-medium {
-        color: #fd7e14;
-    }
-    .priority-low {
-        color: #28a745;
-    }
-}
-
-.message-layout {
-    display: flex;
-    height: calc(100vh - 200px);
-    min-height: 500px;
-    gap: 1px;
-    background: #e9ecef;
-}
-
-.message-list-panel {
-    width: 420px;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-
-    .list-header {
-        padding: 16px 20px;
-        border-bottom: 1px solid #e9ecef;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .list-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1e2a3a;
-        }
-
-        .list-count {
-            font-size: 12px;
-            color: #8a99aa;
-        }
-    }
-
-    .message-list {
-        flex: 1;
-        overflow-y: auto;
-        padding: 0;
-    }
-
-    .pagination-wrapper {
-        padding: 12px 16px;
-        border-top: 1px solid #e9ecef;
-        display: flex;
-        justify-content: center;
-    }
-
-    &.collapsed {
-        width: 100%;
-    }
-}
-
-.message-item {
-    display: flex;
-    align-items: flex-start;
-    padding: 14px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-bottom: 1px solid #f0f2f5;
-    position: relative;
-
-    &:hover {
-        background-color: #f8f9fa;
-
-        .message-actions {
-            opacity: 1;
-        }
-    }
-
-    &.message-read {
-        background-color: #fff;
-
-        .message-title .title-text {
-            color: #8a99aa;
-            font-weight: normal;
-        }
-
-        .message-summary {
-            color: #adb5bd;
-        }
-    }
-
-    &.message-unread {
-        background-color: #fef9e6;
-
-        .message-title .title-text {
-            font-weight: 600;
-            color: #1e2a3a;
-        }
-    }
-
-    &.message-high {
-        border-left: 3px solid #dc3545;
-    }
-
-    &.message-selected {
-        background-color: #ecf5ff;
-        border-left: 3px solid #409eff;
-    }
-}
-
-.message-select {
-    margin-right: 12px;
-    padding-top: 2px;
-}
-
-.message-icon {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 12px;
-    position: relative;
-
-    &.icon-system {
-        background: #e9ecef;
-        color: #495057;
-    }
-    &.icon-approval {
-        background: #fff3e0;
-        color: #fd7e14;
-    }
-    &.icon-todo {
-        background: #ffe6e6;
-        color: #dc3545;
-    }
-    &.icon-finance {
-        background: #e0f7e8;
-        color: #28a745;
-    }
-    &.icon-hr {
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-
-    .priority-badge {
-        position: absolute;
-        top: -4px;
-        right: -6px;
-        width: 16px;
-        height: 16px;
-        background: #dc3545;
-        color: #fff;
-        border-radius: 50%;
-        font-size: 10px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-}
-
-.message-info {
-    flex: 1;
-    min-width: 0;
-
-    .message-title {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-bottom: 6px;
-
-        .title-text {
-            font-size: 14px;
-            font-weight: 500;
-            color: #1e2a3a;
-        }
-
-        .message-type-tag {
-            transform: scale(0.85);
-        }
-
-        .unread-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #409eff;
-            border-radius: 50%;
-        }
-
-        .action-badge {
-            font-size: 10px;
-            background: #fd7e14;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 10px;
-        }
-    }
-
-    .message-summary {
-        font-size: 12px;
-        color: #6c757d;
-        line-height: 1.4;
-        margin-bottom: 6px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .message-meta {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 11px;
-        color: #adb5bd;
-
-        .message-deadline {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-
-            &.deadline-urgent {
-                color: #dc3545;
-            }
-        }
-    }
-}
-
-.message-actions {
-    display: flex;
-    gap: 4px;
-    margin-left: 8px;
-    opacity: 0;
-    transition: opacity 0.2s;
-
-    @media (max-width: 768px) {
-        opacity: 1;
-    }
-}
-
-// 右侧详情面板
-.detail-panel {
-    flex: 1;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transition: all 0.3s ease;
-
-    .detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 24px;
-        border-bottom: 1px solid #e9ecef;
-
-        .detail-header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            .back-btn {
-                padding: 0;
-                font-size: 14px;
-            }
-
-            .detail-title {
-                font-size: 16px;
-                font-weight: 600;
-                color: #1e2a3a;
-            }
-        }
-
-        .detail-actions {
-            display: flex;
-            gap: 8px;
-        }
-    }
-
-    .detail-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px 24px;
-    }
-
-    .detail-empty {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    &.mobile-detail {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 1000;
-        background: #fff;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-
-        &.show {
-            transform: translateX(0);
-        }
-    }
-}
-
-.detail-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 12px;
-
-    .detail-tags {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .detail-time {
-        font-size: 13px;
-        color: #8a99aa;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-}
-
-.detail-title-text {
-    font-size: 20px;
-    font-weight: 600;
-    color: #1e2a3a;
-    margin: 0 0 16px 0;
-    line-height: 1.4;
-}
-
-.detail-info {
-    background: #f8f9fa;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 24px;
-
-    .info-row {
-        font-size: 13px;
-        margin-bottom: 8px;
-
-        &:last-child {
-            margin-bottom: 0;
-        }
-
-        .info-label {
-            color: #6c757d;
-            width: 80px;
-            display: inline-block;
-        }
-
-        .info-value {
-            color: #1e2a3a;
-
-            &.link {
-                color: #409eff;
-                cursor: pointer;
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-
-                &:hover {
-                    text-decoration: underline;
-                }
-            }
-
-            &.deadline-urgent-text {
-                color: #dc3545;
-                font-weight: 500;
-            }
-        }
-    }
-}
-
-.detail-body {
-    margin-bottom: 24px;
-
-    .body-label {
-        font-size: 14px;
-        font-weight: 500;
-        color: #495057;
-        margin-bottom: 12px;
-    }
-
-    .body-text {
-        font-size: 14px;
-        line-height: 1.6;
-        color: #2c3e50;
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
-}
-
-.detail-attachments {
-    margin-bottom: 24px;
-
-    .attachments-title {
-        font-size: 14px;
-        font-weight: 500;
-        color: #495057;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .attachments-list {
-        .attachment-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-
-            &:hover {
-                background: #e9ecef;
-            }
-
-            .file-name {
-                flex: 1;
-                font-size: 13px;
-                color: #409eff;
-            }
-
-            .file-size {
-                font-size: 11px;
-                color: #8a99aa;
-            }
-
-            .download-icon {
-                color: #8a99aa;
-                opacity: 0;
-                transition: opacity 0.2s;
-            }
-
-            &:hover .download-icon {
-                opacity: 1;
-            }
-        }
-    }
-}
-
-.detail-footer-actions {
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e9ecef;
-}
-
-// 滚动条样式
-.message-list::-webkit-scrollbar,
-.detail-content::-webkit-scrollbar {
-    width: 5px;
-}
-
-.message-list::-webkit-scrollbar-track,
-.detail-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.message-list::-webkit-scrollbar-thumb,
-.detail-content::-webkit-scrollbar-thumb {
-    background: #cbd5e0;
-    border-radius: 3px;
-}
-
-// 响应式
-@media (max-width: 768px) {
-    .message-header {
-        padding: 12px 16px;
-
-        .header-left {
-            gap: 16px;
-
-            .title-section .subtitle {
-                display: none;
-            }
-
-            .stats-section {
-                gap: 12px;
-
-                .stat-value {
-                    font-size: 16px;
-                }
-            }
-        }
-    }
-
-    .filter-bar {
-        padding: 12px 16px;
-
-        .search-input {
-            width: 100%;
-        }
-
-        .filter-select {
-            flex: 1;
-            min-width: 100px;
-        }
-
-        .date-picker {
-            width: 100%;
-        }
-    }
-
-    .message-layout {
-        height: calc(100vh - 160px);
-    }
-
-    .message-list-panel {
-        width: 100%;
-    }
-
-    .detail-panel:not(.mobile-detail) {
-        display: none;
-    }
-}
-</style>
+<style scoped lang="scss" src="../assets/css/message.css" />

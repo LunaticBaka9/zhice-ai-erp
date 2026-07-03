@@ -524,6 +524,12 @@ onMounted(() => {
         getUserById(data.user.uid).then((res) => {
             if (res && res.code === "200") {
                 data.userInfo = res.data || {};
+                if (data.userInfo.avatar) {
+                    try {
+                        const u = new URL(data.userInfo.avatar);
+                        data.userInfo.avatar = u.pathname;
+                    } catch {}
+                }
                 // 若 local_user 中缺少 avatar，则同步
                 const localUserStr = localStorage.getItem("local_user");
                 if (localUserStr) {

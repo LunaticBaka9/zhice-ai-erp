@@ -156,6 +156,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Websocket -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>

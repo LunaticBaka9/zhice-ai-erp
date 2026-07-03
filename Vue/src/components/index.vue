@@ -500,7 +500,7 @@ async function fetchRecentNotices() {
     try {
         const res = await getNoticeList({ pageNum: 1, pageSize: 5 });
         if (res && (res.code === "200" || res.code === 200)) {
-            recentNotices.value = res.data?.list || [];
+            recentNotices.value = res.data?.records || [];
         }
     } catch (e) {
         console.error("fetchRecentNotices error", e);
