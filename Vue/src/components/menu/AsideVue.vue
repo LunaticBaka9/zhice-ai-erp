@@ -1,4 +1,4 @@
-<template>
+npm<template>
     <el-aside :width="isCollapse ? '64px' : '240px'" class="aside-transition">
         <!-- Logo区域 -->
         <div class="logo-container">

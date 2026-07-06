@@ -1,14 +1,5 @@
 package com.lunabaka.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -17,15 +8,26 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lunabaka.entity.Notice;
 import com.lunabaka.exception.CustomerException;
 import com.lunabaka.mapper.NoticeMapper;
+import com.lunabaka.service.NoticeReadRecordService;
 import com.lunabaka.service.NoticeService;
-
 import jakarta.annotation.Resource;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> implements NoticeService {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Resource
+    private NoticeReadRecordService readRecordService;
 
     @Override
     public List<Notice> selectAllNotice() {
@@ -88,6 +90,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
             notice.setPublishDate(new Date());
         }
         baseMapper.insert(notice);
+        readRecordService.markAsRead(notice.getNid(), notice.getUid());
     }
 
     @Override

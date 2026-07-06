@@ -67,13 +67,13 @@ public class NoticeController {
         if (!"定时发布".equals(notice.getStatus())) {
             noticeWebSocketService.notifyNewNotice(notice);
         }
-        return Result.success();
+        return Result.success(notice);
     }
 
     @PostMapping("/saveDraft")
     public Result saveDraft(@RequestBody Notice notice){
         noticeService.insertNotice(notice);
-        return Result.success();
+        return Result.success(notice);
     }
 
     @OperationLogAnnotation(module="公告管理", type="修改", value="修改公告")
@@ -94,7 +94,7 @@ public class NoticeController {
         }
         Long userId = notice.getUid();
         if (userId != null) {
-            String limitKey = "notice:views:limit:" + nid + ":" + userId;
+            String limitKey = "notice:viewlock:" + nid + ":" + userId;
             Boolean acquired = redisTemplate.opsForValue().setIfAbsent(limitKey, 1, 60, TimeUnit.SECONDS);
             if (Boolean.FALSE.equals(acquired)) {
                 return Result.success();

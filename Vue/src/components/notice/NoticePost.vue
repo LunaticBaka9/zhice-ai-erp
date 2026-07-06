@@ -500,6 +500,20 @@ const handleConfirmPublish = async () => {
                 if (res.code === "200") {
                     ElMessage.success("公告发布成功");
                     isFormDirty.value = false; // 重置脏状态
+                    // 将新公告标记为已读（同步前端缓存）
+                    const nid = res.data?.nid;
+                    if (nid && user?.uid) {
+                        const key = `read_notices_${user.uid}`;
+                        try {
+                            const ids = JSON.parse(localStorage.getItem(key) || "[]");
+                            if (!ids.includes(nid)) {
+                                ids.push(nid);
+                                localStorage.setItem(key, JSON.stringify(ids));
+                            }
+                        } catch (e) {
+                            console.error("更新已读缓存失败", e);
+                        }
+                    }
                 } else {
                     ElMessage.error("发布失败");
                 }
