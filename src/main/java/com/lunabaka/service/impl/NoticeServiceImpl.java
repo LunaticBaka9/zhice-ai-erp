@@ -11,6 +11,8 @@ import com.lunabaka.mapper.NoticeMapper;
 import com.lunabaka.service.NoticeReadRecordService;
 import com.lunabaka.service.NoticeService;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     private NoticeReadRecordService readRecordService;
 
     @Override
+    @Cacheable(cacheNames = "notice", key = "'list'")
     public List<Notice> selectAllNotice() {
         LambdaQueryWrapper<Notice> wrapper = Wrappers.lambdaQuery();
         wrapper.orderByDesc(Notice::getPublishDate);
@@ -85,6 +88,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = "notice", allEntries = true)
     public void insertNotice(Notice notice) {
         if (notice.getPublishDate() == null) {
             notice.setPublishDate(new Date());
@@ -94,6 +98,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = "notice", allEntries = true)
     public void insertBatch(List<Notice> list) {
         for (Notice notice : list) {
             this.insertNotice(notice);
@@ -101,6 +106,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
+    @Cacheable(cacheNames = "notice", key = "'detail:' + #nid")
     public Notice selectByNid(Long nid) {
         Notice notice = baseMapper.selectById(nid);
         if (notice != null) {
@@ -113,11 +119,13 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = "notice", allEntries = true)
     public void updateNotice(Notice notice) {
         baseMapper.updateById(notice);
     }
 
     @Override
+    @CacheEvict(cacheNames = "notice", allEntries = true)
     public void deleteByNid(Notice notice) {
         Notice dbNotice = baseMapper.selectById(notice.getNid());
         if (dbNotice == null) {
@@ -127,6 +135,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
+    @CacheEvict(cacheNames = "notice", allEntries = true)
     public void deleteBatch(List<Notice> list) {
         for (Notice notice : list) {
             this.deleteByNid(notice);

@@ -10,6 +10,8 @@ import com.lunabaka.service.SaleOutboundService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,7 @@ public class SaleOutboundServiceImpl implements SaleOutboundService {
     private InventoryOperationMapper inventoryOperationMapper;
 
     @Override
+    @CacheEvict(cacheNames = {"saleOrder", "saleOutbound"}, allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public Long createFromSaleOrderId(Long saleOrderId, String remark) {
         Sale order = saleMapper.selectById(saleOrderId);
@@ -80,6 +83,7 @@ public class SaleOutboundServiceImpl implements SaleOutboundService {
     }
 
     @Override
+    @CacheEvict(cacheNames = {"saleOrder", "saleOutbound", "inventoryOperation", "goods"}, allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void confirm(Long outboundId) {
         SaleOutbound outbound = saleOutboundMapper.selectById(outboundId);
@@ -153,6 +157,7 @@ public class SaleOutboundServiceImpl implements SaleOutboundService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "saleOutbound", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void deleteDraft(Long outboundId) {
         SaleOutbound outbound = saleOutboundMapper.selectById(outboundId);
@@ -167,6 +172,7 @@ public class SaleOutboundServiceImpl implements SaleOutboundService {
     }
 
     @Override
+    @Cacheable(cacheNames = "saleOutbound", key = "'detail:' + #id")
     public SaleOutbound detail(Long id) {
         SaleOutbound ob = saleOutboundMapper.selectById(id);
         if (ob != null) {
@@ -191,6 +197,7 @@ public class SaleOutboundServiceImpl implements SaleOutboundService {
     }
 
     @Override
+    @Cacheable(cacheNames = "saleOutbound", key = "'stats'")
     public Map<String, Object> getStatistics() {
         Long total = saleOutboundMapper.countAll();
         Long draft = saleOutboundMapper.countByStatus(SaleOutboundStatus.DRAFT);

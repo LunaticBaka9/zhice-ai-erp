@@ -8,6 +8,8 @@ import com.lunabaka.mapper.InventoryAlertMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,7 @@ public class InventoryAlertService {
      * @param id 预警 ID
      * @return 预警实体
      */
+    @Cacheable(cacheNames = "inventoryAlert", key = "'detail:' + #id")
     public InventoryAlert selectById(Long id) {
         InventoryAlert alert = inventoryAlertMapper.selectById(id);
         if (alert == null) {
@@ -59,6 +62,7 @@ public class InventoryAlertService {
      * @param goodsId 商品 ID
      * @return 预警实体列表
      */
+    @Cacheable(cacheNames = "inventoryAlert", key = "'goods:' + #goodsId")
     public List<InventoryAlert> selectByGoodsId(Long goodsId) {
         return inventoryAlertMapper.selectByGoodsId(goodsId);
     }
@@ -68,6 +72,7 @@ public class InventoryAlertService {
      *
      * @return 生成的预警数量
      */
+    @CacheEvict(cacheNames = "inventoryAlert", allEntries = true)
     @Transactional
     public int generateAlerts() {
         // 获取所有商品
@@ -165,6 +170,7 @@ public class InventoryAlertService {
      * @param acknowledgedBy 确认人 ID
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryAlert", allEntries = true)
     @Transactional
     public int acknowledge(Long id, Integer acknowledgedBy) {
         InventoryAlert alert = inventoryAlertMapper.selectById(id);
@@ -180,6 +186,7 @@ public class InventoryAlertService {
      * @param id 预警 ID
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryAlert", allEntries = true)
     @Transactional
     public int deleteById(Long id) {
         return inventoryAlertMapper.deleteById(id);
@@ -191,6 +198,7 @@ public class InventoryAlertService {
      * @param ids 预警 ID 列表
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryAlert", allEntries = true)
     @Transactional
     public int deleteBatch(List<Long> ids) {
         return inventoryAlertMapper.deleteBatch(ids);
@@ -211,6 +219,7 @@ public class InventoryAlertService {
      *
      * @return 统计结果 Map
      */
+    @Cacheable(cacheNames = "inventoryAlert", key = "'typeCount'")
     public Map<String, Integer> countByAlertType() {
         return inventoryAlertMapper.countByAlertType();
     }
@@ -220,6 +229,7 @@ public class InventoryAlertService {
      *
      * @return 统计信息 Map
      */
+    @Cacheable(cacheNames = "inventoryAlert", key = "'stats'")
     public Map<String, Object> getStatistics() {
         Map<String, Object> statistics = new HashMap<>();
 
@@ -262,6 +272,7 @@ public class InventoryAlertService {
      * @param remarks      备注
      * @return 库存作业 ID
      */
+    @CacheEvict(cacheNames = {"inventoryAlert", "inventoryOperation", "goods"}, allEntries = true)
     @Transactional
     public Long submitReplenishment(Long alertId, Integer actualQty, String operator, String remarks) {
         // 获取预警记录

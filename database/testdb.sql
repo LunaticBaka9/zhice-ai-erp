@@ -998,7 +998,7 @@ CREATE TABLE `permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_permission_code` (`code`),
   KEY `idx_parent` (`parent_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='权限表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='权限表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1034,7 +1034,7 @@ CREATE TABLE `post` (
   UNIQUE KEY `uk_post_name` (`name`),
   KEY `idx_level` (`level`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='职位表';
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='职位表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1262,7 +1262,7 @@ CREATE TABLE `role` (
   UNIQUE KEY `uk_role_code` (`code`),
   UNIQUE KEY `uk_role_name` (`name`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='角色表';
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='角色表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

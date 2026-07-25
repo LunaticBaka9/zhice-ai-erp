@@ -5,6 +5,8 @@ import com.github.pagehelper.PageInfo;
 import com.lunabaka.entity.InventoryOperation;
 import com.lunabaka.mapper.InventoryOperationMapper;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class InventoryOperationService {
      * @param inventoryOperation 库存作业实体
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryOperation", allEntries = true)
     public int insert(InventoryOperation inventoryOperation) {
         return inventoryOperationMapper.insert(inventoryOperation);
     }
@@ -29,6 +32,7 @@ public class InventoryOperationService {
      * @param id 作业 ID
      * @return 库存作业实体
      */
+    @Cacheable(cacheNames = "inventoryOperation", key = "'detail:' + #id")
     public InventoryOperation selectById(Long id) {
         return inventoryOperationMapper.selectById(id);
     }
@@ -38,6 +42,7 @@ public class InventoryOperationService {
      * @param operationNo 作业单号
      * @return 库存作业实体
      */
+    @Cacheable(cacheNames = "inventoryOperation", key = "'no:' + #operationNo")
     public InventoryOperation selectByOperationNo(String operationNo) {
         return inventoryOperationMapper.selectByOperationNo(operationNo);
     }
@@ -60,6 +65,7 @@ public class InventoryOperationService {
      * @param inventoryOperation 库存作业实体
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryOperation", allEntries = true)
     public int update(InventoryOperation inventoryOperation) {
         return inventoryOperationMapper.update(inventoryOperation);
     }
@@ -69,6 +75,7 @@ public class InventoryOperationService {
      * @param id 作业 ID
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryOperation", allEntries = true)
     public int deleteById(Long id) {
         return inventoryOperationMapper.deleteById(id);
     }
@@ -78,6 +85,7 @@ public class InventoryOperationService {
      * @param ids 作业 ID 列表
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryOperation", allEntries = true)
     public int deleteBatch(List<Long> ids) {
         return inventoryOperationMapper.deleteBatch(ids);
     }
@@ -88,6 +96,7 @@ public class InventoryOperationService {
      * @param status 新状态
      * @return 影响行数
      */
+    @CacheEvict(cacheNames = "inventoryOperation", allEntries = true)
     public int updateStatus(Long id, String status) {
         return inventoryOperationMapper.updateStatus(id, status);
     }

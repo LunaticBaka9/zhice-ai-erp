@@ -1,13 +1,21 @@
 package com.lunabaka.entity;
 
-import java.util.Date;
-
 import cn.hutool.core.annotation.Alias;
 import cn.hutool.core.annotation.PropIgnore;
+import com.lunabaka.ProjectApplication;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+import java.util.Date;
+
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class Goods {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Goods extends ProjectApplication implements Serializable {
     @PropIgnore
     private Long id;
 

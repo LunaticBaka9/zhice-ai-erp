@@ -13,6 +13,8 @@ import com.lunabaka.service.PurchaseOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private PurchaseInboundMapper purchaseInboundMapper;
 
     @Override
+    @CacheEvict(cacheNames = "purchaseOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public Long save(PurchaseOrderSaveDTO dto) {
         if (dto == null || dto.getPurchase() == null) {
@@ -106,6 +109,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "purchaseOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void confirm(Long id) {
         Purchase db = purchaseMapper.selectById(id);
@@ -125,6 +129,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "purchaseOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long id) {
         Purchase db = purchaseMapper.selectById(id);
@@ -145,6 +150,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
+    @Cacheable(cacheNames = "purchaseOrder", key = "'detail:' + #id")
     public Purchase detail(Long id) {
         Purchase p = purchaseMapper.selectById(id);
         if (p != null) {
@@ -161,6 +167,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
+    @Cacheable(cacheNames = "purchaseOrder", key = "'eligible'")
     public List<Purchase> listEligibleForInbound() {
         return purchaseMapper.selectEligibleForInbound();
     }

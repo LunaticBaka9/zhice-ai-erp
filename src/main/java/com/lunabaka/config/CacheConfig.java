@@ -2,35 +2,48 @@ package com.lunabaka.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import tools.jackson.databind.ObjectMapper;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableCaching
 public class CacheConfig {
 
     /**
-     * 内存缓存管理器（适用于单机部署）
-     * 使用 ConcurrentMapCacheManager 提供线程安全的缓存实现
+     * 使用Redis进行缓存
+     * @param connectionFactory
+     * @param objectMapper
+     * @return
      */
     @Bean
-    public CacheManager cacheManager() {
-        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-        // 配置所有模块的缓存名称
-        cacheManager.setCacheNames(java.util.Arrays.asList(
-            "goods", "goodsList", "goodsDetail",
-            "category", "categoryTree",
-            "warehouse", "warehouseList",
-            "customer", "customerList",
-            "supplier", "supplierList",
-            "inventory", "inventoryOperation",
-            "user", "userList",
-            "operationLog", "notice"
-        ));
-        // 启用动态创建缓存（如果缓存名称不存在）
-        cacheManager.setAllowNullValues(false); // 不缓存null值
-        return cacheManager;
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
+        // 所有需要缓存的 key 前缀及 TTL
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(5))
+                .serializeKeysWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new JacksonJsonRedisSerializer<>(objectMapper, Object.class)))
+                .disableCachingNullValues();
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(cacheConfigurations)
+                .transactionAware()
+                .build();
     }
 
     /**

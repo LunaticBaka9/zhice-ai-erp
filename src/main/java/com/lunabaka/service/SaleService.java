@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,7 @@ public class SaleService {
     @Resource
     private GoodsMapper goodsMapper;
 
+    @Cacheable(cacheNames = "saleOrder", key = "'list'")
     public List<Sale> selectAll() {
         return saleMapper.selectAll(null);
     }
@@ -48,6 +51,7 @@ public class SaleService {
         return PageInfo.of(list);
     }
 
+    @Cacheable(cacheNames = "saleOrder", key = "'detail:' + #id")
     public Sale selectById(Long id) {
         Sale sale = saleMapper.selectById(id);
         if (sale != null) {
@@ -57,6 +61,7 @@ public class SaleService {
         return sale;
     }
 
+    @CacheEvict(cacheNames = "saleOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public Long insert(Sale sale) {
         if (sale.getCustomerId() == null) {
@@ -116,6 +121,7 @@ public class SaleService {
         item.setProductNameSnapshot(g != null && g.getName() != null ? g.getName() : "");
     }
 
+    @CacheEvict(cacheNames = "saleOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(Sale sale) {
         Sale dbSale = saleMapper.selectById(sale.getId());
@@ -153,6 +159,7 @@ public class SaleService {
         saleMapper.update(sale);
     }
 
+    @CacheEvict(cacheNames = "saleOrder", allEntries = true)
     public void updateStatus(Long id, Integer status) {
         Sale dbSale = saleMapper.selectById(id);
         if (dbSale == null) {
@@ -164,6 +171,7 @@ public class SaleService {
         saleMapper.update(sale);
     }
 
+    @CacheEvict(cacheNames = "saleOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         Sale sale = saleMapper.selectById(id);
@@ -180,6 +188,7 @@ public class SaleService {
         saleMapper.deleteById(id);
     }
 
+    @CacheEvict(cacheNames = "saleOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void confirmOrder(Long id) {
         Sale db = saleMapper.selectById(id);
@@ -201,6 +210,7 @@ public class SaleService {
         saleMapper.update(db);
     }
 
+    @CacheEvict(cacheNames = "saleOrder", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void cancelOrder(Long id) {
         Sale db = saleMapper.selectById(id);
@@ -220,14 +230,17 @@ public class SaleService {
         saleMapper.update(db);
     }
 
+    @Cacheable(cacheNames = "saleOrder", key = "'eligible'")
     public List<Sale> listEligibleForOutbound() {
         return saleMapper.selectEligibleForOutbound();
     }
 
+    @Cacheable(cacheNames = "saleOrder", key = "'count'")
     public long count() {
         return saleMapper.count();
     }
 
+    @Cacheable(cacheNames = "saleOrder", key = "'stats'")
     public Map<String, Object> getStatistics() {
         long total = saleMapper.count();
         long draft = saleMapper.countByStatus(0);

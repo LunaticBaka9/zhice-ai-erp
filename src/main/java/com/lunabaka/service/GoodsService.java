@@ -2,6 +2,8 @@ package com.lunabaka.service;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.lunabaka.entity.Category;
@@ -22,6 +24,7 @@ public class GoodsService {
     @Resource
     private CategoryMapper categoryMapper;
 
+    @Cacheable(cacheNames = "goods", key = "'list'")
     public List<Goods> selectAllGoods() {
         return goodsMapper.selectAllGoods(null);
     }
@@ -32,10 +35,12 @@ public class GoodsService {
         return PageInfo.of(list);
     }
 
+    @Cacheable(cacheNames = "goods", key = "'detail:' + #id")
     public Goods selectById(Long id) {
         return goodsMapper.selectById(id);
     }
 
+    @CacheEvict(cacheNames = "goods", allEntries = true)
     public void insert(Goods goods) {
         goodsMapper.insertGoods(goods);
     }
@@ -48,16 +53,19 @@ public class GoodsService {
         goodsMapper.deleteGoods(id);
     }
 
+    @CacheEvict(cacheNames = "goods", allEntries = true)
     public void deleteById(Goods goods) {
         this.deleteById(goods.getId());
     }
 
+    @CacheEvict(cacheNames = "goods", allEntries = true)
     public void deleteBatch(List<Goods> list) {
         for (Goods goods : list) {
             this.deleteById(goods.getId());
         }
     }
 
+    @CacheEvict(cacheNames = "goods", allEntries = true)
     public void updateGoods(Goods goods) {
         Goods dbGoods = goodsMapper.selectById(goods.getId());
         if (dbGoods == null) {

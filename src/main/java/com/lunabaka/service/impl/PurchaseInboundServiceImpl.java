@@ -10,6 +10,8 @@ import com.lunabaka.service.PurchaseInboundService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,7 @@ public class PurchaseInboundServiceImpl implements PurchaseInboundService {
     private InventoryOperationMapper inventoryOperationMapper;
 
     @Override
+    @CacheEvict(cacheNames = {"purchaseOrder", "purchaseInbound"}, allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public Long createFromPurchaseId(Integer purchaseId, String remark) {
         Purchase p = purchaseMapper.selectById(Long.valueOf(purchaseId));
@@ -74,6 +77,7 @@ public class PurchaseInboundServiceImpl implements PurchaseInboundService {
     }
 
     @Override
+    @CacheEvict(cacheNames = {"purchaseOrder", "purchaseInbound", "inventoryOperation", "goods"}, allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void confirm(Long inboundId) {
         PurchaseInbound inbound = purchaseInboundMapper.selectById(inboundId);
@@ -148,6 +152,7 @@ public class PurchaseInboundServiceImpl implements PurchaseInboundService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "purchaseInbound", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void deleteDraft(Long inboundId) {
         PurchaseInbound inbound = purchaseInboundMapper.selectById(inboundId);
@@ -162,6 +167,7 @@ public class PurchaseInboundServiceImpl implements PurchaseInboundService {
     }
 
     @Override
+    @Cacheable(cacheNames = "purchaseInbound", key = "'detail:' + #id")
     public PurchaseInbound detail(Long id) {
         PurchaseInbound inbound = purchaseInboundMapper.selectById(id);
         if (inbound != null) {

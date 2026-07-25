@@ -82,8 +82,6 @@ public class CacheService {
      */
     public void clearGoodsCache() {
         clearCache("goods");
-        clearCache("goodsList");
-        clearCache("goodsDetail");
     }
 
     /**
@@ -108,6 +106,38 @@ public class CacheService {
     public void clearCustomerCache() {
         clearCache("customer");
         clearCache("customerList");
+    }
+
+    /**
+     * 缓存工具方法 - 清除订单相关缓存
+     */
+    public void clearOrderCache() {
+        clearCache("saleOrder");
+        clearCache("purchaseOrder");
+        clearCache("purchaseInbound");
+        clearCache("saleOutbound");
+    }
+
+    /**
+     * 缓存工具方法 - 清除库存相关缓存
+     */
+    public void clearInventoryCache() {
+        clearCache("inventoryOperation");
+        clearCache("inventoryAlert");
+    }
+
+    /**
+     * 缓存工具方法 - 清除公告相关缓存
+     */
+    public void clearNoticeCache() {
+        clearCache("notice");
+    }
+
+    /**
+     * 缓存工具方法 - 清除报表相关缓存
+     */
+    public void clearReportCache() {
+        clearCache("report");
     }
 
     /**
