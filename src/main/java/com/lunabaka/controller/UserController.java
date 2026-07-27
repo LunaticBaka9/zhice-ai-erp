@@ -27,22 +27,40 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+     
     @Resource
     UserService userService;
     @Resource
     private DeptService deptService;
+
+    /**
+     * 获取用户详细信息
+     * @param uid
+     * @return
+     */
     @GetMapping("/selectById/{uid}")
     public Result getUserById(@PathVariable Long uid){
         User user = userService.getById(uid);
         return Result.success(user);
     }
 
+    /**
+     * 获取用户列表
+     * @return
+     */
     @GetMapping("/selectAllUsers")
     public Result selectAllUsers() {
         List<User> userList = userService.selectAllUsers();
         return Result.success(userList);
     }
-
+    
+    /**
+     * 分页查询用户列表
+     * @param pageNum
+     * @param pageSize
+     * @param user
+     * @return
+     */
     @GetMapping("/list")
     public Result selectPage(@RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize,
@@ -51,6 +69,11 @@ public class UserController {
         return Result.success(page);
     }
 
+    /**
+     * 修改用户
+     * @param user
+     * @return
+     */
     @OperationLogAnnotation(module="用户管理", type="修改", value="修改用户")
     @PostMapping("/updateInfo")
     public Result updateInfo(@RequestBody User user){
@@ -58,6 +81,11 @@ public class UserController {
         return Result.success();
     }
 
+    /**
+     * 修改用户密码
+     * @param user
+     * @return
+     */
     @OperationLogAnnotation(module="用户管理", type="修改", value="修改用户密码")
     @PostMapping("/updatePassword")
     public Result updatePassword(@RequestBody User user){
@@ -65,6 +93,11 @@ public class UserController {
         return Result.success();
     }
 
+    /**
+     * 修改用户状态
+     * @param user
+     * @return
+     */
     @OperationLogAnnotation(module="用户管理", type="修改", value="修改用户状态")
     @PostMapping("/updateStatus")
     public Result updateStatus(@RequestBody User user){
@@ -72,6 +105,11 @@ public class UserController {
         return Result.success();
     }
 
+    /**
+     * 修改用户部门
+     * @param user
+     * @return
+     */
     @PostMapping("/deptTransfer")
     public Result deptTransfer(@RequestBody User user){
         if (user.getDeptId() == null) {
@@ -93,6 +131,11 @@ public class UserController {
         return Result.success();
     }
 
+    /**
+     * 新增用户
+     * @param user
+     * @return
+     */
     @OperationLogAnnotation(module="用户管理", type="新增", value="新增用户")
     @PostMapping("/add")
     public Result add(@RequestBody User user){
@@ -100,6 +143,11 @@ public class UserController {
         return Result.success();
     }
 
+    /**
+     * 删除用户
+     * @param user
+     * @return
+     */
     @OperationLogAnnotation(module="用户管理", type="删除", value="删除用户")
     @PostMapping("/delete")
     public Result deleteById(@RequestBody User user){
@@ -107,12 +155,24 @@ public class UserController {
         return Result.success();
     }
 
+    /**
+     * 批量删除
+     * @param list
+     * @return
+     */
     @PostMapping("/deleteBatch")
     public Result deleteBatch(@RequestBody List<User> list){
         userService.deleteBatch(list);
         return Result.success();
     }
 
+    /**
+     * 导出数据为Excel表
+     * @param username
+     * @param name
+     * @param response
+     * @throws IOException
+     */
     @GetMapping("/exportData")
     public void exportData(
             @RequestParam(required = false) String username,
@@ -145,6 +205,12 @@ public class UserController {
         }
     }
 
+    /**
+     * 导入数据
+     * @param file
+     * @return
+     * @throws IOException
+     */
     @OperationLogAnnotation(module="用户管理", type="新增", value="批量导入用户")
     @PostMapping("/importData")
     public Result importData(MultipartFile file) throws IOException{
@@ -158,6 +224,11 @@ public class UserController {
         return Result.success();
     }
 
+    /**
+     * 批量导入
+     * @param userList
+     * @return
+     */
     @PostMapping("/insertBatch")
     public Result insertBatch(@RequestBody List<User> userList){
         userService.insertBatch(userList);

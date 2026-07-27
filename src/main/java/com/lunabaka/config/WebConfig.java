@@ -32,7 +32,12 @@ public class WebConfig implements WebMvcConfigurer {
                         "/error",
                         "/static/**",
                         "/favicon.ico",
-                        "/index.html"
+                        "/index.html",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/swagger-resources/**",
+                        "/webjars/**"
                 );
     }
 

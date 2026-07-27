@@ -761,6 +761,7 @@ const profileDialog = reactive({
         avatar: "",
         name: "",
         role: "",
+        post: "",
         department: [],
         email: "",
         phone: "",
@@ -798,14 +799,34 @@ const passwordFormRef = ref();
 const phoneFormRef = ref();
 const emailFormRef = ref();
 
+// 在部门树中查找从根到目标id的路径
+const findDeptPath = (options, targetId) => {
+    for (const node of options) {
+        if (node.id === targetId) {
+            return [node.id];
+        }
+        if (node.children && node.children.length > 0) {
+            const childPath = findDeptPath(node.children, targetId);
+            if (childPath) {
+                return [node.id, ...childPath];
+            }
+        }
+    }
+    return null;
+};
+
 // 打开编辑资料对话框
 const handleEdit = () => {
+    const deptPath = data.userInfo.deptId
+        ? findDeptPath(deptNameOptions.value, data.userInfo.deptId)
+        : null;
     // 将当前用户信息填充到表单
     profileDialog.form = {
-        // avatar: data.userInfo.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+        avatar: data.userInfo.avatar || "",
         name: data.userInfo.name || "",
-        role: data.userInfo.role || "",
-        department: data.userInfo.department ? [data.userInfo.department] : [],
+        role: data.userInfo.roleName || "",
+        post: data.userInfo.postName || "",
+        department: deptPath || [],
         email: data.userInfo.email || "",
         phone: data.userInfo.phone || "",
         joinDate: data.userInfo.joinDate || "",
@@ -867,9 +888,9 @@ const submitProfile = async () => {
                 name: profileDialog.form.name,
                 roleName: profileDialog.form.role,
                 postName: profileDialog.form.post,
-                deptName: Array.isArray(profileDialog.form.department)
+                deptId: Array.isArray(profileDialog.form.department) && profileDialog.form.department.length > 0
                     ? profileDialog.form.department[profileDialog.form.department.length - 1]
-                    : profileDialog.form.department,
+                    : null,
                 joinDate: profileDialog.form.joinDate,
                 bio: profileDialog.form.bio,
             };

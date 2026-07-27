@@ -7,17 +7,17 @@ const routeBase = [
     {
         path: "/base/warehouse",
         name: "WarehouseSetting",
-        component: () => import("../components/base/warehouse.vue"),
+        component: () => import("../components/base/Warehouse.vue"),
     },
     {
         path: "/base/supplier",
         name: "SupplierInfo",
-        component: () => import("../components/base/supplier.vue"),
+        component: () => import("../components/base/Supplier.vue"),
     },
     {
         path: "/base/customer",
         name: "Customer",
-        component: () => import("../components/base/customer.vue"),
+        component: () => import("../components/base/Customer.vue"),
     },
 ];
 

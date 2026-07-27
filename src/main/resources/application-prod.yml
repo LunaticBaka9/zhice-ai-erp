@@ -41,3 +41,10 @@ config:
 # 端口
 server:
   port: 8080
+
+# 生产环境关闭OpenAPI
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

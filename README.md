@@ -6,11 +6,12 @@
 
 ### 后端
 
-- Java 17
-- Spring Boot 3.2.0
-- MyBatis + PageHelper
-- MySQL 5.7+
+- Java 21
+- Spring Boot
+- MyBatisPlus
 - JWT 认证
+- MySQL 8
+- Redis 8
 
 ### 前端
 
@@ -26,6 +27,7 @@
 - Maven 3.6+
 - MySQL 5.7+
 - Node.js 18+
+- Redis 8+
 
 ## 快速开始
 

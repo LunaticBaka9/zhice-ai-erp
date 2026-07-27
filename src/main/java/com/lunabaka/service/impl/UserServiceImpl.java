@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lunabaka.entity.Dept;
 import com.lunabaka.entity.User;
 import com.lunabaka.exception.CustomerException;
 import com.lunabaka.mapper.UserMapper;
@@ -13,8 +14,9 @@ import com.lunabaka.service.DeptService;
 import com.lunabaka.service.UserService;
 import com.lunabaka.utils.EmailUtils;
 import com.lunabaka.utils.PasswordUtil;
+
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,9 +24,9 @@ import java.util.List;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Autowired
+    @Resource
     private DeptService deptService;
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -198,11 +200,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .set(User::getName, user.getName())
                 .set(User::getRoleName, user.getRoleName())
                 .set(User::getPostName, user.getPostName())
-                .set(User::getDeptName, user.getDeptName())
                 .set(User::getBio, user.getBio())
                 .set(User::getJoinDate, user.getJoinDate())
                 .set(User::getAvatar, user.getAvatar())
                 .setSql("update_time = NOW()");
+        if (user.getDeptId() != null) {
+            Dept dept = deptService.getById(user.getDeptId());
+            if (dept != null) {
+                wrapper.set(User::getDeptId, user.getDeptId())
+                        .set(User::getDeptName, dept.getName());
+            }
+        } else if (user.getDeptName() != null) {
+            wrapper.set(User::getDeptName, user.getDeptName());
+        }
         baseMapper.update(null, wrapper);
     }
 

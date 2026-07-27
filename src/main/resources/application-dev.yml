@@ -1,4 +1,6 @@
 spring:
+  jackson:
+    date-format: yyyy-MM-dd    # 日期格式---等同于@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
   devtools:
     restart:
       enabled: true
@@ -40,3 +42,9 @@ config:
 server:
   port: 8080
 
+# 开发环境开启OpenAPI
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

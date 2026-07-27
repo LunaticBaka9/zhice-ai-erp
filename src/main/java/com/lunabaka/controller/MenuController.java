@@ -2,7 +2,6 @@ package com.lunabaka.controller;
 
 import com.lunabaka.common.OperationLogAnnotation;
 import com.lunabaka.common.Result;
-import com.lunabaka.entity.Dept;
 import com.lunabaka.entity.Menu;
 import com.lunabaka.service.MenuService;
 import jakarta.annotation.Resource;
