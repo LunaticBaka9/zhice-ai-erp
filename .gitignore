@@ -34,3 +34,6 @@ build/
 
 ### WorkBuddy ###
 .workbuddy/
+
+### Spring Boot ###
+application-dev.yml
