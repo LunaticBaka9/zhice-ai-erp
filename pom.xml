@@ -215,6 +215,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>com.lunabaka.ProjectApplication</mainClass>
+                    <jvmArguments>--enable-native-access=ALL-UNNAMED</jvmArguments>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

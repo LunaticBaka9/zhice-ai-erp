@@ -37,3 +37,9 @@ build/
 
 ### Spring Boot ###
 application-dev.yml
+
+### Node / Frontend ###
+node_modules/
+dist/
+uniapp/node_modules/
+uniapp/dist/

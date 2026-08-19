@@ -25,7 +25,7 @@ public class AiService {
     private AiConversationMapper conversationMapper;
 
     @Resource
-    private AiMessageMapper messageMapper;
+    private AiMessageMapper aiMessageMapper;
 
     public AiService(ChatModel chatModel) {
         this.chatClient = ChatClient.builder(chatModel)
@@ -47,7 +47,7 @@ public class AiService {
     }
 
     public String chat(String conversationId, String message) {
-        List<AiMessage> historyMessages = messageMapper.selectList(
+        List<AiMessage> historyMessages = aiMessageMapper.selectList(
                 Wrappers.<AiMessage>lambdaQuery()
                         .eq(AiMessage::getConversationId, conversationId)
                         .orderByAsc(AiMessage::getCreateTime)
@@ -74,7 +74,7 @@ public class AiService {
         userMsg.setRole("user");
         userMsg.setContent(message);
         userMsg.setCreateTime(new Date());
-        messageMapper.insert(userMsg);
+        aiMessageMapper.insert(userMsg);
 
         String reply = chatClient.prompt()
                 .user(fullPrompt)
@@ -86,7 +86,7 @@ public class AiService {
         aiMsg.setRole("assistant");
         aiMsg.setContent(reply);
         aiMsg.setCreateTime(new Date());
-        messageMapper.insert(aiMsg);
+        aiMessageMapper.insert(aiMsg);
 
         conversationMapper.update(null,
                 Wrappers.<AiConversation>lambdaUpdate()
@@ -106,7 +106,7 @@ public class AiService {
     }
 
     public List<AiMessage> getMessages(String conversationId) {
-        return messageMapper.selectList(
+        return aiMessageMapper.selectList(
                 Wrappers.<AiMessage>lambdaQuery()
                         .eq(AiMessage::getConversationId, conversationId)
                         .orderByAsc(AiMessage::getCreateTime)
@@ -114,7 +114,7 @@ public class AiService {
     }
 
     public void deleteConversation(String conversationId) {
-        messageMapper.delete(
+        aiMessageMapper.delete(
                 Wrappers.<AiMessage>lambdaQuery()
                         .eq(AiMessage::getConversationId, conversationId)
         );

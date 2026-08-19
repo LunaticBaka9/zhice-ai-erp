@@ -1,0 +1,12 @@
+import { get, post } from '@/utils/request'
+export const getNoticeList = (params) => get('/notice/list', params)
+export const getAllNotices = () => get('/notice/selectAllNotice')
+export const getNoticeById = (nid) => get(`/notice/selectByNid/${nid}`)
+export const updateNotice = (data) => post('/notice/update', data)
+export const postNotice = (data) => post('/notice/postNotice', data)
+export const saveDraft = (data) => post('/notice/saveDraft', data)
+export const deleteNotice = (data) => post('/notice/delete', data)
+export const getUnreadCount = () => get('/notice/unreadCount')
+export const updateViews = (data) => post('/notice/updateViews', data)
+export const markAsRead = (data) => post('/notice/markAsRead', data)
+export const exportNotices = () => get('/notice/exportData')

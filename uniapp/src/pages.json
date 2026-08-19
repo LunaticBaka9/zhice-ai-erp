@@ -1,0 +1,232 @@
+{
+	"pages": [
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "登录"
+			}
+		},
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "首页"
+			}
+		},
+		{
+			"path": "pages/message/index",
+			"style": {
+				"navigationBarTitleText": "消息中心"
+			}
+		},
+		{
+			"path": "pages/userinfo/index",
+			"style": {
+				"navigationBarTitleText": "个人中心"
+			}
+		},
+		{
+			"path": "pages/ai/index",
+			"style": {
+				"navigationBarTitleText": "AI 助手"
+			}
+		},
+		{
+			"path": "pages/base/goods",
+			"style": {
+				"navigationBarTitleText": "商品管理"
+			}
+		},
+		{
+			"path": "pages/base/customer",
+			"style": {
+				"navigationBarTitleText": "客户管理"
+			}
+		},
+		{
+			"path": "pages/base/supplier",
+			"style": {
+				"navigationBarTitleText": "供应商管理"
+			}
+		},
+		{
+			"path": "pages/base/warehouse",
+			"style": {
+				"navigationBarTitleText": "仓库管理"
+			}
+		},
+		{
+			"path": "pages/inventory/query",
+			"style": {
+				"navigationBarTitleText": "库存查询"
+			}
+		},
+		{
+			"path": "pages/inventory/operation",
+			"style": {
+				"navigationBarTitleText": "库存操作"
+			}
+		},
+		{
+			"path": "pages/inventory/warning",
+			"style": {
+				"navigationBarTitleText": "库存预警"
+			}
+		},
+		{
+			"path": "pages/purchase/order",
+			"style": {
+				"navigationBarTitleText": "采购订单"
+			}
+		},
+		{
+			"path": "pages/purchase/inbound",
+			"style": {
+				"navigationBarTitleText": "采购入库"
+			}
+		},
+		{
+			"path": "pages/purchase/query",
+			"style": {
+				"navigationBarTitleText": "采购查询"
+			}
+		},
+		{
+			"path": "pages/sale/order",
+			"style": {
+				"navigationBarTitleText": "销售订单"
+			}
+		},
+		{
+			"path": "pages/sale/delivery",
+			"style": {
+				"navigationBarTitleText": "销售出库"
+			}
+		},
+		{
+			"path": "pages/notice/index",
+			"style": {
+				"navigationBarTitleText": "公告列表"
+			}
+		},
+		{
+			"path": "pages/notice/manage",
+			"style": {
+				"navigationBarTitleText": "公告管理"
+			}
+		},
+		{
+			"path": "pages/meeting/index",
+			"style": {
+				"navigationBarTitleText": "会议列表"
+			}
+		},
+		{
+			"path": "pages/meeting/create",
+			"style": {
+				"navigationBarTitleText": "创建会议"
+			}
+		},
+		{
+			"path": "pages/meeting/detail",
+			"style": {
+				"navigationBarTitleText": "会议详情"
+			}
+		},
+		{
+			"path": "pages/dept/manager",
+			"style": {
+				"navigationBarTitleText": "部门管理"
+			}
+		},
+		{
+			"path": "pages/dept/post",
+			"style": {
+				"navigationBarTitleText": "岗位管理"
+			}
+		},
+		{
+			"path": "pages/dept/role",
+			"style": {
+				"navigationBarTitleText": "角色管理"
+			}
+		},
+		{
+			"path": "pages/dept/user",
+			"style": {
+				"navigationBarTitleText": "用户管理"
+			}
+		},
+		{
+			"path": "pages/system/menu",
+			"style": {
+				"navigationBarTitleText": "菜单管理"
+			}
+		},
+		{
+			"path": "pages/system/log",
+			"style": {
+				"navigationBarTitleText": "操作日志"
+			}
+		},
+		{
+			"path": "pages/report/sales",
+			"style": {
+				"navigationBarTitleText": "销售分析"
+			}
+		},
+		{
+			"path": "pages/report/inventory",
+			"style": {
+				"navigationBarTitleText": "库存分析"
+			}
+		},
+		{
+			"path": "pages/report/core",
+			"style": {
+				"navigationBarTitleText": "核心分析"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "进销存管理系统",
+		"navigationBarBackgroundColor": "#FFFFFF",
+		"backgroundColor": "#F5F7FA",
+		"app-plus": {
+			"titleNView": false
+		}
+	},
+	"tabBar": {
+		"color": "#909399",
+		"selectedColor": "#409EFF",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页",
+				"iconPath": "static/tab/home.png",
+				"selectedIconPath": "static/tab/home-active.png"
+			},
+			{
+				"pagePath": "pages/base/goods",
+				"text": "业务",
+				"iconPath": "static/tab/business.png",
+				"selectedIconPath": "static/tab/business-active.png"
+			},
+			{
+				"pagePath": "pages/message/index",
+				"text": "消息",
+				"iconPath": "static/tab/message.png",
+				"selectedIconPath": "static/tab/message-active.png"
+			},
+			{
+				"pagePath": "pages/userinfo/index",
+				"text": "我的",
+				"iconPath": "static/tab/user.png",
+				"selectedIconPath": "static/tab/user-active.png"
+			}
+		]
+	}
+}

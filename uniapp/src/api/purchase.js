@@ -1,0 +1,12 @@
+import { get, post } from '@/utils/request'
+export const getPurchaseOrderList = (params) => get('/purchase/order/list', params)
+export const getPurchaseOrderDetail = (id) => get(`/purchase/order/detail/${id}`)
+export const savePurchaseOrder = (data) => post('/purchase/order/save', data)
+export const confirmPurchaseOrder = (id) => post(`/purchase/order/confirm/${id}`)
+export const cancelPurchaseOrder = (id) => post(`/purchase/order/cancel/${id}`)
+export const getEligibleInbound = (params) => get('/purchase/order/eligibleInbound', params)
+export const getInboundList = (params) => get('/purchase/inbound/list', params)
+export const createInbound = (data) => post('/purchase/inbound/create', data)
+export const getInboundDetail = (id) => get(`/purchase/inbound/detail/${id}`)
+export const confirmInbound = (id) => post(`/purchase/inbound/confirm/${id}`)
+export const deleteDraftInbound = (id) => post(`/purchase/inbound/deleteDraft/${id}`)

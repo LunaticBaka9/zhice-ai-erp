@@ -16,11 +16,10 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
 
---
--- Table structure for table `category`
---
+
 
 -- AI会话表
+DROP TABLE IF EXISTS `ai_conversation`;
 CREATE TABLE IF NOT EXISTS `ai_conversation` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `conversation_id` varchar(64) NOT NULL COMMENT '会话唯一标识',
@@ -34,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `ai_conversation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI会话表';
 
 -- AI消息表
+DROP TABLE IF EXISTS `ai_message`;
 CREATE TABLE IF NOT EXISTS `ai_message` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `conversation_id` varchar(64) NOT NULL COMMENT '会话唯一标识',
@@ -44,6 +44,9 @@ CREATE TABLE IF NOT EXISTS `ai_message` (
   KEY `idx_conversation_id` (`conversation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI消息表';
 
+--
+-- Table structure for table `category`
+--
 
 DROP TABLE IF EXISTS `category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
