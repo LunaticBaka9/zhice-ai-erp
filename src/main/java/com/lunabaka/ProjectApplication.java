@@ -10,7 +10,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.TimeZone;

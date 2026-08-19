@@ -234,6 +234,7 @@ const router = useRouter();
 const breadcrumbMap = {
     "/userInfo": "个人中心",
     "/message": "消息中心",
+    "/ai/partner": "AI助手",
     "/notice/index": "公告详情",
     "/notice/post": "公告发布",
     "/notice/manager": "公告管理",

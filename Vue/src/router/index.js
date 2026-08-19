@@ -10,6 +10,7 @@ import routeSale from "./routeSale.js";
 import routeReport from "./routeReport.js";
 import routeMeeting from "./routeMeeting.js";
 import routeDept from "./routeDept.js";
+import routeAi from "./routeAi.js";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -37,6 +38,7 @@ const router = createRouter({
         ...routeSale,
         ...routeReport,
         ...routeMeeting,
+        ...routeAi,
     ],
 });
 

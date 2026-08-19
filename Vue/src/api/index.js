@@ -19,3 +19,4 @@ export * from "./report";
 export * from "./operationLog";
 export * from "./post";
 export * from "./file";
+export * from "./ai";

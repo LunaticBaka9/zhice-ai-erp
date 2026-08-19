@@ -8,27 +8,30 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.lunabaka.config.RabbitConfig;
 import com.lunabaka.entity.OperationLog;
 import com.lunabaka.entity.User;
-import com.lunabaka.service.OperationLogService;
 import com.lunabaka.service.UserService;
 
 import cn.hutool.json.JSONUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Aspect
 @Component
 public class OperationLogAspect {
     @Resource
-    private OperationLogService operationLogService;
+    private UserService userService;
 
     @Resource
-    private UserService userService;
+    private RabbitTemplate rabbitTemplate;
 
     // 使用Hutool的JSON工具
 
@@ -56,22 +59,22 @@ public class OperationLogAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         
-        OperationLog log = new OperationLog();
-        log.setTime(time);
-        log.setCreateTime(new Date());
+        OperationLog operationLog = new OperationLog();
+        operationLog.setTime(time);
+        operationLog.setCreateTime(new Date());
         
         // 获取注解信息
         OperationLogAnnotation annotation = method.getAnnotation(OperationLogAnnotation.class);
         if (annotation != null) {
-            log.setModule(annotation.module());
-            log.setType(annotation.type());
-            log.setOperation(annotation.value());
+            operationLog.setModule(annotation.module());
+            operationLog.setType(annotation.type());
+            operationLog.setOperation(annotation.value());
         }
         
         // 获取方法名
         String className = joinPoint.getTarget().getClass().getName();
         String methodName = signature.getName();
-        log.setMethod(className + "." + methodName + "()");
+        operationLog.setMethod(className + "." + methodName + "()");
         
         // 获取参数
         try {
@@ -81,9 +84,9 @@ public class OperationLogAspect {
             if (params.length() > 2000) {
                 params = params.substring(0, 2000);
             }
-            log.setParams(params);
+            operationLog.setParams(params);
         } catch (Exception e) {
-            log.setParams("参数序列化失败");
+            operationLog.setParams("参数序列化失败");
         }
         
         // 获取操作用户和IP地址
@@ -100,18 +103,23 @@ public class OperationLogAspect {
                         username = loginUser.getName();
                     }
                 }
-                log.setUsername(username);
+                operationLog.setUsername(username);
 
                 String ip = getClientIp(request);
-                log.setIp(ip);
+                operationLog.setIp(ip);
             } else {
-                log.setUsername("系统");
+                operationLog.setUsername("系统");
             }
         } catch (Exception e) {
-            log.setUsername("系统");
+            operationLog.setUsername("系统");
         }
 
-        operationLogService.insertLog(log);
+        try {
+            rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE, RabbitConfig.ROUTING_KEY_LOG, operationLog);
+            log.info("日志已发送到RabbitMQ队列");
+        } catch (Exception e) {
+            log.error("发送日志到RabbitMQ失败", e);
+        }
     }
 
     private String getClientIp(HttpServletRequest request) {

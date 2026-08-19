@@ -106,7 +106,6 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
-    @Cacheable(cacheNames = "notice", key = "'detail:' + #nid")
     public Notice selectByNid(Long nid) {
         Notice notice = baseMapper.selectById(nid);
         if (notice != null) {

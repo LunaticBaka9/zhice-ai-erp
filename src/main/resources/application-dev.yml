@@ -1,50 +1,60 @@
 spring:
-  jackson:
-    date-format: yyyy-MM-dd    # 日期格式---等同于@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-  devtools:
-    restart:
-      enabled: true
-      additional-paths: src/main/java
-  #文件上传大小限制
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-  #MySQL配置
-  datasource:
-    url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  #Redis
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
-      database: 0
-  session:
-    store-type: redis
-    timeout: 168h
-  mvc:
-    static-path-pattern: /static/**
-  web:
-    resources:
-      static-locations:
-        classpath:/static/,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:SystemData
+    jackson:
+        date-format: yyyy-MM-dd # 日期格式---等同于@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    devtools:
+        restart:
+            enabled: true
+            additional-paths: src/main/java
+    #文件上传大小限制
+    servlet:
+        multipart:
+            max-file-size: 10MB
+            max-request-size: 10MB
+    #MySQL配置
+    datasource:
+        url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
+        username: root
+        password: root
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    #Redis
+    data:
+        redis:
+            host: 127.0.0.1
+            port: 6379
+            database: 0
+    # RabbitMQ
+    rabbitmq:
+        host: 127.0.0.1
+        port: 5672
+        username: root
+        password: root
+        virtual-host: /
+    session:
+        store-type: redis
+        timeout: 168h
+    mvc:
+        static-path-pattern: /static/**
+    web:
+        resources:
+            static-locations: classpath:/static/,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:SystemData
+    # DeepSeek AI
+    ai:
+        deepseek:
+            api-key: sk-fb588397a0744033820e0e5821d5a105
 
 # JWT配置 (至少64字符以满足HS512的512位要求)
 config:
-  jwt:
-    secret: ThisIsAVeryLongAndSecureSecretKeyForJWTTokenSigningThatMustBeAtLeastSixtyFourCharactersLongToMeetHS512Requirements12345678901234567890
-    expire: 86400
+    jwt:
+        secret: ThisIsAVeryLongAndSecureSecretKeyForJWTTokenSigningThatMustBeAtLeastSixtyFourCharactersLongToMeetHS512Requirements12345678901234567890
+        expire: 86400
 
 # 端口
 server:
-  port: 8080
+    port: 8080
 
 # 开发环境开启OpenAPI
 springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
+    api-docs:
+        enabled: true
+    swagger-ui:
+        enabled: true

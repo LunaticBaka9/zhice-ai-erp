@@ -181,6 +181,12 @@ npm<template>
                 <span>消息中心</span>
             </el-menu-item>
 
+            <!-- AI 助手 -->
+            <el-menu-item index="/ai/partner">
+                <el-icon><ChatLineSquare /></el-icon>
+                <span>AI 助手</span>
+            </el-menu-item>
+
             <!-- 个人主页 -->
             <el-menu-item index="/userInfo">
                 <el-icon><Avatar /></el-icon>
@@ -196,6 +202,7 @@ import {useRoute} from "vue-router";
 import {
     Avatar,
     Box, ChatSquare,
+    ChatLineSquare,
     Goods,
     House,
     Message,

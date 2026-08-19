@@ -1,45 +1,34 @@
 package com.lunabaka.service.websocket;
 
+import com.lunabaka.config.RabbitConfig;
 import com.lunabaka.entity.Notice;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.annotation.Resource;
 
+@Slf4j
 @Service
 public class NoticeWebSocketService {
 
-    private final SimpMessagingTemplate messagingTemplate;
-
-    public NoticeWebSocketService(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     public void notifyNewNotice(Notice notice) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("action", "new");
-        payload.put("nid", notice.getNid());
-        payload.put("title", notice.getTitle());
-        payload.put("type", notice.getType());
-        payload.put("summary", notice.getSummary());
-        payload.put("author", notice.getAuthor());
-        payload.put("publishDate", notice.getPublishDate());
-        messagingTemplate.convertAndSend("/topic/notices", (Object) payload);
+        rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE, RabbitConfig.ROUTING_KEY_NOTICE, notice);
+        log.info("通知已发送到RabbitMQ队列: {}", notice.getTitle());
     }
 
     public void notifyUpdateNotice(Notice notice) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("action", "update");
-        payload.put("nid", notice.getNid());
-        payload.put("title", notice.getTitle());
-        messagingTemplate.convertAndSend("/topic/notices", (Object) payload);
+        rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE, RabbitConfig.ROUTING_KEY_NOTICE, notice);
+        log.info("通知更新已发送到RabbitMQ队列: {}", notice.getTitle());
     }
 
     public void notifyDeleteNotice(Long nid) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("action", "delete");
-        payload.put("nid", nid);
-        messagingTemplate.convertAndSend("/topic/notices", (Object) payload);
+        Notice notice = new Notice();
+        notice.setNid(nid);
+        rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE, RabbitConfig.ROUTING_KEY_NOTICE, notice);
+        log.info("通知删除已发送到RabbitMQ队列: nid={}", nid);
     }
 }

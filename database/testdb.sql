@@ -20,6 +20,31 @@
 -- Table structure for table `category`
 --
 
+-- AI会话表
+CREATE TABLE IF NOT EXISTS `ai_conversation` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `conversation_id` varchar(64) NOT NULL COMMENT '会话唯一标识',
+  `title` varchar(100) DEFAULT '新对话' COMMENT '会话标题',
+  `user_id` varchar(64) DEFAULT NULL COMMENT '用户ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_conversation_id` (`conversation_id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI会话表';
+
+-- AI消息表
+CREATE TABLE IF NOT EXISTS `ai_message` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `conversation_id` varchar(64) NOT NULL COMMENT '会话唯一标识',
+  `role` varchar(20) NOT NULL COMMENT '角色: user/assistant/system',
+  `content` text NOT NULL COMMENT '消息内容',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_conversation_id` (`conversation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI消息表';
+
+
 DROP TABLE IF EXISTS `category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
