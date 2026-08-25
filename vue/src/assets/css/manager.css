@@ -1,0 +1,107 @@
+.user-management {
+    padding: 20px;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    color: #303133;
+}
+
+.search-card {
+    margin-bottom: 10px;
+}
+
+.search-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-form .el-form-item {
+    margin-bottom: 0;
+    margin-right: 20px;
+}
+
+.table-card {
+    position: relative;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+:deep(.el-table) {
+    font-size: 14px;
+}
+
+:deep(.el-table th) {
+    background-color: #f5f7fa;
+    color: #606266;
+    font-weight: 500;
+}
+
+:deep(.el-table .el-table__row) {
+    transition: background-color 0.2s;
+}
+
+:deep(.el-table .el-table__row:hover) {
+    background-color: #f5f7fa;
+}
+
+:deep(.el-table__row) {
+    height: 60px;
+}
+
+:deep(.el-table__body td) {
+    padding: 15px 0;
+}
+
+:deep(.el-table td),
+:deep(.el-table th) {
+    padding: 12px 0;
+}
+
+@media (max-width: 768px) {
+    .user-management {
+        padding: 12px;
+    }
+
+    .search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form .el-form-item {
+        margin-bottom: 12px;
+        margin-right: 0;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    :deep(.el-table) {
+        overflow-x: auto;
+    }
+}
