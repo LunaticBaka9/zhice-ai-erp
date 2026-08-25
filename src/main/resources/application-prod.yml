@@ -13,7 +13,7 @@ spring:
     #MySQL配置
     datasource:
         url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
-        username: testdb
+        username: #testdb
         password: #密码
         driver-class-name: com.mysql.cj.jdbc.Driver
     #Redis
