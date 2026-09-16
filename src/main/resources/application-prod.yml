@@ -37,10 +37,7 @@ spring:
     web:
         resources:
             static-locations: classpath:/static/,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:SystemData
-    # DeepSeek AI
-    ai:
-        deepseek:
-            api-key: # 输入自己的api-key
+
 # JWT配置 (至少64字符以满足HS512的512位要求)
 config:
     jwt:

@@ -1,6 +1,7 @@
 package com.lunabaka;
 
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.ai.model.deepseek.autoconfigure.DeepSeekChatAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +15,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.TimeZone;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = DeepSeekChatAutoConfiguration.class)
 @EnableScheduling
 @EnableAspectJAutoProxy
 @MapperScan("com.lunabaka.mapper")

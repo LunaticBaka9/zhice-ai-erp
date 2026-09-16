@@ -75,6 +75,11 @@
                     <span class="chat-title">{{ currentConversationTitle || "AI 助手" }}</span>
                 </div>
                 <div class="header-right">
+                    <el-tooltip content="API Key 设置" placement="bottom">
+                        <el-icon class="header-icon key-icon" :class="{ active: apiKeyConfigured }" @click="openApiKeyDialog">
+                            <Key />
+                        </el-icon>
+                    </el-tooltip>
                     <el-tooltip content="清空当前对话" placement="bottom">
                         <el-icon class="header-icon" @click="handleClearMessages">
                             <Delete />
@@ -202,6 +207,28 @@
                 <el-button type="primary" @click="handleRenameConfirm">确定</el-button>
             </template>
         </el-dialog>
+
+        <!-- API Key 设置弹窗 -->
+        <el-dialog v-model="apiKeyDialogVisible" title="DeepSeek API Key 设置" width="440px">
+            <el-form label-position="top">
+                <el-form-item label="API Key">
+                    <el-input
+                        v-model="apiKeyInput"
+                        type="password"
+                        show-password
+                        placeholder="请输入 DeepSeek API Key（sk- 开头）"
+                        clearable
+                    />
+                </el-form-item>
+            </el-form>
+            <div v-if="apiKeyConfigured" class="apikey-status">当前已配置 API Key</div>
+            <div class="apikey-tip">API Key 将保存在你的账户下，不会写入系统配置文件。可从 DeepSeek 开放平台获取。</div>
+            <template #footer>
+                <el-button v-if="apiKeyConfigured" type="danger" plain @click="handleRemoveApiKey">删除</el-button>
+                <el-button @click="apiKeyDialogVisible = false">取消</el-button>
+                <el-button type="primary" :loading="apiKeySaving" @click="handleSaveApiKey">保存</el-button>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
@@ -215,11 +242,13 @@ import {
     Delete,
     Expand,
     Fold,
+    Key,
     MoreFilled,
     Plus,
     Promotion,
     User,
 } from "@element-plus/icons-vue";
+import { getAiApiKeyStatus, removeAiApiKey, sendChatMessage, setAiApiKey } from "@/api";
 
 // ======================== 状态 ========================
 const sidebarVisible = ref(true);
@@ -235,6 +264,10 @@ const inputRef = ref(null);
 const renameDialogVisible = ref(false);
 const renameTitle = ref("");
 const renameTarget = ref(null);
+const apiKeyDialogVisible = ref(false);
+const apiKeyInput = ref("");
+const apiKeySaving = ref(false);
+const apiKeyConfigured = ref(false);
 
 // ======================== 计算属性 ========================
 const currentConversationTitle = computed(() => {
@@ -413,7 +446,6 @@ async function handleSendMessage() {
 
     try {
         // 调用后端 AI 接口
-        const { sendChatMessage } = await import("@/api");
         const res = await sendChatMessage({
             conversationId: currentConversationId.value,
             message: text,
@@ -427,6 +459,10 @@ async function handleSendMessage() {
                 currentConversationId.value = res.data.conversationId;
             }
         } else {
+            // 未配置或 API Key 无效时，引导用户打开设置
+            if (res?.msg && res.msg.includes("API Key")) {
+                openApiKeyDialog();
+            }
             reply = res?.msg || "抱歉，服务暂时不可用，请稍后重试。";
         }
 
@@ -460,6 +496,66 @@ function handleCopy(text) {
         .writeText(text)
         .then(() => ElMessage.success("已复制到剪贴板"))
         .catch(() => ElMessage.error("复制失败"));
+}
+
+// ======================== API Key 设置 ========================
+async function checkApiKeyStatus() {
+    try {
+        const res = await getAiApiKeyStatus();
+        if (res && (res.code === "200" || res.code === 200)) {
+            apiKeyConfigured.value = !!res.data?.configured;
+        }
+    } catch {
+        apiKeyConfigured.value = false;
+    }
+}
+
+function openApiKeyDialog() {
+    apiKeyInput.value = "";
+    apiKeyDialogVisible.value = true;
+}
+
+async function handleSaveApiKey() {
+    const key = apiKeyInput.value.trim();
+    if (!key) {
+        ElMessage.warning("请输入 DeepSeek API Key");
+        return;
+    }
+    apiKeySaving.value = true;
+    try {
+        const res = await setAiApiKey({ apiKey: key });
+        if (res && (res.code === "200" || res.code === 200)) {
+            apiKeyConfigured.value = true;
+            apiKeyDialogVisible.value = false;
+            ElMessage.success("API Key 保存成功");
+        } else {
+            ElMessage.error(res?.msg || "保存失败");
+        }
+    } catch {
+        ElMessage.error("保存失败，请稍后重试");
+    } finally {
+        apiKeySaving.value = false;
+    }
+}
+
+async function handleRemoveApiKey() {
+    try {
+        await ElMessageBox.confirm("确定删除已配置的 API Key 吗？", "删除确认", {
+            confirmButtonText: "删除",
+            cancelButtonText: "取消",
+            type: "warning",
+        });
+        const res = await removeAiApiKey();
+        if (res && (res.code === "200" || res.code === 200)) {
+            apiKeyConfigured.value = false;
+            apiKeyDialogVisible.value = false;
+            ElMessage.success("API Key 已删除");
+        } else {
+            ElMessage.error(res?.msg || "删除失败");
+        }
+    } catch {
+        // 用户取消或失败
+    }
 }
 
 // 滚动到底部
@@ -553,6 +649,7 @@ function loadConversationsFromStorage() {
 // ======================== 初始化 ========================
 onMounted(() => {
     loadConversationsFromStorage();
+    checkApiKeyStatus();
     nextTick(() => inputRef.value?.focus());
 });
 </script>
@@ -753,6 +850,26 @@ onMounted(() => {
 
 .header-icon:hover {
     color: #f56c6c;
+}
+
+.header-icon.key-icon:hover,
+.header-icon.key-icon.active {
+    color: #409eff;
+}
+
+.apikey-status {
+    font-size: 13px;
+    color: #67c23a;
+    margin-bottom: 8px;
+}
+
+.apikey-tip {
+    font-size: 12px;
+    color: #909399;
+    line-height: 1.6;
+    background-color: #f5f7fa;
+    border-radius: 6px;
+    padding: 8px 12px;
 }
 
 /* ======================== 消息区域 ======================== */

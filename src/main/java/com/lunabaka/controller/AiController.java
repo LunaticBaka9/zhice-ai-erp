@@ -34,13 +34,33 @@ public class AiController {
             conversationId = conversation.getConversationId();
         }
 
-        String reply = aiService.chat(conversationId, message.trim());
+        String reply = aiService.chat(userId, conversationId, message.trim());
 
         Map<String, Object> data = new HashMap<>();
         data.put("content", reply);
         data.put("conversationId", conversationId);
 
         return Result.success(data);
+    }
+
+    @PostMapping("/api-key")
+    public Result saveApiKey(@RequestBody Map<String, String> request,
+                             @RequestAttribute(required = false) String userId) {
+        aiService.saveApiKey(userId, request.get("apiKey"));
+        return Result.success();
+    }
+
+    @GetMapping("/api-key/status")
+    public Result apiKeyStatus(@RequestAttribute(required = false) String userId) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("configured", aiService.hasApiKey(userId));
+        return Result.success(data);
+    }
+
+    @DeleteMapping("/api-key")
+    public Result removeApiKey(@RequestAttribute(required = false) String userId) {
+        aiService.removeApiKey(userId);
+        return Result.success();
     }
 
     @GetMapping("/conversations")

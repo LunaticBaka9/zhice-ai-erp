@@ -46,3 +46,25 @@ export function deleteConversation(data) {
 export function renameConversation(data) {
     return request.post("/ai/conversation/rename", data);
 }
+
+/**
+ * 保存当前用户的 DeepSeek API Key
+ * @param {Object} data - { apiKey }
+ */
+export function setAiApiKey(data) {
+    return request.post("/ai/api-key", data);
+}
+
+/**
+ * 查询当前用户是否已配置 API Key
+ */
+export function getAiApiKeyStatus() {
+    return request.get("/ai/api-key/status");
+}
+
+/**
+ * 删除当前用户已配置的 API Key
+ */
+export function removeAiApiKey() {
+    return request.delete("/ai/api-key");
+}
