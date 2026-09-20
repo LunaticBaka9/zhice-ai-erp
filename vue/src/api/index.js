@@ -14,6 +14,7 @@ export * from "./sale";
 export * from "./saleOutbound";
 export * from "./purchase";
 export * from "./notice";
+export * from "./message";
 export * from "./meeting";
 export * from "./report";
 export * from "./operationLog";

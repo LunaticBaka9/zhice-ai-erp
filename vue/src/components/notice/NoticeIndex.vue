@@ -443,6 +443,10 @@ const viewDetail = async (item) => {
         };
         const res = await updateViews(payload);
         if (res && (res.code === "200")) {
+            // 阅读次数以 Redis 实时计数为准（Redis 优先）
+            if (res.data != null) {
+                selectedAnnouncement.value.views = Number(res.data);
+            }
             // 同步更新本地列表中的阅读数
             const idx = announcements.value.findIndex((a) => a.id === item.id);
             if (idx !== -1) {

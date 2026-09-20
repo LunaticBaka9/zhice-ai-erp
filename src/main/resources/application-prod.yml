@@ -1,10 +1,6 @@
 spring:
     jackson:
         date-format: yyyy-MM-dd # 日期格式---等同于@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    devtools:
-        restart:
-            enabled: true
-            additional-paths: src/main/java
     #文件上传大小限制
     servlet:
         multipart:
@@ -37,6 +33,15 @@ spring:
     web:
         resources:
             static-locations: classpath:/static/,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:SystemData
+
+# DeepSeek AI 说明：
+# -----------------------------------------------------------------------------
+# 1. 原 spring.ai.deepseek.api-key 已移除：api-key 不再写死在配置文件中，避免泄漏与启动强校验。
+# 2. ProjectApplication 中已通过 exclude = DeepSeekChatAutoConfiguration.class 禁用 DeepSeek 自动配置，
+#    因此这里无需配置 spring.ai.deepseek.*，项目启动时也不会对 api-key 做任何检测。
+# 3. 每个用户在系统前端“AI 助手 → API Key 设置”中自行导入自己的深度求索(DeepSeek) API Key，
+#    后端按用户维度存入 Redis（key 前缀 ai:apikey:），运行时由 AiService 动态构建 ChatClient。
+# -----------------------------------------------------------------------------
 
 # JWT配置 (至少64字符以满足HS512的512位要求)
 config:

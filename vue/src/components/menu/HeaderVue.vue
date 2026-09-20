@@ -37,6 +37,7 @@
         <div class="header-right">
             <!-- 消息通知 -->
             <el-popover
+                ref="messagePopoverRef"
                 placement="bottom-end"
                 :width="360"
                 trigger="click"
@@ -117,14 +118,18 @@
                         />
                     </div>
 
+                    <!--
+                        底部「查看更多」入口：
+                        原实现调用 loadMore() 在弹窗内分页加载，现改为跳转到消息中心页面
+                        （/message → components/Message.vue），分页 / 筛选 / 批量操作都在那里完成。
+                        只要当前用户存在消息就展示该入口，保证任何时候都能进入消息中心。
+                    -->
                     <div
                         class="message-footer"
-                        v-if="
-                            messageList.length > 0 && total > messageList.length
-                        "
+                        v-if="messageList.length > 0"
                     >
-                        <el-button type="primary" link @click="loadMore"
-                        >查看更多
+                        <el-button type="primary" link @click="goToMessageCenter"
+                        >查看更多（共 {{ total }} 条）
                         </el-button
                         >
                     </div>
@@ -205,14 +210,27 @@ import {
     Fold,
     FullScreen,
     InfoFilled,
+    Money,
     Setting,
     SuccessFilled,
     SwitchButton,
     Tickets,
+    User,
     Warning,
 } from "@element-plus/icons-vue";
 import {getUserById} from "@/api/user";
 import {getUnreadCount} from "@/api/notice";
+// 消息中心接口（与 components/Message.vue 共用同一套后端接口）：
+//   getMessageList        分页查询当前用户消息（响应里附带未读总数，用于铃铛角标）
+//   getMessageUnreadCount 只查询未读数（页面初次加载时用，避免拉整页数据）
+//   markMessageRead       单条消息标记已读
+//   markAllMessageRead    当前用户全部标记已读
+import {
+    getMessageList,
+    getMessageUnreadCount,
+    markAllMessageRead,
+    markMessageRead,
+} from "@/api/message";
 import {useMenuStore} from "../../store/menu";
 
 const menuStore = useMenuStore();
@@ -304,71 +322,76 @@ const isFullscreen = ref(false);
 // 主题模式
 const theme = ref(localStorage.getItem("theme") || "light");
 
-// 消息相关状态
+// ============================ 消息通知（已对接「消息中心」模块） ============================
+// 说明：
+//   1. 顶部铃铛弹窗的数据全部来自后端消息中心接口（MessageController，/message/**），
+//      与「消息中心」页面 components/Message.vue 共用同一套接口和同一张 message 表；
+//   2. 原实现使用组件内的 mockMessages 假数据 + 定时器伪造实时推送，已全部移除；
+//   3. 弹窗只展示最近 POPUP_PAGE_SIZE 条，完整列表通过底部「查看更多」跳转到消息中心页面。
+
+/** 弹窗一次展示的消息条数（完整列表请点击「查看更多」进入消息中心） */
+const POPUP_PAGE_SIZE = 5;
+
+/** 当前用户未读消息数：用于顶部铃铛角标 */
 const unreadCount = ref(0);
+/** 公告未读数：用于公告图标角标（属于公告模块，与消息中心无关） */
 const noticeUnreadCount = ref(0);
+/** 弹窗内展示的消息列表（后端实体已通过 mapMessage 映射为组件展示结构） */
 const messageList = ref([]);
+/** 弹窗列表加载状态 */
 const loading = ref(false);
-const currentPage = ref(1);
-const pageSize = ref(5);
+/** 当前用户消息总数：仅用于「查看更多（共 N 条）」提示 */
 const total = ref(0);
+/** 消息弹窗（el-popover）实例引用：跳转消息中心前需要主动关闭它 */
+const messagePopoverRef = ref(null);
 
-// 模拟消息数据
-const mockMessages = [
-    {
-        id: 1,
-        title: "系统升级通知",
-        content: "系统将于今晚22:00进行升级维护，预计持续2小时",
-        type: "system",
-        isRead: false,
-        createTime: "2024-01-15 10:30:00",
-    },
-    {
-        id: 2,
-        title: "新任务分配",
-        content: "您有一个新的任务需要处理，请及时查看",
-        type: "task",
-        isRead: false,
-        createTime: "2024-01-15 09:15:00",
-    },
-    {
-        id: 3,
-        title: "审批通过",
-        content: "您提交的请假申请已通过审批",
-        type: "approve",
-        isRead: true,
-        createTime: "2024-01-14 16:20:00",
-    },
-    {
-        id: 4,
-        title: "新评论",
-        content: "您的项目文档有新的评论",
-        type: "comment",
-        isRead: false,
-        createTime: "2024-01-14 14:45:00",
-    },
-    {
-        id: 5,
-        title: "会议提醒",
-        content: "下午3点召开项目进度会议，请准时参加",
-        type: "reminder",
-        isRead: true,
-        createTime: "2024-01-14 10:00:00",
-    },
-    {
-        id: 6,
-        title: "文件更新",
-        content: "项目需求文档已更新，请查看最新版本",
-        type: "file",
-        isRead: false,
-        createTime: "2024-01-13 17:30:00",
-    },
-];
+/**
+ * 将后端消息实体（message 表记录）映射为弹窗展示所需的字段结构。
+ *
+ * 后端字段 → 组件字段：
+ *   msgId       → id        消息唯一标识（标记已读时回传后端）
+ *   title       → title     消息标题
+ *   summary     → content   消息摘要（没有摘要时退化为正文前 60 个字符）
+ *   type        → type      消息类型：system / approval / todo / finance / hr
+ *   isRead      → isRead    是否已读（后端为 tinyint 0/1，这里转为布尔值）
+ *   publishDate → createTime 发布时间（字符串 "yyyy-MM-dd HH:mm:ss"）
+ *
+ * @param {Object} item 后端返回的单条消息
+ * @returns {Object} 组件内部使用的消息对象
+ */
+const mapMessage = (item) => ({
+    id: item.msgId,
+    title: item.title || "无标题消息",
+    // 摘要为空时用正文兜底，并截断，避免弹窗里换行撑高
+    content: item.summary || (item.content ? String(item.content).slice(0, 60) : ""),
+    type: item.type || "system",
+    // 后端用 tinyint(0/1) 表示已读，这里统一转成布尔值方便模板判断
+    isRead: item.isRead === 1 || item.isRead === true,
+    createTime: item.publishDate,
+});
 
-// 获取消息图标
+/**
+ * 根据消息类型返回弹窗中展示的图标组件。
+ *
+ * 类型取值与后端 message.type 保持一致（与 components/Message.vue 中的映射一致）：
+ *   system   系统通知 → 信息图标
+ *   approval 审批消息 → 勾选图标
+ *   todo     待办提醒 → 工单图标
+ *   finance  财务通知 → 金额图标
+ *   hr       人事通知 → 人员图标
+ *
+ * 同时保留旧类型（task / approve / comment / reminder / file / warning）的兼容映射，
+ * 避免历史数据或其它调用方传入旧类型时图标丢失。
+ */
 const getMessageIcon = (type) => {
     const iconMap = {
+        // —— 与消息中心一致的 5 种类型 ——
         system: InfoFilled,
+        approval: SuccessFilled,
+        todo: Tickets,
+        finance: Money,
+        hr: User,
+        // —— 兼容旧类型 ——
         task: Tickets,
         approve: SuccessFilled,
         comment: ChatDotRound,
@@ -379,10 +402,19 @@ const getMessageIcon = (type) => {
     return iconMap[type] || InfoFilled;
 };
 
-// 获取消息图标颜色
+/**
+ * 根据消息类型返回图标颜色，配色与 components/Message.vue 保持一致，
+ * 使顶栏弹窗与消息中心页面的视觉语言统一。
+ */
 const getMessageIconColor = (type) => {
     const colorMap = {
-        system: "#409EFF",
+        // —— 与消息中心一致的 5 种类型 ——
+        system: "#409EFF",   // 系统通知：蓝色
+        approval: "#E6A23C", // 审批消息：橙色
+        todo: "#F56C6C",     // 待办提醒：红色
+        finance: "#67C23A",  // 财务通知：绿色
+        hr: "#909399",       // 人事通知：灰色
+        // —— 兼容旧类型 ——
         task: "#E6A23C",
         approve: "#67C23A",
         comment: "#909399",
@@ -392,109 +424,153 @@ const getMessageIconColor = (type) => {
     return colorMap[type] || "#909399";
 };
 
-// 格式化时间
+/**
+ * 将后端返回的发布时间格式化为「相对时间」。
+ *
+ * 后端 publishDate 为 "yyyy-MM-dd HH:mm:ss" 字符串，这里统一做兼容处理：
+ *   - 把 "-" 替换成 "/"，避免部分浏览器（如 Safari）解析该格式失败；
+ *   - 解析失败时直接返回原字符串，保证界面不会出现 Invalid Date；
+ *   - 未来时间（例如定时发布的消息）直接展示完整时间，避免出现「-1分钟前」。
+ *
+ * @param {string|Date} time 发布时间
+ * @returns {string} 例如「刚刚 / 5分钟前 / 3小时前 / 2天前 / 2026-09-20 07:53」
+ */
 const formatTime = (time) => {
-    const date = new Date(time);
-    const now = new Date();
-    const diff = now - date;
+    if (!time) return "";
+    const date =
+        time instanceof Date ? time : new Date(String(time).replace(/-/g, "/"));
+    if (Number.isNaN(date.getTime())) return String(time);
 
-    if (diff < 3600000) {
-        return `${Math.floor(diff / 60000)}分钟前`;
-    } else if (diff < 86400000) {
-        return `${Math.floor(diff / 3600000)}小时前`;
-    } else if (diff < 604800000) {
-        return `${Math.floor(diff / 86400000)}天前`;
-    }
-    return time.slice(0, 16);
+    const pad = (n) => String(n).padStart(2, "0");
+    const absolute = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+        date.getDate(),
+    )} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+    const diff = Date.now() - date.getTime();
+    if (diff < 0) return absolute; // 未来时间：直接展示绝对时间
+    if (diff < 60 * 1000) return "刚刚";
+    if (diff < 3600 * 1000) return `${Math.floor(diff / 60000)}分钟前`;
+    if (diff < 86400 * 1000) return `${Math.floor(diff / 3600000)}小时前`;
+    if (diff < 7 * 86400 * 1000) return `${Math.floor(diff / 86400000)}天前`;
+    return absolute;
 };
 
-// 获取消息列表
+/**
+ * 拉取顶部弹窗的消息列表（真实接口版本）。
+ *
+ * 调用消息中心分页接口 GET /message/list：
+ *   - 只取第 1 页的 POPUP_PAGE_SIZE 条，按发布时间倒序（后端已按 publish_date 排序）；
+ *   - 响应体同时携带 unreadCount（未读总数），这里直接同步到铃铛角标，
+ *     因此打开弹窗后角标会自动刷新，无需额外发起一次未读数请求。
+ *
+ * 说明：原实现基于组件内 mockMessages 做前端分页，并用 setTimeout 伪造网络延迟，
+ *      现已全部替换为真实后端数据。
+ */
 const fetchMessages = async () => {
     loading.value = true;
     try {
-        // 模拟API请求
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const start = (currentPage.value - 1) * pageSize.value;
-        const end = start + pageSize.value;
-        const list = mockMessages.slice(start, end);
-        const totalMessages = mockMessages.length;
-
-        messageList.value = list;
-        total.value = totalMessages;
-
-        // 计算未读数量（实际项目中应从接口获取）
-        updateUnreadCount();
-    } catch (error) {
-        ElMessage.error("获取消息失败");
+        const res = await getMessageList({
+            pageNum: 1,
+            pageSize: POPUP_PAGE_SIZE,
+        });
+        if (res && res.code === "200" && res.data) {
+            const records = Array.isArray(res.data.records)
+                ? res.data.records
+                : [];
+            // 后端实体 → 组件展示结构
+            messageList.value = records.map(mapMessage);
+            total.value = Number(res.data.total || 0);
+            // 接口顺带返回未读总数，直接同步到角标，保持与消息中心页面一致
+            unreadCount.value = Number(res.data.unreadCount || 0);
+        } else {
+            messageList.value = [];
+            total.value = 0;
+            ElMessage.error(res?.msg || "获取消息失败");
+        }
+    } catch (e) {
+        // request 响应拦截器已统一弹出错误提示，这里只做数据兜底
+        messageList.value = [];
+        total.value = 0;
     } finally {
         loading.value = false;
     }
 };
 
-// 更新未读数量
-const updateUnreadCount = () => {
-    const unread = mockMessages.filter((item) => !item.isRead).length;
-    unreadCount.value = unread;
-};
-
-// 处理消息点击
-const handleMessageClick = (item) => {
-    if (!item.isRead) {
-        item.isRead = true;
-        updateUnreadCount();
-        // 可以在这里调用标记已读的接口
-        ElNotification({
-            title: item.title,
-            message: item.content,
-            type: "info",
-            duration: 3000,
-        });
-    } else {
-        ElNotification({
-            title: item.title,
-            message: item.content,
-            type: "info",
-            duration: 3000,
-        });
+/**
+ * 单独拉取未读消息数，用于页面初次加载时渲染铃铛角标。
+ * （此时弹窗尚未打开，没有必要加载完整消息列表。）
+ */
+const fetchUnreadCount = async () => {
+    try {
+        const res = await getMessageUnreadCount();
+        if (res && res.code === "200") {
+            unreadCount.value = Number(res.data || 0);
+        }
+    } catch (e) {
+        // 未读数获取失败不阻断页面其它逻辑，角标保持原值即可
     }
 };
 
-// 全部标记为已读
-const markAllAsRead = () => {
-    mockMessages.forEach((item) => {
-        item.isRead = true;
+/**
+ * 点击弹窗中的某条消息：
+ *   1. 未读时先调用 POST /message/markRead 在服务端标记已读；
+ *      —— 只有服务端成功后才更新本地状态，避免前后端数据不一致；
+ *   2. 本地同步 isRead 并递减铃铛角标（无需再发一次未读数请求）；
+ *   3. 用 ElNotification 弹出消息内容（保持原有交互习惯）。
+ *
+ * 说明：这里只处理「已读 + 提示」，不做页面跳转；
+ *      查看完整消息列表请点击弹窗底部的「查看更多」进入消息中心页面。
+ */
+const handleMessageClick = async (item) => {
+    if (!item.isRead) {
+        try {
+            const res = await markMessageRead(item.id);
+            if (res && res.code !== "200") {
+                ElMessage.error(res.msg || "标记已读失败");
+                return;
+            }
+            // 服务端标记已读成功后再同步本地状态
+            item.isRead = true;
+            if (unreadCount.value > 0) unreadCount.value -= 1;
+        } catch (e) {
+            // request 响应拦截器已统一提示，这里直接返回，保证本地状态与后端一致
+            return;
+        }
+    }
+    ElNotification({
+        title: item.title,
+        message: item.content,
+        type: "info",
+        duration: 3000,
     });
-    messageList.value.forEach((item) => {
-        item.isRead = true;
-    });
-    updateUnreadCount();
-    ElMessage.success("已全部标记为已读");
 };
 
-// 模拟实时消息推送
-const simulateRealTimeMessage = () => {
-    setTimeout(() => {
-        const newMessage = {
-            id: Date.now(),
-            title: "实时消息",
-            content: "您有一条新的实时消息",
-            type: "system",
-            isRead: false,
-            createTime: new Date().toLocaleString(),
-        };
-        mockMessages.unshift(newMessage);
-        updateUnreadCount();
-
-        // 如果消息弹窗未打开，显示通知
-        ElNotification({
-            title: "新消息",
-            message: newMessage.title,
-            type: "info",
-            duration: 5000,
+/**
+ * 全部标记为已读：调用 POST /message/markAllRead。
+ * 成功后把弹窗内已加载的消息同步为已读，并将铃铛角标清零。
+ * （接口本身会更新当前用户全部未读消息，无需前端逐条处理。）
+ */
+const markAllAsRead = async () => {
+    try {
+        const res = await markAllMessageRead();
+        if (res && res.code !== "200") {
+            ElMessage.error(res.msg || "操作失败");
+            return;
+        }
+        messageList.value.forEach((item) => {
+            item.isRead = true;
         });
-    }, 10000);
+        unreadCount.value = 0;
+        ElMessage.success("已全部标记为已读");
+    } catch (e) {
+        // request 响应拦截器已统一提示
+    }
 };
+
+// 已移除：原 simulateRealTimeMessage() 通过 setTimeout 每 10 秒向页面注入一条假消息，
+// 属于纯前端模拟，会造成「角标数字」与后端真实数据不一致。
+// 若后续需要真正的实时提醒，可参照公告模块的 WebSocket 方案（utils/useWebSocket.js），
+// 订阅后端推送后调用 fetchMessages() / fetchUnreadCount() 刷新列表与角标即可。
 
 // 获取公告未读数量
 const fetchNoticeUnreadCount = async () => {
@@ -516,10 +592,10 @@ const goToNotices = () => {
 };
 
 onMounted(() => {
-    updateUnreadCount();
+    // 页面加载即拉取真实未读数，保证一进入系统铃铛角标就是准确的；
+    // 弹窗消息列表则等到用户点击铃铛时再按需加载（见 handleMessagePopoverShow）。
+    fetchUnreadCount();
     fetchNoticeUnreadCount();
-    // 模拟实时消息
-    simulateRealTimeMessage();
     // 加载用户详细信息，确保头像和名称可用
     if (data.user && data.user.uid) {
         getUserById(data.user.uid).then((res) => {
@@ -551,16 +627,30 @@ onMounted(() => {
     }
 });
 
-// 加载更多
-const loadMore = () => {
-    currentPage.value++;
-    fetchMessages();
+/**
+ * 「查看更多」：跳转到消息中心页面
+ * （路由 /message → vue/src/components/Message.vue）。
+ *
+ * 原实现是弹窗内分页「加载更多」(loadMore)；
+ * 现在弹窗只作为「最近消息预览」，分页 / 筛选 / 批量操作等完整能力
+ * 统一在消息中心页面完成，避免两处重复实现同一套逻辑。
+ */
+const goToMessageCenter = () => {
+    // 先主动关闭弹窗再跳转，避免弹窗残留悬浮在消息中心页面之上
+    messagePopoverRef.value?.hide();
+    router.push("/message");
 };
 
-// 消息弹窗显示时的处理
+/**
+ * 弹窗展开时的处理：
+ *   - 首次打开（列表为空）才请求消息列表，做一层缓存，避免每次展开都打接口；
+ *   - 已有数据时只刷新未读数，保证角标与后端一致。
+ */
 const handleMessagePopoverShow = () => {
-    if (currentPage.value === 1 && messageList.value.length === 0) {
+    if (messageList.value.length === 0) {
         fetchMessages();
+    } else {
+        fetchUnreadCount();
     }
 };
 

@@ -555,3 +555,17 @@
         }
     }
 }
+
+/* 批量操作按钮上的已选条数徽标 */
+.header-right {
+    .batch-count {
+        font-size: 12px;
+        color: #409eff;
+        margin: 0 2px;
+    }
+}
+
+/* 已处理状态徽标（复用 .action-badge 结构，仅换色） */
+.message-list .message-item .message-title .action-badge.processed {
+    background: #67c23a;
+}

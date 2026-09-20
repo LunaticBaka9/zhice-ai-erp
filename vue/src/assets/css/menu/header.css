@@ -254,7 +254,12 @@
     max-height: 480px;
 }
 
-.message-header {
+/* 注意：以下规则统一限定在 .message-panel（顶部消息铃铛弹窗根节点）内。
+   本文件通过 <style src> 以非 scoped 方式引入，若直接使用 .message-list /
+   .message-item 等通用类名，会污染消息中心页面（Message.vue）的同名类，
+   例如 .message-list 的 max-height:360px 会把消息中心列表高度写死，
+   导致分页下方出现大片空白。 */
+.message-panel .message-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -264,19 +269,19 @@
     border-radius: 12px 12px 0 0;
 }
 
-.message-header .title {
+.message-panel .message-header .title {
     font-size: 16px;
     font-weight: 600;
     color: #1f2f3d;
 }
 
-.message-list {
+.message-panel .message-list {
     flex: 1;
     overflow-y: auto;
     max-height: 360px;
 }
 
-.message-item {
+.message-panel .message-item {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -287,19 +292,19 @@
     position: relative;
 }
 
-.message-item:hover {
+.message-panel .message-item:hover {
     background-color: #f5f7fa;
 }
 
-.message-item.unread {
+.message-panel .message-item.unread {
     background-color: #ecf5ff;
 }
 
-.message-item.unread:hover {
+.message-panel .message-item.unread:hover {
     background-color: #e1eaf5;
 }
 
-.message-icon-wrapper {
+.message-panel .message-icon-wrapper {
     flex-shrink: 0;
     width: 36px;
     height: 36px;
@@ -310,12 +315,12 @@
     background-color: #f5f7fa;
 }
 
-.message-content {
+.message-panel .message-content {
     flex: 1;
     min-width: 0;
 }
 
-.message-title {
+.message-panel .message-title {
     font-size: 14px;
     font-weight: 600;
     color: #303133;
@@ -323,7 +328,7 @@
     line-height: 1.4;
 }
 
-.message-desc {
+.message-panel .message-desc {
     font-size: 13px;
     color: #606266;
     line-height: 1.4;
@@ -336,12 +341,12 @@
     -webkit-box-orient: vertical;
 }
 
-.message-time {
+.message-panel .message-time {
     font-size: 11px;
     color: #909399;
 }
 
-.unread-dot {
+.message-panel .unread-dot {
     position: absolute;
     right: 20px;
     top: 50%;
@@ -352,7 +357,7 @@
     border-radius: 50%;
 }
 
-.message-footer {
+.message-panel .message-footer {
     padding: 12px 20px;
     text-align: center;
     border-top: 1px solid #f0f0f0;
@@ -361,20 +366,20 @@
 }
 
 /* 滚动条样式 */
-.message-list::-webkit-scrollbar {
+.message-panel .message-list::-webkit-scrollbar {
     width: 6px;
 }
 
-.message-list::-webkit-scrollbar-track {
+.message-panel .message-list::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 3px;
 }
 
-.message-list::-webkit-scrollbar-thumb {
+.message-panel .message-list::-webkit-scrollbar-thumb {
     background: #c1c1c1;
     border-radius: 3px;
 }
 
-.message-list::-webkit-scrollbar-thumb:hover {
+.message-panel .message-list::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }

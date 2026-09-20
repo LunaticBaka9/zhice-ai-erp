@@ -13,12 +13,12 @@
                         <span class="stat-value danger">{{ unreadCount }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">待审批</span>
-                        <span class="stat-value warning">{{ pendingApprovalCount }}</span>
+                        <span class="stat-label">待处理</span>
+                        <span class="stat-value warning">{{ pendingCount }}</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">总消息</span>
-                        <span class="stat-value">{{ messageList.length }}</span>
+                        <span class="stat-value">{{ total }}</span>
                     </div>
                 </div>
             </div>
@@ -26,6 +26,7 @@
                 <el-dropdown trigger="click" @command="handleBatchCommand" :disabled="selectedMessages.length === 0">
                     <el-button type="default">
                         批量操作
+                        <span v-if="selectedMessages.length" class="batch-count">({{ selectedMessages.length }})</span>
                         <el-icon>
                             <ArrowDown/>
                         </el-icon>
@@ -43,7 +44,7 @@
                     </el-icon>
                     全部已读
                 </el-button>
-                <el-button type="danger" plain @click="clearAllMessages" :disabled="messageList.length === 0">
+                <el-button type="danger" plain @click="clearAllMessages" :disabled="total === 0">
                     <el-icon>
                         <Delete/>
                     </el-icon>
@@ -61,6 +62,8 @@
                 clearable
                 size="default"
                 class="search-input"
+                @keyup.enter="handleSearch"
+                @clear="handleSearch"
             />
             <el-select v-model="filterType" placeholder="消息类型" clearable size="default" class="filter-select">
                 <el-option label="系统通知" value="system"/>
@@ -80,12 +83,17 @@
                     <span class="priority-low">🟢 低优先级</span>
                 </el-option>
             </el-select>
+            <el-select v-model="filterReadStatus" placeholder="阅读状态" clearable size="default" class="filter-select">
+                <el-option label="未读" :value="0"/>
+                <el-option label="已读" :value="1"/>
+            </el-select>
             <el-date-picker
                 v-model="dateRange"
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                value-format="YYYY-MM-DD"
                 size="default"
                 class="date-picker"
             />
@@ -98,13 +106,21 @@
             <!-- 左侧消息列表 -->
             <div class="message-list-panel" :class="{ collapsed: !showDetailPanel && isMobile }">
                 <div class="list-header">
-                    <span class="list-title">消息列表</span>
-                    <span class="list-count">共 {{ filteredMessages.length }} 条</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <el-checkbox
+                            :model-value="isAllCurrentSelected"
+                            :indeterminate="isCurrentIndeterminate"
+                            :disabled="messageList.length === 0"
+                            @change="toggleSelectAll"
+                        />
+                        <span class="list-title">消息列表</span>
+                    </div>
+                    <span class="list-count">共 {{ total }} 条</span>
                 </div>
                 <div class="message-list" v-loading="loading">
-                    <template v-if="filteredMessages.length > 0">
+                    <template v-if="messageList.length > 0">
                         <div
-                            v-for="message in paginatedMessages"
+                            v-for="message in messageList"
                             :key="message.id"
                             class="message-item"
                             :class="{
@@ -129,7 +145,7 @@
                             </div>
                             <div class="message-info">
                                 <div class="message-title">
-                                    <span class="title-text">{{ message.title }}</span>
+                                    <span class="title-text">{{ message.title || "无标题消息" }}</span>
                                     <el-tag
                                         :type="getTagType(message.type)"
                                         size="small"
@@ -139,7 +155,10 @@
                                         {{ getTypeLabel(message.type) }}
                                     </el-tag>
                                     <span v-if="!message.isRead" class="unread-dot"></span>
-                                    <span v-if="message.needAction" class="action-badge">待处理</span>
+                                    <span v-if="message.needAction && !message.isProcessed" class="action-badge">待处理</span>
+                                    <span v-else-if="message.needAction && message.isProcessed" class="action-badge processed">
+                                        已处理
+                                    </span>
                                 </div>
                                 <div class="message-summary">{{ message.summary }}</div>
                                 <div class="message-meta">
@@ -196,13 +215,13 @@
                 </div>
 
                 <!-- 分页组件 -->
-                <div class="pagination-wrapper" v-if="filteredMessages.length > 0">
+                <div class="pagination-wrapper" v-if="total > 0">
                     <el-pagination
                         v-model:current-page="currentPage"
                         v-model:page-size="pageSize"
                         :page-sizes="[10, 20, 50]"
-                        :total="filteredMessages.length"
-                        layout="total, prev, pager, next"
+                        :total="total"
+                        layout="total, sizes, prev, pager, next"
                         small
                         @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
@@ -249,7 +268,12 @@
                             <el-tag v-if="selectedMessage.priority === 'high'" type="danger" size="small" effect="dark">
                                 高优先级
                             </el-tag>
-                            <el-tag v-if="selectedMessage.needAction" type="warning" size="small"> 需处理</el-tag>
+                            <el-tag v-if="selectedMessage.priority === 'medium'" type="warning" size="small" effect="plain">
+                                中优先级
+                            </el-tag>
+                            <el-tag v-if="selectedMessage.needAction" type="warning" size="small">
+                                {{ selectedMessage.isProcessed ? "已处理" : "需处理" }}
+                            </el-tag>
                             <el-tag v-if="!selectedMessage.isRead" type="info" size="small" effect="plain">
                                 未读
                             </el-tag>
@@ -262,7 +286,7 @@
                         </div>
                     </div>
 
-                    <h3 class="detail-title-text">{{ selectedMessage.title }}</h3>
+                    <h3 class="detail-title-text">{{ selectedMessage.title || "无标题消息" }}</h3>
 
                     <div class="detail-info">
                         <div class="info-row">
@@ -292,7 +316,7 @@
                     <div class="detail-body">
                         <div class="body-label">消息内容</div>
                         <div class="body-text">
-                            {{ selectedMessage.content || selectedMessage.summary }}
+                            {{ selectedMessage.content || selectedMessage.summary || "暂无内容" }}
                         </div>
                     </div>
 
@@ -373,179 +397,110 @@ import {
     User,
 } from "@element-plus/icons-vue";
 import {ElMessage, ElMessageBox} from "element-plus";
+import {
+    clearAllMessage,
+    getMessageList,
+    markAllMessageRead,
+    markBatchMessageRead,
+    markMessageRead,
+    removeBatchMessage,
+    removeMessage,
+} from "@/api/message";
 
-// 模拟ERP系统消息数据
-const generateMockMessages = () => {
-    const now = new Date();
-    const types = ["system", "approval", "todo", "finance", "hr"];
-    const messages = [];
-
-    const templates = {
-        system: {
-            title: ["系统维护通知", "安全策略更新", "新模块上线通知", "数据库升级预告"],
-            summary: [
-                "ERP系统将于本周末进行升级维护，届时将暂停服务2小时",
-                "系统安全策略已更新，请及时修改密码",
-                "采购管理模块已上线，欢迎使用",
-                "数据库将于明日凌晨进行优化升级",
-            ],
-            sender: "系统运维部",
-        },
-        approval: {
-            title: ["采购申请待审批", "费用报销申请", "合同审批提醒", "请假申请待审批"],
-            summary: [
-                "张三提交的采购申请单号PO-2024001，金额¥12,800",
-                "李四提交的费用报销单，金额¥3,200",
-                "销售合同SALE-2024005待您审批",
-                "王五提交的年假申请，共3天",
-            ],
-            sender: "审批中心",
-        },
-        todo: {
-            title: ["待处理工单提醒", "库存盘点任务", "月度报表待提交", "供应商对账提醒"],
-            summary: [
-                "您有3个工单待处理，请及时响应",
-                "仓库A区库存盘点任务已分配给您",
-                "10月份销售报表请于今日下班前提交",
-                "本月供应商对账单已生成，请及时核对",
-            ],
-            sender: "任务中心",
-        },
-        finance: {
-            title: ["付款审批提醒", "发票到期通知", "预算超支预警", "工资条已生成"],
-            summary: [
-                "供应商付款申请单号PAY-2024032待审批",
-                "发票号INV-20241023即将到期，请及时处理",
-                "部门预算使用率已达85%，请注意控制",
-                "本月工资条已生成，请登录查看",
-            ],
-            sender: "财务部",
-        },
-        hr: {
-            title: ["入职手续提醒", "绩效考核通知", "培训报名确认", "生日祝福"],
-            summary: [
-                "新员工王五今日入职，请完成相关手续",
-                "季度绩效考核已开启，请于本周完成自评",
-                '您已成功报名"领导力培训"课程',
-                "祝您生日快乐，公司为您准备了惊喜礼品",
-            ],
-            sender: "人力资源部",
-        },
-    };
-
-    const priorities = ["high", "medium", "low"];
-
-    for (let i = 1; i <= 28; i++) {
-        const type = types[Math.floor(Math.random() * types.length)];
-        const template = templates[type];
-        const titleIndex = Math.floor(Math.random() * template.title.length);
-        const isRead = Math.random() > 0.55;
-        const priority = priorities[Math.floor(Math.random() * priorities.length)];
-        const needAction = type === "approval" || type === "todo" ? Math.random() > 0.6 : false;
-        const time = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000);
-
-        let deadline = null;
-        if (needAction && Math.random() > 0.5) {
-            deadline = new Date(now.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000);
-        }
-
-        messages.push({
-            id: i,
-            type: type,
-            title: template.title[titleIndex],
-            summary: template.summary[titleIndex],
-            content: `${template.summary[titleIndex]}。\n\n详细信息：请登录ERP系统查看完整内容，如有疑问请联系相关部门。\n\n这是一条来自ERP系统的企业级消息通知，请及时处理相关事务。`,
-            time: time,
-            isRead: isRead,
-            priority: priority,
-            needAction: needAction,
-            isProcessed: needAction ? Math.random() > 0.7 : false,
-            sender: template.sender,
-            deadline: deadline,
-            relatedId: type === "approval" ? `APP-${2024000 + i}` : type === "finance" ? `FIN-${2024000 + i}` : null,
-            attachments:
-                Math.random() > 0.85
-                    ? [
-                        {name: `附件_${i}.pdf`, size: "128 KB"},
-                        {name: `相关文档_${i}.docx`, size: "256 KB"},
-                    ]
-                    : [],
-        });
-    }
-    return messages.sort((a, b) => b.time - a.time);
-};
-
-// 状态
+// ------------------------------------------------------------------ 状态
+const loading = ref(false);
 const messageList = ref([]);
+const total = ref(0);
+const unreadCount = ref(0);
+const pendingCount = ref(0);
+
 const searchKeyword = ref("");
 const filterType = ref("");
 const filterPriority = ref("");
-const dateRange = ref(null);
-const loading = ref(false);
+const filterReadStatus = ref("");
+const dateRange = ref([]);
+
+const currentPage = ref(1);
+const pageSize = ref(10);
+
 const selectedMessage = ref(null);
 const selectedMessages = ref([]);
-const currentPage = ref(1);
-const pageSize = ref(15);
 const showDetailPanel = ref(true);
 const isMobile = ref(false);
 
-// 检测屏幕宽度
-const checkMobile = () => {
-    isMobile.value = window.innerWidth < 768;
-    if (isMobile.value) {
-        showDetailPanel.value = false;
-    } else {
-        showDetailPanel.value = true;
+// ------------------------------------------------------------------ 工具方法
+const parseDate = (value) => {
+    if (!value && value !== 0) return null;
+    if (value instanceof Date) return value;
+    const date = new Date(typeof value === "string" ? value.replace(/-/g, "/") : value);
+    return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseAttachments = (raw) => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try {
+        const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        return [];
     }
 };
 
-// 计算属性
-const unreadCount = computed(() => messageList.value.filter((msg) => !msg.isRead).length);
-const pendingApprovalCount = computed(
-    () => messageList.value.filter((msg) => msg.type === "approval" && !msg.isProcessed).length,
-);
+const toBooleanFlag = (value) => value === 1 || value === true || value === "1";
 
-// 综合筛选
-const filteredMessages = computed(() => {
-    let result = [...messageList.value];
-
-    if (searchKeyword.value) {
-        const keyword = searchKeyword.value.toLowerCase();
-        result = result.filter(
-            (msg) =>
-                msg.title.toLowerCase().includes(keyword) ||
-                msg.summary.toLowerCase().includes(keyword) ||
-                (msg.content && msg.content.toLowerCase().includes(keyword)),
-        );
-    }
-
-    if (filterType.value) {
-        result = result.filter((msg) => msg.type === filterType.value);
-    }
-
-    if (filterPriority.value) {
-        result = result.filter((msg) => msg.priority === filterPriority.value);
-    }
-
-    if (dateRange.value && dateRange.value.length === 2) {
-        const [startDate, endDate] = dateRange.value;
-        result = result.filter((msg) => {
-            const msgDate = new Date(msg.time);
-            return msgDate >= startDate && msgDate <= endDate;
-        });
-    }
-
-    return result;
+// 后端实体 -> 前端展示模型
+const mapMessage = (item) => ({
+    id: item.msgId,
+    type: item.type || "system",
+    title: item.title,
+    summary: item.summary || "",
+    content: item.content || "",
+    time: parseDate(item.publishDate),
+    isRead: toBooleanFlag(item.isRead),
+    priority: item.priority || "medium",
+    needAction: toBooleanFlag(item.needAction),
+    isProcessed: toBooleanFlag(item.isProcessed),
+    sender: item.senderName || "系统管理员",
+    deadline: parseDate(item.deadline),
+    relatedId: item.relatedId || null,
+    attachments: parseAttachments(item.attachments),
+    receiverId: item.receiverId,
 });
 
-// 分页后的消息
-const paginatedMessages = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value;
-    const end = start + pageSize.value;
-    return filteredMessages.value.slice(start, end);
-});
+const formatTime = (time) => {
+    const date = parseDate(time);
+    if (!date) return "";
+    const now = new Date();
+    const diff = now - date;
 
-// 获取图标组件
+    if (diff < 0) return formatDateTime(date);
+    if (diff < 60 * 1000) return "刚刚";
+    if (diff < 60 * 60 * 1000) return `${Math.floor(diff / (60 * 1000))}分钟前`;
+    if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / (60 * 60 * 1000))}小时前`;
+    if (diff < 7 * 24 * 60 * 60 * 1000) return `${Math.floor(diff / (24 * 60 * 60 * 1000))}天前`;
+    return `${date.getMonth() + 1}月${date.getDate()}日`;
+};
+
+const formatDateTime = (value) => {
+    const d = parseDate(value);
+    if (!d) return "";
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+
+const formatDate = (value) => {
+    const d = parseDate(value);
+    if (!d) return "";
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+};
+
+const isDeadlineUrgent = (deadline) => {
+    const d = parseDate(deadline);
+    if (!d) return false;
+    const diff = d - new Date();
+    return diff > 0 && diff < 24 * 60 * 60 * 1000;
+};
+
 const getIconComponent = (type) => {
     const icons = {
         system: Setting,
@@ -557,7 +512,6 @@ const getIconComponent = (type) => {
     return icons[type] || Bell;
 };
 
-// 获取标签类型
 const getTagType = (type) => {
     const types = {
         system: "info",
@@ -569,7 +523,6 @@ const getTagType = (type) => {
     return types[type] || "";
 };
 
-// 获取类型显示文本
 const getTypeLabel = (type) => {
     const map = {
         system: "系统通知",
@@ -581,90 +534,78 @@ const getTypeLabel = (type) => {
     return map[type] || type;
 };
 
-// 格式化时间
-const formatTime = (time) => {
-    const date = new Date(time);
-    const now = new Date();
-    const diff = now - date;
-
-    if (diff < 60 * 1000) return "刚刚";
-    if (diff < 60 * 60 * 1000) return `${Math.floor(diff / (60 * 1000))}分钟前`;
-    if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / (60 * 60 * 1000))}小时前`;
-    if (diff < 7 * 24 * 60 * 60 * 1000) return `${Math.floor(diff / (24 * 60 * 60 * 1000))}天前`;
-    return `${date.getMonth() + 1}月${date.getDate()}日`;
-};
-
-const formatDateTime = (date) => {
-    const d = new Date(date);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-};
-
-const formatDate = (date) => {
-    const d = new Date(date);
-    return `${d.getMonth() + 1}/${d.getDate()}`;
-};
-
-const isDeadlineUrgent = (deadline) => {
-    if (!deadline) return false;
-    const now = new Date();
-    const diff = new Date(deadline) - now;
-    return diff < 24 * 60 * 60 * 1000 && diff > 0;
-};
-
-// 消息操作
-const markAsRead = (message) => {
-    if (!message.isRead) {
-        message.isRead = true;
-        ElMessage.success("已标记为已读");
+// ------------------------------------------------------------------ 数据加载
+const buildQuery = () => {
+    const query = {
+        pageNum: currentPage.value,
+        pageSize: pageSize.value,
+    };
+    if (searchKeyword.value && searchKeyword.value.trim()) {
+        query.keyword = searchKeyword.value.trim();
     }
+    if (filterType.value) query.type = filterType.value;
+    if (filterPriority.value) query.priority = filterPriority.value;
+    if (filterReadStatus.value !== "" && filterReadStatus.value !== null && filterReadStatus.value !== undefined) {
+        query.isRead = filterReadStatus.value;
+    }
+    if (Array.isArray(dateRange.value) && dateRange.value.length === 2 && dateRange.value[0] && dateRange.value[1]) {
+        query.startDate = dateRange.value[0];
+        query.endDate = dateRange.value[1];
+    }
+    return query;
 };
 
-const deleteMessage = async (message) => {
+const loadMessages = async (options = {}) => {
+    const {keepSelection = false} = options;
+    loading.value = true;
     try {
-        await ElMessageBox.confirm("确定要删除这条消息吗？", "删除确认", {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
-        });
-        const index = messageList.value.findIndex((m) => m.id === message.id);
-        if (index !== -1) {
-            messageList.value.splice(index, 1);
-            if (selectedMessage.value?.id === message.id) {
-                selectedMessage.value = filteredMessages.value[0] || null;
+        const res = await getMessageList(buildQuery());
+        if (res && res.code === "200" && res.data) {
+            const data = res.data;
+            const records = Array.isArray(data.records) ? data.records.map(mapMessage) : [];
+
+            // 当前页不足时回退一页（例如删除/筛选后）
+            if (records.length === 0 && currentPage.value > 1 && Number(data.total || 0) > 0) {
+                currentPage.value -= 1;
+                loading.value = false;
+                return loadMessages({keepSelection});
             }
-            selectedMessages.value = selectedMessages.value.filter((id) => id !== message.id);
-            ElMessage.success("删除成功");
+
+            messageList.value = records;
+            total.value = Number(data.total || 0);
+            unreadCount.value = Number(data.unreadCount || 0);
+            pendingCount.value = Number(data.pendingCount || 0);
+
+            if (!keepSelection) {
+                selectedMessages.value = [];
+            }
+
+            if (selectedMessage.value) {
+                selectedMessage.value = records.find((m) => m.id === selectedMessage.value.id) || records[0] || null;
+            } else {
+                selectedMessage.value = records[0] || null;
+            }
+        } else {
+            ElMessage.error(res?.msg || "获取消息列表失败");
         }
-    } catch {
+    } catch (e) {
+        // 请求拦截器已统一提示
+    } finally {
+        loading.value = false;
     }
 };
 
-const markAllAsRead = () => {
-    messageList.value.forEach((msg) => {
-        msg.isRead = true;
-    });
-    if (selectedMessage.value) {
-        selectedMessage.value.isRead = true;
-    }
-    ElMessage.success("已全部标记为已读");
-};
+// ------------------------------------------------------------------ 计算属性
+const isAllCurrentSelected = computed(
+    () => messageList.value.length > 0 && messageList.value.every((m) => selectedMessages.value.includes(m.id)),
+);
+const isCurrentIndeterminate = computed(() => {
+    if (!messageList.value.length) return false;
+    const count = messageList.value.filter((m) => selectedMessages.value.includes(m.id)).length;
+    return count > 0 && count < messageList.value.length;
+});
 
-const clearAllMessages = async () => {
-    try {
-        await ElMessageBox.confirm("清空后将无法恢复，确定要清空所有消息吗？", "清空确认", {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
-        });
-        messageList.value = [];
-        selectedMessage.value = null;
-        selectedMessages.value = [];
-        ElMessage.success("已清空所有消息");
-    } catch {
-    }
-};
-
-// 批量操作
+// ------------------------------------------------------------------ 选择
 const toggleSelect = (id) => {
     const index = selectedMessages.value.indexOf(id);
     if (index === -1) {
@@ -674,35 +615,154 @@ const toggleSelect = (id) => {
     }
 };
 
+const toggleSelectAll = (checked) => {
+    const ids = messageList.value.map((m) => m.id);
+    if (checked) {
+        ids.forEach((id) => {
+            if (!selectedMessages.value.includes(id)) selectedMessages.value.push(id);
+        });
+    } else {
+        selectedMessages.value = selectedMessages.value.filter((id) => !ids.includes(id));
+    }
+};
+
+// ------------------------------------------------------------------ 消息操作
+const markAsRead = async (message) => {
+    if (!message || message.isRead) return;
+    try {
+        const res = await markMessageRead(message.id);
+        if (res && res.code !== "200") {
+            ElMessage.error(res.msg || "标记已读失败");
+            return;
+        }
+        message.isRead = true;
+        if (unreadCount.value > 0) unreadCount.value -= 1;
+        ElMessage.success("已标记为已读");
+        // 处于“未读”筛选时，标记后该条应从列表移除
+        if (filterReadStatus.value === 0) {
+            await loadMessages({keepSelection: true});
+        }
+    } catch (e) {
+        // 请求拦截器已统一提示
+    }
+};
+
+const markAllAsRead = async () => {
+    try {
+        const res = await markAllMessageRead();
+        if (res && res.code !== "200") {
+            ElMessage.error(res.msg || "操作失败");
+            return;
+        }
+        ElMessage.success("已全部标记为已读");
+        await loadMessages();
+    } catch (e) {
+        // 请求拦截器已统一提示
+    }
+};
+
+const deleteMessage = async (message) => {
+    if (!message) return;
+    try {
+        await ElMessageBox.confirm("确定要删除这条消息吗？", "删除确认", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+        });
+    } catch {
+        return;
+    }
+    try {
+        const res = await removeMessage(message.id);
+        if (res && res.code !== "200") {
+            ElMessage.error(res.msg || "删除失败");
+            return;
+        }
+        selectedMessages.value = selectedMessages.value.filter((id) => id !== message.id);
+        if (selectedMessage.value?.id === message.id) {
+            selectedMessage.value = null;
+        }
+        ElMessage.success("删除成功");
+        await loadMessages({keepSelection: true});
+    } catch (e) {
+        // 请求拦截器已统一提示
+    }
+};
+
+const clearAllMessages = async () => {
+    try {
+        await ElMessageBox.confirm("清空后将无法恢复，确定要清空所有消息吗？", "清空确认", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+        });
+    } catch {
+        return;
+    }
+    try {
+        const res = await clearAllMessage();
+        if (res && res.code !== "200") {
+            ElMessage.error(res.msg || "清空失败");
+            return;
+        }
+        selectedMessage.value = null;
+        selectedMessages.value = [];
+        currentPage.value = 1;
+        ElMessage.success("已清空所有消息");
+        await loadMessages();
+    } catch (e) {
+        // 请求拦截器已统一提示
+    }
+};
+
 const handleBatchCommand = async (command) => {
     if (selectedMessages.value.length === 0) return;
+    const ids = [...selectedMessages.value];
 
     if (command === "markRead") {
-        selectedMessages.value.forEach((id) => {
-            const msg = messageList.value.find((m) => m.id === id);
-            if (msg) msg.isRead = true;
-        });
-        ElMessage.success(`已标记 ${selectedMessages.value.length} 条消息为已读`);
-        selectedMessages.value = [];
-    } else if (command === "delete") {
         try {
-            await ElMessageBox.confirm(`确定要删除选中的 ${selectedMessages.value.length} 条消息吗？`, "批量删除确认", {
+            const res = await markBatchMessageRead(ids);
+            if (res && res.code !== "200") {
+                ElMessage.error(res.msg || "批量标记失败");
+                return;
+            }
+            ElMessage.success(`已标记 ${ids.length} 条消息为已读`);
+            await loadMessages();
+        } catch (e) {
+            // 请求拦截器已统一提示
+        }
+        return;
+    }
+
+    if (command === "delete") {
+        try {
+            await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条消息吗？`, "批量删除确认", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
                 type: "warning",
             });
-            messageList.value = messageList.value.filter((m) => !selectedMessages.value.includes(m.id));
-            if (selectedMessage.value && selectedMessages.value.includes(selectedMessage.value.id)) {
-                selectedMessage.value = filteredMessages.value[0] || null;
+        } catch {
+            return;
+        }
+        try {
+            const res = await removeBatchMessage(ids);
+            if (res && res.code !== "200") {
+                ElMessage.error(res.msg || "批量删除失败");
+                return;
+            }
+            if (selectedMessage.value && ids.includes(selectedMessage.value.id)) {
+                selectedMessage.value = null;
             }
             selectedMessages.value = [];
             ElMessage.success("批量删除成功");
-        } catch {
+            await loadMessages();
+        } catch (e) {
+            // 请求拦截器已统一提示
         }
     }
 };
 
-// 审批操作
+// ------------------------------------------------------------------ 其它交互
 const handleApproval = (message) => {
     ElMessage.info(`跳转到审批页面，审批单号：${message.relatedId || message.id}`);
 };
@@ -713,80 +773,64 @@ const handleApprovalFromDetail = () => {
     }
 };
 
-// 查看关联文档
 const viewRelatedDoc = (relatedId) => {
     ElMessage.info(`查看关联单据：${relatedId}`);
 };
 
-// 下载附件
 const downloadAttachment = (file) => {
     ElMessage.info(`下载附件：${file.name}`);
 };
 
-// 搜索与筛选
+// ------------------------------------------------------------------ 搜索 / 分页
 const handleSearch = () => {
     currentPage.value = 1;
-    if (
-        filteredMessages.value.length > 0 &&
-        selectedMessage.value &&
-        !filteredMessages.value.find((m) => m.id === selectedMessage.value.id)
-    ) {
-        selectedMessage.value = filteredMessages.value[0];
-    }
+    loadMessages();
 };
 
 const resetFilters = () => {
     searchKeyword.value = "";
     filterType.value = "";
     filterPriority.value = "";
-    dateRange.value = null;
+    filterReadStatus.value = "";
+    dateRange.value = [];
     currentPage.value = 1;
-    if (filteredMessages.value.length > 0 && !selectedMessage.value) {
-        selectedMessage.value = filteredMessages.value[0];
-    }
+    loadMessages();
 };
 
-// 分页处理
 const handleSizeChange = (val) => {
     pageSize.value = val;
     currentPage.value = 1;
+    loadMessages();
 };
 
 const handleCurrentChange = (val) => {
     currentPage.value = val;
+    loadMessages();
 };
 
-// 点击消息
 const handleMessageClick = (message) => {
     selectedMessage.value = message;
     if (isMobile.value) {
         showDetailPanel.value = true;
     }
     if (!message.isRead) {
-        message.isRead = true;
+        markAsRead(message);
     }
 };
 
-// 关闭详情面板（移动端）
 const closeDetailPanel = () => {
     showDetailPanel.value = false;
 };
 
-// 初始化
-const initData = () => {
-    loading.value = true;
-    setTimeout(() => {
-        messageList.value = generateMockMessages();
-        if (messageList.value.length > 0) {
-            selectedMessage.value = messageList.value[0];
-        }
-        loading.value = false;
-    }, 300);
+// ------------------------------------------------------------------ 生命周期
+const checkMobile = () => {
+    isMobile.value = window.innerWidth < 768;
+    showDetailPanel.value = !isMobile.value;
 };
 
 onMounted(() => {
-    initData();
     checkMobile();
+    loadMessages();
     window.addEventListener("resize", checkMobile);
 });
 

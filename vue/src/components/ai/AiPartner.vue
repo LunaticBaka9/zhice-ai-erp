@@ -75,6 +75,9 @@
                     <span class="chat-title">{{ currentConversationTitle || "AI 助手" }}</span>
                 </div>
                 <div class="header-right">
+                    <!-- API Key 设置入口：点击打开设置弹窗；已配置 key 时图标高亮(active)，
+                         未配置或配置失效时正常灰显。用户在此导入自己的 DeepSeek API Key，
+                         后端按用户维度保存在 Redis 中，项目启动时不校验、配置文件中也无需填写。 -->
                     <el-tooltip content="API Key 设置" placement="bottom">
                         <el-icon class="header-icon key-icon" :class="{ active: apiKeyConfigured }" @click="openApiKeyDialog">
                             <Key />
@@ -95,7 +98,7 @@
                     <div class="welcome-logo">
                         <el-icon :size="56" color="#667eea"><ChatLineSquare /></el-icon>
                     </div>
-                    <h2 class="welcome-title">你好，我是 AI 助手</h2>
+                    <h2 class="welcome-title">你好，我是智策 AI 助手</h2>
                     <p class="welcome-desc">基于 DeepSeek 大模型，随时为你解答进销存业务问题</p>
                     <div class="suggestion-cards">
                         <div
@@ -208,7 +211,10 @@
             </template>
         </el-dialog>
 
-        <!-- API Key 设置弹窗 -->
+        <!-- API Key 设置弹窗：
+             - 密码框输入自己的 DeepSeek API Key（sk- 开头），点击“保存”写入后端 Redis（按当前登录用户隔离）；
+             - 已配置过时显示绿色提示，并提供“删除”按钮移除 key；
+             - 保存/删除成功后 apiKeyConfigured 会同步更新，从而控制顶部钥匙图标的亮/灭。 -->
         <el-dialog v-model="apiKeyDialogVisible" title="DeepSeek API Key 设置" width="440px">
             <el-form label-position="top">
                 <el-form-item label="API Key">
@@ -242,12 +248,14 @@ import {
     Delete,
     Expand,
     Fold,
-    Key,
+    Key, // 顶部“API Key 设置”图标的图标组件
     MoreFilled,
     Plus,
     Promotion,
     User,
 } from "@element-plus/icons-vue";
+// 引入 AI 接口：sendChatMessage 用于聊天；setAiApiKey / getAiApiKeyStatus / removeAiApiKey
+// 用于“由用户自行导入 DeepSeek API Key”（后端按用户存入 Redis，启动时不校验）
 import { getAiApiKeyStatus, removeAiApiKey, sendChatMessage, setAiApiKey } from "@/api";
 
 // ======================== 状态 ========================
@@ -264,10 +272,11 @@ const inputRef = ref(null);
 const renameDialogVisible = ref(false);
 const renameTitle = ref("");
 const renameTarget = ref(null);
-const apiKeyDialogVisible = ref(false);
-const apiKeyInput = ref("");
-const apiKeySaving = ref(false);
-const apiKeyConfigured = ref(false);
+// ---- API Key 设置相关状态 ----
+const apiKeyDialogVisible = ref(false); // 设置弹窗是否显示
+const apiKeyInput = ref("");              // 弹窗中输入框的 api-key 临时值
+const apiKeySaving = ref(false);          // 保存中（控制保存按钮 loading）
+const apiKeyConfigured = ref(false);      // 当前用户是否已配置 key（控制钥匙图标亮/灭、弹窗内提示）
 
 // ======================== 计算属性 ========================
 const currentConversationTitle = computed(() => {
@@ -459,7 +468,8 @@ async function handleSendMessage() {
                 currentConversationId.value = res.data.conversationId;
             }
         } else {
-            // 未配置或 API Key 无效时，引导用户打开设置
+            // 业务失败：若提示信息与“API Key”相关（例如后端返回“请先配置 DeepSeek API Key”
+            // 或“AI 调用失败，请检查 API Key 是否有效”），自动弹出设置框引导用户导入/修正 key
             if (res?.msg && res.msg.includes("API Key")) {
                 openApiKeyDialog();
             }
@@ -499,22 +509,39 @@ function handleCopy(text) {
 }
 
 // ======================== API Key 设置 ========================
+
+/**
+ * 查询当前用户是否已配置过 API Key。
+ * 组件挂载时调用，用于点亮/置灰顶部钥匙图标；用户删除 key 后也会刷新该状态。
+ */
 async function checkApiKeyStatus() {
     try {
         const res = await getAiApiKeyStatus();
         if (res && (res.code === "200" || res.code === 200)) {
+            // 后端返回 { configured: true|false }
             apiKeyConfigured.value = !!res.data?.configured;
         }
     } catch {
+        // 接口异常时视为未配置，钥匙图标灰显
         apiKeyConfigured.value = false;
     }
 }
 
+/**
+ * 打开 API Key 设置弹窗。
+ * 每次打开时清空输入框，避免与上一次输入混淆。
+ */
 function openApiKeyDialog() {
     apiKeyInput.value = "";
     apiKeyDialogVisible.value = true;
 }
 
+/**
+ * 保存用户输入的 DeepSeek API Key。
+ * - 先做非空校验（前端兜底）；
+ * - 调用 setAiApiKey 写入后端 Redis；
+ * - 成功后更新 apiKeyConfigured 状态、关闭弹窗并提示“保存成功”。
+ */
 async function handleSaveApiKey() {
     const key = apiKeyInput.value.trim();
     if (!key) {
@@ -538,6 +565,10 @@ async function handleSaveApiKey() {
     }
 }
 
+/**
+ * 删除当前用户已配置的 API Key。
+ * 二次确认后调用 removeAiApiKey；删除后需要重新导入 key 才能继续使用 AI 对话。
+ */
 async function handleRemoveApiKey() {
     try {
         await ElMessageBox.confirm("确定删除已配置的 API Key 吗？", "删除确认", {
@@ -554,7 +585,7 @@ async function handleRemoveApiKey() {
             ElMessage.error(res?.msg || "删除失败");
         }
     } catch {
-        // 用户取消或失败
+        // 用户取消或请求失败，不做处理
     }
 }
 
@@ -649,6 +680,7 @@ function loadConversationsFromStorage() {
 // ======================== 初始化 ========================
 onMounted(() => {
     loadConversationsFromStorage();
+    // 查询当前用户是否已配置 API Key，用于点亮/置灰顶部钥匙图标（配置与否互不影响进入页面）
     checkApiKeyStatus();
     nextTick(() => inputRef.value?.focus());
 });
@@ -848,21 +880,25 @@ onMounted(() => {
     transition: color 0.2s;
 }
 
+/* 清空对话等图标悬停变红，表示风险操作 */
 .header-icon:hover {
     color: #f56c6c;
 }
 
+/* 钥匙图标（API Key 设置）：悬停或已配置(active)时显示蓝色，标识“已可用” */
 .header-icon.key-icon:hover,
 .header-icon.key-icon.active {
     color: #409eff;
 }
 
+/* 设置弹窗内“已配置”状态提示（绿色） */
 .apikey-status {
     font-size: 13px;
     color: #67c23a;
     margin-bottom: 8px;
 }
 
+/* 设置弹窗内说明文字（灰色气泡） */
 .apikey-tip {
     font-size: 12px;
     color: #909399;

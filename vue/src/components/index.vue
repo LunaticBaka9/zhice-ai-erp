@@ -155,7 +155,7 @@
                                 {{ getMessageTypeText(msg.type) }}
                             </el-tag>
                             <span class="notice-title">
-                                <span v-if="!isMessageRead(msg.id)" class="unread-badge"></span>
+                                <span v-if="!msg.isRead" class="unread-badge"></span>
                                 {{ msg.content }}
                             </span>
                             <span class="notice-date">
@@ -218,7 +218,7 @@ import {computed, onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import {ElMessage} from "element-plus";
 import {Document, Download,} from "@element-plus/icons-vue";
-import { getAlertList, getAlertStatistics, getNoticeList, getNoticeById, updateViews, markAsRead as apiMarkAsRead } from "@/api";
+import { getAlertList, getAlertStatistics, getMessageList, getNoticeList, getNoticeById, updateViews, markAsRead as apiMarkAsRead } from "@/api";
 import {formatDateTime, parseDate} from "../utils/date";
 
 const router = useRouter();
@@ -370,28 +370,25 @@ async function fetchAlertStatistics() {
 // ---------- 最新消息数据 ----------
 const recentMessages = ref([]);
 
-// 生成模拟消息数据
-function generateMockMessages() {
-    const types = ["system", "approval", "todo", "finance", "hr"];
-    const contents = [
-        "您有待审批的采购申请单，请及时处理",
-        "库存预警：农夫山泉矿泉水库存不足",
-        "本月销售报表已生成，请查阅",
-        "系统将于今晚22:00进行维护升级",
-        "您有新的待办任务需要处理",
-    ];
-    const now = new Date();
-    return contents.map((content, index) => ({
-        id: index + 1,
-        type: types[index % types.length],
-        content: content,
-        createTime: new Date(now.getTime() - index * 3600000),
-    }));
-}
-
-// 获取最新消息（使用模拟数据）
-function fetchRecentMessages() {
-    recentMessages.value = generateMockMessages();
+// 获取最新消息（来自后端消息中心，取最近 5 条）
+async function fetchRecentMessages() {
+    try {
+        const res = await getMessageList({ pageNum: 1, pageSize: 5 });
+        if (res && res.code === "200" && res.data) {
+            const records = Array.isArray(res.data.records) ? res.data.records : [];
+            recentMessages.value = records.map((item) => ({
+                id: item.msgId,
+                type: item.type,
+                content: item.title || item.summary || "无标题消息",
+                createTime: item.publishDate,
+                isRead: item.isRead === 1 || item.isRead === true,
+            }));
+        } else {
+            recentMessages.value = [];
+        }
+    } catch (e) {
+        recentMessages.value = [];
+    }
 }
 
 // 消息类型标签
@@ -416,17 +413,6 @@ function getMessageTypeText(type) {
         hr: "人事",
     };
     return typeMap[type] || "消息";
-}
-
-// 消息已读状态
-function isMessageRead(msgId) {
-    const key = "read_messages_" + (getLocalUserId() || "guest");
-    try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data).includes(msgId) : false;
-    } catch (e) {
-        return false;
-    }
 }
 
 // 查看消息
@@ -581,7 +567,17 @@ const viewNotice = async (item) => {
     try {
         const userId = getLocalUserId();
         const payload = { nid: item.nid, uid: userId };
-        await updateViews(payload);
+        const res = await updateViews(payload);
+        // 阅读次数以 Redis 实时计数为准（Redis 优先）
+        if (res && (res.code === "200" || res.code === 200) && res.data != null) {
+            selectedAnnouncement.value.views = Number(res.data);
+            const recent = recentNotices.value.find(
+                (r) => r.nid === item.nid || r.id === item.nid
+            );
+            if (recent) {
+                recent.views = selectedAnnouncement.value.views;
+            }
+        }
         if (userId) {
             await apiMarkAsRead({
                 noticeId: item.nid,

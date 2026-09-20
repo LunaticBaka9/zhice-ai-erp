@@ -107,13 +107,19 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
 
     @Override
     public Notice selectByNid(Long nid) {
+        // 先查 MySQL 获取公告主体内容（标题/内容等字段只存 MySQL，不可省略）
         Notice notice = baseMapper.selectById(nid);
-        if (notice != null) {
-            Object views = redisTemplate.opsForValue().get("notice:views:" + nid);
-            if (views instanceof Number) {
-                notice.setViews(((Number) views).longValue());
-            }
+        if (notice == null) {
+            return null;
         }
+        // view 次数优先从 Redis 实时读取（updateViews 每次浏览都会 increment 该 key）
+        Object views = redisTemplate.opsForValue().get("notice:views:" + nid);
+        if (views instanceof Number) {
+            notice.setViews(((Number) views).longValue());
+            return notice;
+        }
+        // Redis 中该 key 不存在（如 Redis 未启动或数据被清除）时，
+        // 兜底使用 MySQL notice.views 的值——即“Redis 优先、MySQL 次之”。
         return notice;
     }
 
