@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.4.10, for Linux (x86_64)
 --
--- Host: localhost    Database: testdb
+-- Host: 127.0.0.1    Database: testdb
 -- ------------------------------------------------------
 -- Server version	8.4.10
 
@@ -14,14 +14,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Current Database: `testdb`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `testdb` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `testdb`;
 
 --
 -- Table structure for table `ai_conversation`
@@ -91,7 +83,7 @@ DROP TABLE IF EXISTS `category`;
 CREATE TABLE `category` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '分类ID',
   `parent_id` int unsigned DEFAULT '0' COMMENT '上级分类ID，0表示顶级',
-  `name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类名称',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类名称',
   `sort_order` int DEFAULT '0' COMMENT '排序',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -123,12 +115,12 @@ DROP TABLE IF EXISTS `customer`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `customer` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '客户ID',
-  `code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '客户编码',
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '客户名称',
-  `contact_person` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系人',
-  `phone` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '电话',
-  `email` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `address` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '客户编码',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '客户名称',
+  `contact_person` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系人',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '电话',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `price_level` tinyint DEFAULT '1' COMMENT '价格等级（1-零售价 2-批发价 3-VIP价）',
   `credit_limit` decimal(12,2) DEFAULT '0.00' COMMENT '信用额度',
   `status` tinyint(1) DEFAULT '1',
@@ -164,17 +156,17 @@ DROP TABLE IF EXISTS `dept`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `dept` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '部门ID',
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '部门名称',
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '部门编码',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '部门名称',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '部门编码',
   `parent_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '父部门ID，0表示根部门',
-  `parent_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '父部门名称',
-  `intro` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门简介',
-  `phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门电话',
-  `address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门地址',
+  `parent_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '父部门名称',
+  `intro` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门简介',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门电话',
+  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门地址',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `status` int NOT NULL DEFAULT '1' COMMENT '状态（1启用 0禁用）',
   `user_id` bigint DEFAULT NULL COMMENT '负责人ID',
-  `user_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '负责人名称',
+  `user_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '负责人名称',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_dept_code` (`code`),
   KEY `idx_parent_id` (`parent_id`),
@@ -201,14 +193,14 @@ DROP TABLE IF EXISTS `goods`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `goods` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '商品ID',
-  `sku_code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU编码，全局唯一',
-  `name` varchar(200) COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称',
-  `img` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '图片URL',
+  `sku_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU编码，全局唯一',
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称',
+  `img` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '图片URL',
   `category_id` int unsigned DEFAULT NULL COMMENT '分类ID',
-  `brand` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '品牌',
-  `spec` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '规格型号',
-  `unit` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '个' COMMENT '基本单位',
-  `barcode` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '主条码',
+  `brand` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '品牌',
+  `spec` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '规格型号',
+  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '个' COMMENT '基本单位',
+  `barcode` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '主条码',
   `purchase_price` decimal(12,2) DEFAULT '0.00' COMMENT '参考采购价',
   `sale_price` decimal(12,2) DEFAULT '0.00' COMMENT '标准售价',
   `cost_price` decimal(12,2) DEFAULT '0.00' COMMENT '当前移动加权平均成本',
@@ -252,8 +244,8 @@ CREATE TABLE `inventory` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `goods_id` int unsigned NOT NULL COMMENT '商品ID',
   `warehouse_id` int unsigned NOT NULL COMMENT '仓库ID',
-  `location` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '默认库位',
-  `batch_no` varchar(50) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '批次号（非批次商品为空字符串）',
+  `location` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '默认库位',
+  `batch_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '批次号（非批次商品为空字符串）',
   `qty_on_hand` decimal(12,2) NOT NULL DEFAULT '0.00' COMMENT '在手量（实际物理库存）',
   `qty_available` decimal(12,2) NOT NULL DEFAULT '0.00' COMMENT '可用量（在手量 - 锁定量）',
   `locked_qty` decimal(12,2) NOT NULL DEFAULT '0.00' COMMENT '销售订单锁定数量',
@@ -293,16 +285,16 @@ DROP TABLE IF EXISTS `inventory_alert`;
 CREATE TABLE `inventory_alert` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '预警ID',
   `goods_id` bigint unsigned NOT NULL COMMENT '商品ID',
-  `goods_name` varchar(200) COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称',
-  `sku_code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU编码',
-  `brand` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '品牌',
-  `spec` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '规格型号',
-  `unit` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '个' COMMENT '单位',
+  `goods_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称',
+  `sku_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU编码',
+  `brand` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '品牌',
+  `spec` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '规格型号',
+  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '个' COMMENT '单位',
   `stock_quantity` decimal(12,2) DEFAULT '0.00' COMMENT '当前库存数量',
   `stock_low` decimal(12,2) DEFAULT '0.00' COMMENT '库存预警下限',
   `stock_high` decimal(12,2) DEFAULT '0.00' COMMENT '库存预警上限',
-  `alert_type` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT '预警类型：out_of_stock-缺货，low_stock-库存不足，high_stock-库存过多，expiring_soon-即将到期',
-  `alert_level` varchar(10) COLLATE utf8mb4_general_ci NOT NULL COMMENT '预警级别：high-高，medium-中，low-低',
+  `alert_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '预警类型：out_of_stock-缺货，low_stock-库存不足，high_stock-库存过多，expiring_soon-即将到期',
+  `alert_level` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '预警级别：high-高，medium-中，low-低',
   `acknowledged` tinyint(1) DEFAULT '0' COMMENT '是否已确认：0-未确认，1-已确认',
   `acknowledged_by` int DEFAULT NULL COMMENT '确认人ID',
   `acknowledged_time` datetime DEFAULT NULL COMMENT '确认时间',
@@ -338,22 +330,22 @@ DROP TABLE IF EXISTS `inventory_operation`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `inventory_operation` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '作业 ID',
-  `operation_no` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '作业单号',
-  `operation_type` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT '作业类型：inbound-入库，outbound-出库，transfer-调拨，adjustment-盘点',
+  `operation_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '作业单号',
+  `operation_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '作业类型：inbound-入库，outbound-出库，transfer-调拨，adjustment-盘点',
   `from_warehouse_id` int unsigned DEFAULT NULL COMMENT '源仓库 ID（出库/调拨时有值）',
-  `from_warehouse_name` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '源仓库名称（冗余字段，方便查询）',
+  `from_warehouse_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '源仓库名称（冗余字段，方便查询）',
   `to_warehouse_id` int unsigned DEFAULT NULL COMMENT '目标仓库 ID（入库/调拨时有值）',
-  `to_warehouse_name` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '目标仓库名称（冗余字段，方便查询）',
+  `to_warehouse_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '目标仓库名称（冗余字段，方便查询）',
   `goods_id` int unsigned NOT NULL COMMENT '商品 ID',
-  `goods_name` varchar(200) COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称（冗余字段，方便查询）',
-  `sku_code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU 编码（冗余字段，方便查询）',
+  `goods_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商品名称（冗余字段，方便查询）',
+  `sku_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'SKU 编码（冗余字段，方便查询）',
   `quantity` decimal(12,2) NOT NULL DEFAULT '0.00' COMMENT '作业数量',
-  `unit` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '单位',
-  `operator` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作员',
-  `status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending' COMMENT '状态：pending-待处理，completed-已完成，cancelled-已取消',
-  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
-  `source_type` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '来源类型：purchase-采购，sales-销售，manual-手工',
-  `source_no` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '来源单号（关联采购单/销售单等）',
+  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '单位',
+  `operator` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作员',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending' COMMENT '状态：pending-待处理，completed-已完成，cancelled-已取消',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `source_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '来源类型：purchase-采购，sales-销售，manual-手工',
+  `source_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '来源单号（关联采购单/销售单等）',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `complete_time` datetime DEFAULT NULL COMMENT '完成时间',
@@ -397,19 +389,19 @@ DROP TABLE IF EXISTS `meeting`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `meeting` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '会议ID',
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会议标题',
-  `content` text COLLATE utf8mb4_unicode_ci COMMENT '会议内容',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会议标题',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '会议内容',
   `publish_time` datetime DEFAULT NULL COMMENT '发布时间',
   `start_time` datetime DEFAULT NULL COMMENT '开始时间',
-  `end_time` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '结束时间',
+  `end_time` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '结束时间',
   `status` int DEFAULT NULL COMMENT '会议状态 0:未开始 1:进行中 2:已结束',
-  `make_user` text COLLATE utf8mb4_unicode_ci COMMENT '参加人员',
-  `actual_user` text COLLATE utf8mb4_unicode_ci COMMENT '实到人员',
-  `address` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会议地点',
-  `dept_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门名称',
+  `make_user` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '参加人员',
+  `actual_user` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '实到人员',
+  `address` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会议地点',
+  `dept_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '部门名称',
   `dept_id` int DEFAULT NULL COMMENT '部门ID',
   `user_id` bigint DEFAULT NULL COMMENT '会议主持人ID',
-  `user_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会议主持人名称',
+  `user_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会议主持人名称',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会议表';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -433,12 +425,12 @@ DROP TABLE IF EXISTS `menu`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `menu` (
   `id` int NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `icon` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `icon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `pid` int DEFAULT NULL,
-  `page_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `page_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `sort_num` int DEFAULT NULL,
   `status` int DEFAULT NULL COMMENT '菜单状态',
   PRIMARY KEY (`id`) USING BTREE
@@ -466,16 +458,16 @@ CREATE TABLE `message` (
   `msg_id` int NOT NULL AUTO_INCREMENT,
   `sender_id` int DEFAULT NULL,
   `receiver_id` int DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'æ¶ˆæ¯æ ‡é¢˜',
-  `summary` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'æ¶ˆæ¯æ‘˜è¦',
-  `content` text COLLATE utf8mb4_general_ci COMMENT '消息正文',
-  `priority` varchar(16) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'medium' COMMENT 'ä¼˜å…ˆçº§ï¼šhigh/medium/low',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'æ¶ˆæ¯æ ‡é¢˜',
+  `summary` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'æ¶ˆæ¯æ‘˜è¦',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '消息正文',
+  `priority` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'medium' COMMENT 'ä¼˜å…ˆçº§ï¼šhigh/medium/low',
   `need_action` tinyint NOT NULL DEFAULT '0' COMMENT 'æ˜¯å¦éœ€è¦å¤„ç†ï¼š0-å¦ 1-æ˜¯',
   `is_processed` tinyint NOT NULL DEFAULT '0' COMMENT 'æ˜¯å¦å·²å¤„ç†ï¼š0-å¦ 1-æ˜¯',
   `deadline` datetime DEFAULT NULL COMMENT 'å¤„ç†æˆªæ­¢æ—¶é—´',
-  `related_id` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'å…³è”ä¸šåŠ¡å•å·',
-  `attachments` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `related_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'å…³è”ä¸šåŠ¡å•å·',
+  `attachments` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `publish_date` datetime DEFAULT NULL,
   `is_read` tinyint NOT NULL DEFAULT '0' COMMENT '是否已读：0-未读 1-已读',
   `del_flag` tinyint NOT NULL DEFAULT '0' COMMENT '逻辑删除：0-正常 1-已删除',
@@ -505,15 +497,15 @@ DROP TABLE IF EXISTS `notice`;
 CREATE TABLE `notice` (
   `nid` int NOT NULL AUTO_INCREMENT,
   `uid` int DEFAULT NULL,
-  `title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `author` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `summary` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `content` text COLLATE utf8mb4_general_ci,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `author` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `summary` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `publishDate` datetime DEFAULT NULL,
   `views` int DEFAULT '0',
-  `status` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `attachments` text COLLATE utf8mb4_general_ci,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `attachments` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`nid`) USING BTREE,
   KEY `idx_publishDate_status` (`publishDate`,`status`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='公告表';
@@ -566,15 +558,15 @@ DROP TABLE IF EXISTS `operation_log`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `operation_log` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作用户',
-  `operation` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作描述',
-  `method` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '方法名',
-  `params` text COLLATE utf8mb4_general_ci COMMENT '参数',
+  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作用户',
+  `operation` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作描述',
+  `method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '方法名',
+  `params` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '参数',
   `time` bigint DEFAULT NULL COMMENT '执行时间(ms)',
-  `ip` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'IP地址',
+  `ip` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'IP地址',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `module` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '模块名称',
-  `type` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作类型',
+  `module` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '模块名称',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '操作类型',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_username` (`username`) USING BTREE,
   KEY `idx_create_time` (`create_time`) USING BTREE
@@ -601,12 +593,12 @@ DROP TABLE IF EXISTS `permission`;
 CREATE TABLE `permission` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '权限ID',
   `parent_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '父权限ID',
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '权限名称',
-  `code` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '权限编码',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '权限名称',
+  `code` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '权限编码',
   `type` tinyint NOT NULL COMMENT '权限类型（1目录 2菜单 3按钮）',
-  `path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '前端路由',
-  `component` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '前端组件',
-  `icon` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '图标',
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '前端路由',
+  `component` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '前端组件',
+  `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '图标',
   `sort` int NOT NULL DEFAULT '0' COMMENT '排序',
   `status` tinyint NOT NULL DEFAULT '1' COMMENT '状态',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -634,11 +626,11 @@ DROP TABLE IF EXISTS `post`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `post` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '职位ID',
-  `name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '职位名称',
-  `code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '职位编码',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '职位名称',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '职位编码',
   `level` tinyint NOT NULL DEFAULT '4' COMMENT '职位等级（1最高）',
   `sort` int NOT NULL DEFAULT '0' COMMENT '排序',
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '岗位说明',
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '岗位说明',
   `status` tinyint NOT NULL DEFAULT '1' COMMENT '状态（1启用 0禁用）',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
@@ -668,13 +660,13 @@ DROP TABLE IF EXISTS `purchase`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `purchase` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `bill_no` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '单据编号（规则如 PO + 日期 + 流水）',
+  `bill_no` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '单据编号（规则如 PO + 日期 + 流水）',
   `supplier_id` bigint DEFAULT NULL COMMENT '关联供应商ID',
   `warehouse_id` int DEFAULT NULL COMMENT '入库目标仓库',
-  `total_amount` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '含税总金额',
+  `total_amount` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '含税总金额',
   `status` tinyint DEFAULT NULL COMMENT '状态：0-草稿，1-待审核，2-已完成，3-已作废',
   `in_stock_time` datetime DEFAULT NULL COMMENT '实际入库时间（用于成本核算的截止点）',
-  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `confirm_time` datetime DEFAULT NULL COMMENT '确认时间',
@@ -702,10 +694,10 @@ DROP TABLE IF EXISTS `purchase_inbound`;
 CREATE TABLE `purchase_inbound` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '入库单ID',
   `purchase_id` int NOT NULL COMMENT '关联采购订单ID',
-  `bill_no` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '入库单号',
+  `bill_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '入库单号',
   `warehouse_id` int unsigned DEFAULT NULL COMMENT '入库仓库ID',
   `status` tinyint DEFAULT '0' COMMENT '状态：0-待确认，1-已确认',
-  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `confirm_time` datetime DEFAULT NULL COMMENT '确认时间',
   PRIMARY KEY (`id`) USING BTREE,
@@ -796,9 +788,9 @@ DROP TABLE IF EXISTS `role`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `role` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '角色ID',
-  `name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色名称',
-  `code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色编码',
-  `bio` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色简介',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色名称',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色编码',
+  `bio` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色简介',
   `sort` int NOT NULL DEFAULT '0' COMMENT '排序',
   `is_system` tinyint NOT NULL DEFAULT '0' COMMENT '是否系统角色（1是 0否）',
   `status` tinyint NOT NULL DEFAULT '1' COMMENT '状态（1启用 0禁用）',
@@ -853,7 +845,7 @@ DROP TABLE IF EXISTS `sal_order`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sal_order` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '订单ID',
-  `order_no` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '订单编号',
+  `order_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '订单编号',
   `customer_id` bigint unsigned DEFAULT NULL COMMENT '客户ID',
   `warehouse_id` int unsigned DEFAULT NULL COMMENT '出库仓库ID',
   `order_date` datetime DEFAULT NULL COMMENT '订单日期',
@@ -861,8 +853,8 @@ CREATE TABLE `sal_order` (
   `discount_amount` decimal(12,2) DEFAULT '0.00' COMMENT '折扣金额',
   `final_amount` decimal(12,2) DEFAULT '0.00' COMMENT '最终金额',
   `status` tinyint DEFAULT '0' COMMENT '状态：0-草稿，1-已确认，2-已完成，3-已作废',
-  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
-  `created_by` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '创建人',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `created_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '创建人',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `confirm_time` datetime DEFAULT NULL COMMENT '确认时间',
@@ -897,7 +889,7 @@ CREATE TABLE `sal_order_item` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '明细ID',
   `order_id` bigint unsigned NOT NULL COMMENT '订单ID',
   `product_id` bigint unsigned DEFAULT NULL COMMENT '商品ID',
-  `product_name_snapshot` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '商品名称快照',
+  `product_name_snapshot` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '商品名称快照',
   `price` decimal(12,2) DEFAULT '0.00' COMMENT '单价',
   `quantity` int DEFAULT '0' COMMENT '数量',
   `subtotal` decimal(12,2) DEFAULT '0.00' COMMENT '小计',
@@ -928,10 +920,10 @@ DROP TABLE IF EXISTS `sale_outbound`;
 CREATE TABLE `sale_outbound` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '出库单ID',
   `sale_order_id` bigint unsigned NOT NULL COMMENT '关联销售订单ID',
-  `bill_no` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '出库单号',
+  `bill_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '出库单号',
   `warehouse_id` int unsigned DEFAULT NULL COMMENT '出库仓库ID',
   `status` tinyint DEFAULT '0' COMMENT '状态：0-待确认，1-已确认',
-  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `confirm_time` datetime DEFAULT NULL COMMENT '确认时间',
   PRIMARY KEY (`id`) USING BTREE,
@@ -994,10 +986,10 @@ CREATE TABLE `sign_record` (
   `uid` int NOT NULL COMMENT '用户ID',
   `sign_in_time` datetime DEFAULT NULL COMMENT '签到时间',
   `sign_out_time` datetime DEFAULT NULL COMMENT '签退时间',
-  `remark` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-  `sign_in_status` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sign_out_status` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sign_in_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sign_out_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`sid`) USING BTREE,
   KEY `idx_user_id` (`uid`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='签到记录表';
@@ -1022,16 +1014,16 @@ DROP TABLE IF EXISTS `supplier`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `supplier` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '供应商ID',
-  `code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商编码',
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商名称',
-  `type` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '供应商类型',
-  `contact_person` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系人',
-  `phone` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系电话',
-  `email` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
-  `address` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '地址',
-  `bank_account` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '银行账号',
-  `bank_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '开户银行',
-  `tax_number` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '税人识别号',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商编码',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商名称',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '供应商类型',
+  `contact_person` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系人',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系电话',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
+  `address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '地址',
+  `bank_account` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '银行账号',
+  `bank_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '开户银行',
+  `tax_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '税人识别号',
   `status` tinyint(1) DEFAULT '1' COMMENT '状态',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1064,24 +1056,24 @@ DROP TABLE IF EXISTS `user`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
   `uid` bigint NOT NULL AUTO_INCREMENT,
-  `username` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
-  `dept_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `dept_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `post_id` bigint DEFAULT NULL COMMENT '所属职位',
-  `post_name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '所属职位',
+  `post_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '所属职位',
   `role_id` bigint DEFAULT NULL COMMENT '角色ID',
-  `role_name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色名',
-  `phone` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `bio` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `role_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色名',
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `bio` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `employed` int DEFAULT NULL COMMENT '在职状态 0:实习 1:试用 2:转正 3:离职',
   `join_date` datetime DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_general_ci DEFAULT '启用',
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '启用',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `avatar` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `del_flag` int DEFAULT '0',
   PRIMARY KEY (`uid`) USING BTREE,
   UNIQUE KEY `unique_id` (`uid`) USING BTREE
@@ -1107,12 +1099,12 @@ DROP TABLE IF EXISTS `warehouse`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `warehouse` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '仓库ID',
-  `code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT '仓库编码',
-  `name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '仓库名称',
-  `kind` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仓库类型',
-  `address` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仓库地址',
-  `manager` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '负责人',
-  `phone` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '负责人电话',
+  `code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '仓库编码',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '仓库名称',
+  `kind` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仓库类型',
+  `address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仓库地址',
+  `manager` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '负责人',
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '负责人电话',
   `status` tinyint(1) DEFAULT '1' COMMENT '状态 0-停用 1-启用',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `del_flag` int DEFAULT '0',
@@ -1137,10 +1129,6 @@ INSERT INTO `warehouse` VALUES (1,'F1',' 一号仓库','原料仓','不知道哪
 UNLOCK TABLES;
 
 --
--- Dumping events for database 'testdb'
---
-
---
 -- Dumping routines for database 'testdb'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -1153,4 +1141,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-20  9:06:16
+-- Dump completed on 2026-10-08 12:35:27

@@ -1,6 +1,6 @@
 <template>
-    <!-- 主要内容区域 -->
-    <el-main class="main-content">
+    <!-- 主要内容区域（滚动交给外层 el-main，页面内不再嵌套滚动容器） -->
+    <div class="main-content">
         <div class="profile-container">
             <!-- 页面标题 -->
             <div class="page-header">
@@ -139,7 +139,7 @@
                 </el-col>
             </el-row>
         </div>
-    </el-main>
+    </div>
 
     <!-- 修改密码对话框 -->
     <el-dialog v-model="passwordDialog.visible" title="修改密码" width="400px" :close-on-click-modal="false">
@@ -1023,8 +1023,8 @@ onMounted(() => {
 .main-content {
     background-color: #f5f7fa;
     padding: 0;
-    overflow-y: auto;
-    height: calc(100vh - 20px);
+    min-height: 100%;
+    box-sizing: border-box;
 }
 
 .profile-container {
@@ -1222,20 +1222,6 @@ onMounted(() => {
 
 .aside-menu::-webkit-scrollbar-track {
     background-color: #1f2d3d;
-}
-
-.main-content::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.main-content::-webkit-scrollbar-thumb {
-    background-color: #c0c4cc;
-    border-radius: 4px;
-}
-
-.main-content::-webkit-scrollbar-track {
-    background-color: #f5f7fa;
 }
 
 /* 头像上传样式 */

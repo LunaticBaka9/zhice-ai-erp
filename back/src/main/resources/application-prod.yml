@@ -8,9 +8,9 @@ spring:
             max-request-size: 10MB
     #MySQL配置
     datasource:
-        url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
-        username: #testdb
-        password: #密码
+        url: jdbc:mysql://192.140.163.56:3306/testdb?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
+        username: testdb
+        password: WydGMmyYXiAcn3kC
         driver-class-name: com.mysql.cj.jdbc.Driver
     #Redis
     data:
