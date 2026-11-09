@@ -1,6 +1,11 @@
 spring:
   profiles:
-    active: prod
+    active: dev
+  jackson:
+    # Jackson 3 默认对原始类型收到 null 抛异常；恢复 Jackson 2 行为，
+    # 允许前端省略 stockQuantity/delFlag 等由后端计算的原始类型字段
+    deserialization:
+      fail-on-null-for-primitives: false
 server:
   port: 8080
 

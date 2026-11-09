@@ -8,14 +8,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.lunabaka.config.RabbitConfig;
 import com.lunabaka.entity.OperationLog;
 import com.lunabaka.entity.User;
+import com.lunabaka.service.OperationLogService;
 import com.lunabaka.service.UserService;
 
 import cn.hutool.json.JSONUtil;
@@ -31,7 +30,7 @@ public class OperationLogAspect {
     private UserService userService;
 
     @Resource
-    private RabbitTemplate rabbitTemplate;
+    private OperationLogService operationLogService;
 
     // 使用Hutool的JSON工具
 
@@ -115,10 +114,10 @@ public class OperationLogAspect {
         }
 
         try {
-            rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE, RabbitConfig.ROUTING_KEY_LOG, operationLog);
-            log.info("日志已发送到RabbitMQ队列");
+            operationLogService.insertLog(operationLog);
+            log.info("操作日志已写入数据库");
         } catch (Exception e) {
-            log.error("发送日志到RabbitMQ失败", e);
+            log.error("操作日志写入数据库失败", e);
         }
     }
 
