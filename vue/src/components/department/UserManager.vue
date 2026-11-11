@@ -260,14 +260,15 @@
                     </el-col>
                 </el-row>
 
-                <el-form-item label="角色" prop="role">
+                <el-form-item label="角色" prop="roleId">
                     <el-select
-                        v-model="dialog.form.roleName"
+                        v-model="dialog.form.roleId"
                         placeholder="请选择角色"
                         style="width: 100%"
                         :disabled="dialog.isView"
+                        @change="onRoleChange"
                     >
-                        <el-option v-for="r in roleOptions" :key="r.id" :label="r.name" :value="r.name"/>
+                        <el-option v-for="r in roleOptions" :key="r.id" :label="r.name" :value="r.id"/>
                     </el-select>
                 </el-form-item>
 
@@ -563,6 +564,7 @@ const dialog = reactive({
         name: "",
         password: "",
         confirmPassword: "",
+        roleId: null,
         roleName: "",
         deptName: [],
         phone: "",
@@ -612,7 +614,7 @@ const dialog = reactive({
                 trigger: "blur",
             },
         ],
-        roleName: [{required: true, message: "请选择角色", trigger: "change"}],
+        roleId: [{required: true, message: "请选择角色", trigger: "change"}],
         deptName: [
             {required: true, message: "请选择部门", trigger: "change"},
         ],
@@ -746,6 +748,7 @@ const handleAdd = () => {
         name: "",
         password: "",
         confirmPassword: "",
+        roleId: null,
         roleName: "",
         deptName: "",
         employed: "",
@@ -770,6 +773,7 @@ const handleEdit = (row) => {
         name: row.name || "",
         password: "",
         confirmPassword: "",
+        roleId: row.roleId || roleOptions.value.find((r) => r.name === row.roleName)?.id || null,
         roleName: row.roleName || "",
         deptName: row.deptName || "",
         phone: row.phone || "",
@@ -937,6 +941,11 @@ const exportData = async () => {
 
 const roleOptions = ref([]);
 const postOptions = ref([]);
+
+const onRoleChange = (roleId) => {
+    const role = roleOptions.value.find((r) => r.id === roleId);
+    dialog.form.roleName = role ? role.name : "";
+};
 
 const loadRoles = async () => {
     try {

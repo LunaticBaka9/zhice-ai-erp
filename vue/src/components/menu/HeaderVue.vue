@@ -232,9 +232,10 @@ import {
     markMessageRead,
 } from "@/api/message";
 import {useMenuStore} from "../../store/menu";
+import {storeToRefs} from "pinia";
 
 const menuStore = useMenuStore();
-const isCollapse = menuStore.isCollapse;
+const {isCollapse} = storeToRefs(menuStore);
 const handleToggle = menuStore.handleToggle;
 
 const data = reactive({
@@ -708,6 +709,8 @@ const login = () => {
 
 const logout = () => {
     localStorage.removeItem("local_user");
+    localStorage.removeItem("token");
+    menuStore.clearAuth();
     router.push("/login");
 };
 

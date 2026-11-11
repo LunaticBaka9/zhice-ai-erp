@@ -1,359 +1,221 @@
-# 乡链 - 进销存管理系统
+# 乡链 · 进销存管理系统
 
-一个基于 Spring Boot + Vue 的进销存管理系统。
+Spring Boot + Vue 的进销存系统，覆盖商品、库存、采购、销售，以及组织与权限。另有 UniApp 移动端，接口与 Web 共用。
+
+## 能做什么
+
+| 模块 | 内容 |
+| --- | --- |
+| 基础资料 | 商品、分类、供应商、客户、仓库 |
+| 库存 | 查询、出入库/调拨/盘点作业、库存预警 |
+| 采购 | 采购订单、采购入库、单据查询 |
+| 销售 | 销售订单、销售发货 |
+| 组织 | 部门、用户、职位、角色、菜单 |
+| 协同 | 公告、消息中心、会议 |
+| 报表 | 核心报表、销售分析、库存分析 |
+| 系统 | 操作日志、AI 助手（需自行配置 DeepSeek API Key） |
+
+侧边栏按当前用户的角色显示。超级管理员看到全部菜单；其他角色只看到已分配的菜单。工作台和个人主页始终可进。
 
 ## 技术栈
 
-### 后端
+- 后端：Java 21、Spring Boot 4、MyBatis-Plus、JWT、MySQL 8、Redis 8
+- Web：Vue 3.5、Element Plus、Vite、Pinia、Vue Router
+- 移动端：UniApp（与 Web 共用后端）
 
-- Java 21
-- Spring Boot
-- MyBatisPlus
-- JWT 认证
+## 环境
+
+- JDK 21
+- Maven 3.6+（可用仓库内 `back/mvnw`）
 - MySQL 8
 - Redis 8
-
-### 前端
-
-- Vue 3.5
-- Element Plus
-- Vite
-- Pinia
-- Vue Router
-
-## 环境要求
-
-- JDK 17+
-- Maven 3.6+
-- MySQL 5.7+
 - Node.js 18+
-- Redis 8+
 
 ## 快速开始
 
-### 1. 数据库初始化
+### 1. 准备数据库
+
+```sql
+CREATE DATABASE testdb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+```
 
 ```bash
-# 登录 MySQL
-mysql -u root -p
+# 导入主库
+mysql -u root -p testdb < database/testdb.sql
 
-# 创建数据库
-CREATE DATABASE testdb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
-# 导入 SQL 文件
-source database/testdb.sql
+# 补齐角色-菜单、角色-权限（已有库也执行这一条）
+mysql -u root -p testdb < database/role_permission_init.sql
 ```
 
-### 2. 后端配置
+若 MySQL 跑在 Docker 里：
 
-配置文件位于 `src/main/resources/application-dev.properties`：
-
-```properties
-# 数据库连接（根据实际情况修改）
-spring.datasource.url=jdbc:mysql://localhost:3306/testdb
-spring.datasource.username=root
-spring.datasource.password=root
-
-# JWT 密钥（生产环境请修改）
-config.jwt.secret=YourSecureSecretKey
+```bash
+docker exec -i <mysql容器名> mysql -uroot -proot testdb < database/testdb.sql
+docker exec -i <mysql容器名> mysql -uroot -proot testdb < database/role_permission_init.sql
 ```
+
+只导入 `testdb.sql`、不跑第二份脚本时，角色可以增删改，但分配菜单会因缺表或缺权限数据失败，侧边栏也无法按角色过滤。
+
+### 2. 核对后端配置
+
+开发配置在 `back/src/main/resources/application-dev.yml`，按本机修改：
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
+    username: root
+    password: root
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+config:
+  jwt:
+    secret: 请换成至少 64 字符的密钥
+    expire: 86400
+```
+
+激活的 profile 是 `dev`（见 `application.yml`）。
 
 ### 3. 启动后端
 
 ```bash
-# 在项目根目录执行
+cd back
 ./mvnw spring-boot:run
-
-# 或打包后运行
-./mvnw clean package
-java -jar target/demo-0.0.1-SNAPSHOT.jar
 ```
 
-后端服务默认运行在 http://localhost:8080
-
-### 4. 启动前端
+或：
 
 ```bash
-cd Vue
+cd back
+./mvnw clean package -DskipTests
+java -jar target/zhice-ai-erp-0.0.1.jar
+```
 
-# 安装依赖
+后端：http://localhost:8080
+
+### 4. 启动 Web 前端
+
+```bash
+cd vue
 npm install
-
-# 启动开发服务器
 npm run dev
 ```
 
-前端服务默认运行在 http://localhost:5173
+前端：http://localhost:5173  
+Vite 把 `/api` 代理到 `8080`，并去掉 `/api` 前缀，所以浏览器请求 `/api/login`，后端实际收到 `/login`。
+
+### 5. 启动 UniApp（可选）
+
+```bash
+cd uniapp
+npm install
+npm run dev:h5
+```
+
+同样走 `/api` → `8080`。微信小程序用 `npm run dev:mp-weixin`。
 
 ## 默认账号
 
-| 角色     | 用户名 | 密码   |
-| -------- | ------ | ------ |
-| 管理员   | admin  | 123456 |
-| 测试用户 | test   | test   |
+| 说明 | 用户名 | 密码 |
+| --- | --- | --- |
+| 超级管理员 | admin | 123456 |
 
-## 项目结构
+库里还有 `test`、`admin1` 等演示账号，密码以当前 `user` 表为准。生产环境请改掉默认密码和 JWT 密钥。
 
-```
-├── Vue/                      # Vue 前端项目
-│   ├── src/
-│   │   ├── components/       # 组件目录
-│   │   │   ├── base/        # 基础数据管理（商品、客户、仓库等）
-│   │   │   ├── inventory/   # 库存管理
-│   │   │   ├── menu/       # 菜单组件
-│   │   │   ├── notice/    # 公告管理
-│   │   │   ├── purchase/   # 采购管理
-│   │   │   ├── sales/     # 销售管理
-│   │   │   └── system/    # 系统管理
-│   │   ├── router/          # 路由配置
-│   │   ├── store/          # Pinia 状态管理
-│   │   ├── utils/          # 工具函数
-│   │   └── views/          # 页面视图
-│   │       └── login/      # 登录注册页
-│   └── package.json
-├── src/main/java/           # Java 后端代码
-│   └── com/example/demo/
-│       ├── controller/     # 控制器
-│       ├── entity/         # 实体类
-│       ├── mapper/         # MyBatis Mapper
-│       ├── service/       # 业务逻辑
-│       └── common/         # 公共类
-├── database/               # 数据库 SQL 脚本
-│   ├── testdb.sql         # 主数据库
-│   └── sales/            # 销售模块
-├── src/main/resources/
-│   ├── mapper/           # MyBatis XML 映射文件
-│   └── application*.properties  # 配置文件
-└── pom.xml               # Maven 配置
-```
+## 角色权限怎么用
 
-## 主要功能模块
+1. **部门管理 → 角色列表**：维护角色；给角色勾选菜单和按钮权限。
+2. **用户列表**：给用户指定角色（同时写入角色 ID 和名称）。
+3. 该用户重新登录后，侧边栏只保留已分配菜单。
+4. 系统角色（如超级管理员）不能删除。新增角色必须填写名称和编码，编码唯一。
 
-### 基础数据管理
+菜单管「能看见哪些页面」，权限码管按钮（如 `role:add`、`goods:edit`）。后端目前按登录态鉴权，不按权限码拦截每一个 URL。
 
-- 商品管理：商品 SKU、分类、品牌、规格、价格
-- 客户管理：客户信息、价格等级、信用额度
-- 供应商管理
-- 仓库管理
-- 商品分类管理
+## 两条主业务链
 
-### 库存管理
-
-- 库存查询与预警
-- 库存作业（入库、出库、调拨、盘点）
-- 库存预警提醒
-
-### 采购管理
-
-- 采购订单
-- 采购入库
-
-### 销售管理
-
-- 销售订单
-- 销售发货
-
-### 公告系统
-
-- 公告发布与阅读
-
-### 系统管理
-
-- 用户管理
-- 角色权限
-- 系统菜单
-- 操作日志
-
-## 典型使用流程
-
-### 基础数据管理
-
-#### 商品管理
+采购：
 
 ```
-新增商品 → 设置分类/价格/规格 → 维护商品信息 → 删除/禁用商品
+采购订单（草稿）→ 确认 → 生成入库单 → 确认入库 → 库存增加
 ```
 
-1. **新增商品**：填写商品名称、SKU、分类、品牌、规格、价格等信息
-2. **设置分类/价格**：为商品关联分类、设置销售价格和成本价
-3. **维护商品信息**：修改商品信息或调整价格
-4. **删除/禁用商品**：对不再销售的商品进行禁用或删除
-
-#### 客户管理
+销售：
 
 ```
-新增客户 → 设置价格等级/信用额度 → 维护客户信息 → 删除客户
+销售订单（草稿）→ 确认 → 生成出库单 → 确认出库 → 库存减少
 ```
 
-1. **新增客户**：填写客户名称、联系方式、地址等信息
-2. **设置价格等级/信用额度**：为客户设置对应的价格等级和信用额度
-3. **维护客户信息**：修改客户信息
-4. **删除客户**：删除不存在的客户
-
-#### 供应商管理
+## 目录
 
 ```
-新增供应商 → 维护供应商信息 → 删除供应商
+├── back/                      后端（Spring Boot）
+│   ├── pom.xml
+│   └── src/main/
+│       ├── java/com/lunabaka/  controller / service / entity / mapper
+│       └── resources/          application-*.yml、MyBatis XML
+├── vue/                       Web 前端
+│   └── src/
+│       ├── api/               接口封装
+│       ├── components/        页面（登录、基础资料、进销存、部门、系统等）
+│       ├── router/
+│       ├── store/             Pinia（含当前用户菜单与权限）
+│       └── utils/
+├── uniapp/                    移动端
+├── database/
+│   ├── testdb.sql             全库结构与演示数据
+│   └── role_permission_init.sql  角色菜单 / 权限初始数据
+└── README.md
 ```
 
-1. **新增供应商**：填写供应商名称、联系方式、地址等信息
-2. **维护供应商信息**：修改供应商信息
-3. **删除供应商**：删除不合作的供应商
+## 接口
 
-#### 仓库管理
+前端开发时统一加 `/api` 前缀。后端映射不含 `/api`。
 
-```
-新增仓库 → 设置仓库信息 → 修改仓库状态 → 删除仓库
-```
+| 模块 | 后端路径 | 说明 |
+| --- | --- | --- |
+| 登录 / 注册 | `/login`、`/register` | 账号登录、注册；另有邮箱验证码登录 |
+| 用户 | `/user/*` | 用户 CRUD、导入导出 |
+| 角色 | `/role/*` | 角色 CRUD、分配菜单/权限、当前用户菜单 |
+| 权限树 | `/permission/tree` | 按钮权限树 |
+| 菜单 | `/menu/*` | 系统菜单 |
+| 商品 / 客户 / 库存 / 销售 / 采购 / 公告 | `/goods/*`、`/customer/*`、`/inventory*`、`/sale/*`、`/purchase*`、`/notice/*` | 对应业务 |
 
-1. **新增仓库**：填写仓库名称、地址、负责人等信息
-2. **设置仓库信息**：配置仓库的存储能力和负责人
-3. **修改仓库状态**：启用/停用仓库
-4. **删除仓库**：删除不再使用的仓库
+开发环境 OpenAPI：http://localhost:8080/swagger-ui.html
 
-#### 商品分类管理
+AI 助手不在配置文件里写 API Key。用户在「AI 助手 → API Key 设置」里保存自己的 DeepSeek Key，后端按用户写入 Redis。
 
-```
-新增分类 → 构建分类树 → 修改分类 → 删除分类
-```
-
-1. **新增分类**：填写分类名称，选择上级分类
-2. **构建分类树**：通过上级分类构建多级分类结构
-3. **修改分类**：修改分类名称或上级分类
-4. **删除分类**：删除空分类
-
-### 库存管理
-
-#### 库存作业
-
-```
-新增库存作业 → 执行作业 → 更新作业状态 → 删除作业
-```
-
-1. **新增库存作业**：选择作业类型（入库/出库/调拨/盘点），填写商品和数量
-2. **执行作业**：根据作业单执行具体操作
-3. **更新作业状态**：更新作业执行状态
-4. **删除作业**：删除草稿状态的作业
-
-#### 库存预警
-
-```
-生成预警 → 查看预警列表 → 确认预警 → 提交补货申请
-```
-
-1. **生成预警**：系统扫描所有商品，生成库存预警记录
-2. **查看预警列表**：查看低于安全库存的商品预警
-3. **确认预警**：对预警进行确认和处理
-4. **提交补货申请**：根据预警提交补货申请
-
-### 采购流程
-
-```
-创建采购订单 → 确认采购订单 → 生成采购入库单 → 确认采购入库 → 库存增加
-```
-
-1. **创建采购订单**：在采购订单页面填写供应商、商品、数量、价格等信息，保存为草稿状态
-2. **确认采购订单**：确认后订单状态变为"已确认"，等待入库
-3. **生成采购入库单**：选择已确认的采购订单，生成入库单
-4. **确认采购入库**：核实货物后确认入库，库存相应增加
-
-### 销售流程
-
-```
-创建销售订单 → 确认销售订单 → 生成销售出库单 → 确认销售出库 → 库存减少
-```
-
-1. **创建销售订单**：在销售订单页面填写客户、商品、数量、价格等信息，保存为草稿状态
-2. **确认销售订单**：确认后订单状态变为"已确认"，等待出库
-3. **生成销售出库单**：选择已确认的销售订单，生成出库单
-4. **确认销售出库**：核实货物后确认出库，库存相应减少
-
-### 公告系统
-
-```
-发布公告 → 查看公告 → 标记已读 → 删除公告
-```
-
-1. **发布公告**：填写公告标题、内容，选择发布范围
-2. **查看公告**：用户查看公告列表和详情
-3. **标记已读**：用户阅读公告后标记为已读
-4. **删除公告**：删除过期公告
-
-### 系统管理
-
-#### 用户管理
-
-```
-新增用户 → 分配角色 → 维护用户信息 → 禁用/删除用户
-```
-
-1. **新增用户**：填写用户名、密码、角色等信息
-2. **分配角色**：为用户分配系统角色
-3. **维护用户信息**：修改用户信息
-4. **禁用/删除用户**：禁用或删除用户账号
-
-#### 操作日志
-
-```
-执行操作 → 查看日志 → 导出日志
-```
-
-1. **执行操作**：用户执行增删改等操作
-2. **查看日志**：在日志页面查看操作记录
-3. **导出日志**：导出操作日志用于审计
-
-#### 菜单管理
-
-```
-配置菜单 → 设置菜单权限 → 调整菜单顺序
-```
-
-1. **配置菜单**：添加/修改系统菜单
-2. **设置菜单权限**：为角色配置菜单访问权限
-3. **调整菜单顺序**：调整菜单显示顺序
-
-## API 接口
-
-主要接口：`/api`
-
-| 模块 | 接口路径          | 说明     |
-| ---- | ----------------- | -------- |
-| 登录 | `/api/login`      | 用户登录 |
-| 注册 | `/api/register`   | 用户注册 |
-| 商品 | `/api/goods/*`    | 商品管理 |
-| 客户 | `/api/customer/*` | 客户管理 |
-| 库存 | `/api/inventory*` | 库存管理 |
-| 销售 | `/api/sale/*`     | 销售订单 |
-| 公告 | `/api/notice/*`   | 公告管理 |
-| 用户 | `/api/user/*`     | 用户管理 |
-
-## 开发相关命令
+## 常用命令
 
 ```bash
 # 后端打包
-./mvnw clean package -DskipTests
+cd back && ./mvnw clean package -DskipTests
 
-# 前端构建生产版本
-cd Vue && npm run build
+# Web 生产构建
+cd vue && npm run build
 
-# 运行测试
-./mvnw test
+# 后端测试（仓库内测试很少）
+cd back && ./mvnw test
 ```
-
-## 注意事项
-
-1. 首次运行需先创建数据库并导入 `database/testdb.sql`
-2. 后端端口 8080，前端端口 5173，如遇端口冲突请修改配置文件
-3. 生产环境请修改默认密码和 JWT 密钥
-4. 前端代理配置在 `Vue/vite.config.js` 中
 
 ## 常见问题
 
-**Q: 启动报错数据库连接失败**
-A: 检查 MySQL 是否启动，确认数据库用户名密码配置正确
+**数据库连不上**  
+确认 MySQL 已启动，且 `application-dev.yml` 里的库名、账号、密码与本机一致。
 
-**Q: 前端请求 404**
-A: 确认后端服务已启动，检查 Vite 代理配置
+**前端请求 404**  
+先开后端。代理在 `vue/vite.config.js`（UniApp 在 `uniapp/vite.config.js`）。
 
-**Q: 登录失败**
-A: 检查数据库是否正确导入，检查 JWT 配置是否一致
+**登录失败**  
+确认已导入 `testdb.sql`。JWT `secret` 改过之后，旧 token 会失效，重新登录即可。
+
+**分配菜单报错 / 侧边栏不按角色变化**  
+补跑 `database/role_permission_init.sql`，然后重新登录。
+
+**端口被占用**  
+后端改 `application-dev.yml` 的 `server.port`，前端改 Vite 端口。
+
+**跑一段时间后接口全 500**  
+开发配置里已关掉 Spring DevTools 自动重启，避免编译中途重启导致 Mapper 丢失。不要在 `application-dev.yml` 里重新打开 `spring.devtools.restart.enabled`。

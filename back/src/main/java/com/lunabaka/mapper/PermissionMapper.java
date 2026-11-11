@@ -2,6 +2,7 @@ package com.lunabaka.mapper;
 
 import com.lunabaka.entity.Permission;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author lunaticbaka
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2026-06-30 17:42:19
 * @Entity com.lunabaka.entity.Permission
 */
+@Mapper
 public interface PermissionMapper extends BaseMapper<Permission> {
 
 }

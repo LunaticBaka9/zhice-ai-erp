@@ -11,6 +11,7 @@ import routeReport from "./routeReport.js";
 import routeMeeting from "./routeMeeting.js";
 import routeDept from "./routeDept.js";
 import routeAi from "./routeAi.js";
+import { useMenuStore } from "../store/menu.ts";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -42,15 +43,10 @@ const router = createRouter({
     ],
 });
 
-// 路由守卫
-router.beforeEach((to, from) => {
-    // 白名单路径（不需要登录）
+// 路由守卫：登录后按角色菜单拦截侧边栏对应路径
+router.beforeEach(async (to) => {
     const whiteList = ["/login", "/register"];
-
-    // 检查用户是否已登录
     const isAuthenticated = checkAuth();
-
-    // 检查当前路径是否在白名单中
     const isWhiteListed = whiteList.includes(to.path);
 
     if (isWhiteListed) {
@@ -58,12 +54,18 @@ router.beforeEach((to, from) => {
             return { path: "/" };
         }
         return true;
-    } else {
-        if (isAuthenticated) {
-            return true;
-        }
+    }
+    if (!isAuthenticated) {
         return { path: "/login", query: { redirect: to.fullPath } };
     }
+    const menuStore = useMenuStore();
+    if (!menuStore.loaded) {
+        await menuStore.fetchAuth();
+    }
+    if (!menuStore.canAccess(to.path)) {
+        return { path: "/" };
+    }
+    return true;
 });
 
 // 检查用户是否已登录

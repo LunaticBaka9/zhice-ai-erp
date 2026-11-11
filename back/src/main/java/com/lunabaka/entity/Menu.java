@@ -1,11 +1,16 @@
 package com.lunabaka.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.List;
 
+/**
+ * 系统菜单表
+ */
 @Data
+@TableName("menu")
 public class Menu {
     private Integer id;
     private Integer pid;

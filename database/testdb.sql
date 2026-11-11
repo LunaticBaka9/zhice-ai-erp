@@ -447,6 +447,14 @@ INSERT INTO `menu` VALUES (1,'工作台','/','house','工作台',NULL,'/views/da
 /*!40000 ALTER TABLE `menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
+INSERT INTO `menu` (`id`,`name`,`path`,`icon`,`description`,`pid`,`page_path`,`sort_num`,`status`) VALUES
+(33,'会议管理','meeting','chat-square','会议相关操作',NULL,'/views/meeting/index',11,1),
+(34,'发起会议','/meeting/create','chat-square','发起会议',33,'/views/meeting/create',1101,1),
+(35,'会议列表','/meeting/index','chat-square','会议列表',33,'/views/meeting/index',1102,1),
+(36,'部门列表','/dept/list','office-building','部门列表',26,'/views/dept/list',805,1),
+(37,'职位管理','/system/post','office-building','职位管理',26,'/views/system/post',806,1),
+(38,'AI助手','/ai/partner','chat-line-square','AI助手',NULL,'/views/ai/partner',12,1);
+
 --
 -- Table structure for table `message`
 --
@@ -835,6 +843,19 @@ LOCK TABLES `role_permission` WRITE;
 /*!40000 ALTER TABLE `role_permission` DISABLE KEYS */;
 /*!40000 ALTER TABLE `role_permission` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `role_menu`
+--
+
+DROP TABLE IF EXISTS `role_menu`;
+CREATE TABLE `role_menu` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '角色菜单关联ID',
+  `role_id` bigint NOT NULL COMMENT '角色ID',
+  `menu_id` int NOT NULL COMMENT '菜单ID',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_role_menu` (`role_id`,`menu_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户角色菜单关联表';
 
 --
 -- Table structure for table `sal_order`

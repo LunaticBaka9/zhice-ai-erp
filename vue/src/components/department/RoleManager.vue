@@ -27,13 +27,14 @@
         </el-card>
 
         <div class="card" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px">
-            <el-button type="primary" @click="handleAdd">
+            <el-button v-if="menuStore.hasPermission('role:add')" type="primary" @click="handleAdd">
                 <el-icon><Plus /></el-icon>
                 新增用户角色
             </el-button>
             <el-button type="primary" @click="exportData"> 导出表格 </el-button>
             <el-upload
-                action="/role/importData"
+                action="/api/role/importData"
+                :headers="uploadHeaders"
                 :on-success="handleImport"
                 style="display: inline-block; margin-left: 10px"
                 :show-file-list="false"
@@ -56,8 +57,10 @@
                 <el-table-column type="selection" width="55" />
                 <el-table-column prop="id" label="ID" width="80" />
                 <el-table-column prop="name" label="用户角色" />
+                <el-table-column prop="code" label="编码" width="160" />
+                <el-table-column prop="sort" label="排序" width="80" />
                 <el-table-column prop="bio" label="简介" />
-                <el-table-column label="状态" >
+                <el-table-column label="状态" width="100">
                     <template #default="{ row }">
                         <el-switch
                             v-model="row.status"
@@ -67,9 +70,10 @@
                         />
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" fixed="right">
+                <el-table-column label="操作" fixed="right" width="360">
                     <template #default="{ row }">
                         <el-button
+                            v-if="menuStore.hasPermission('role:edit')"
                             link
                             type="primary"
                             size="small"
@@ -79,9 +83,29 @@
                             编辑
                         </el-button>
                         <el-button
+                            v-if="menuStore.hasPermission('role:assignMenu')"
+                            link
+                            type="primary"
+                            size="small"
+                            @click="openMenuDialog(row)"
+                        >
+                            分配菜单
+                        </el-button>
+                        <el-button
+                            v-if="menuStore.hasPermission('role:assignPermission')"
+                            link
+                            type="primary"
+                            size="small"
+                            @click="openPermDialog(row)"
+                        >
+                            分配权限
+                        </el-button>
+                        <el-button
+                            v-if="menuStore.hasPermission('role:delete')"
                             link
                             type="danger"
                             size="small"
+                            :disabled="row.isSystem === 1"
                             @click="handleDelete(row)"
                         >
                             <el-icon><Delete /></el-icon>
@@ -131,9 +155,29 @@
                             />
                         </el-form-item>
                     </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="角色编码" prop="code">
+                            <el-input
+                                v-model="dialog.form.code"
+                                placeholder="请输入角色编码"
+                                :disabled="dialog.isView || dialog.form.isSystem === 1"
+                            />
+                        </el-form-item>
+                    </el-col>
                 </el-row>
 
                 <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="排序" prop="sort">
+                            <el-input-number
+                                v-model="dialog.form.sort"
+                                :min="0"
+                                :max="9999"
+                                style="width: 100%"
+                                :disabled="dialog.isView"
+                            />
+                        </el-form-item>
+                    </el-col>
                     <el-col :span="12">
                         <el-form-item label="状态" prop="status">
                             <el-select
@@ -176,36 +220,95 @@
                 </span>
             </template>
         </el-dialog>
+
+        <!-- 分配菜单 -->
+        <el-dialog
+            v-model="menuDialog.visible"
+            :title="menuDialog.title"
+            width="520px"
+            :close-on-click-modal="false"
+        >
+            <el-tree
+                ref="menuTreeRef"
+                :data="menuTree"
+                show-checkbox
+                node-key="id"
+                :props="{ label: 'name', children: 'children' }"
+                default-expand-all
+                :check-strictly="false"
+            />
+            <template #footer>
+                <el-button @click="menuDialog.visible = false">取消</el-button>
+                <el-button type="primary" :loading="menuDialog.loading" @click="submitMenus">确认</el-button>
+            </template>
+        </el-dialog>
+
+        <!-- 分配权限 -->
+        <el-dialog
+            v-model="permDialog.visible"
+            :title="permDialog.title"
+            width="520px"
+            :close-on-click-modal="false"
+        >
+            <el-tree
+                ref="permTreeRef"
+                :data="permTree"
+                show-checkbox
+                node-key="id"
+                :props="{ label: 'name', children: 'children' }"
+                default-expand-all
+                :check-strictly="false"
+            />
+            <template #footer>
+                <el-button @click="permDialog.visible = false">取消</el-button>
+                <el-button type="primary" :loading="permDialog.loading" @click="submitPerms">确认</el-button>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from "vue";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {Delete, Edit, Plus, Refresh, Search,} from "@element-plus/icons-vue";
-import { getRoleList as apiGetRoleList, addRole, updateRole, deleteRole, updateRoleStatus, exportRoles } from "@/api";
+import { nextTick, onMounted, reactive, ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, Edit, Plus, Refresh, Search } from "@element-plus/icons-vue";
+import {
+    addRole,
+    assignRoleMenus,
+    assignRolePermissions,
+    deleteRole,
+    exportRoles,
+    getMenuList,
+    getPermissionTree,
+    getRoleList as apiGetRoleList,
+    getRoleMenus,
+    getRolePermissions,
+    updateRole,
+    updateRoleStatus,
+} from "@/api";
+import { useMenuStore } from "@/store/menu.ts";
 
-// 搜索表单
+const menuStore = useMenuStore();
+
+const uploadHeaders = {
+    token: localStorage.getItem("token") || "",
+};
+
 const searchForm = reactive({
     name: "",
-    status: ""
+    status: "",
 });
 
-// 用户列表数据
 const roleList = ref([]);
 const loading = ref(false);
 
-// 分页参数
 const pagination = reactive({
     pageNum: 1,
     pageSize: 10,
     total: 0,
 });
 
-// 选中的行
 const selectedRows = ref([]);
 
-// 新增/编辑对话框
 const roleFormRef = ref();
 const dialog = reactive({
     visible: false,
@@ -216,23 +319,42 @@ const dialog = reactive({
     form: {
         id: null,
         name: "",
+        code: "",
+        sort: 0,
         bio: "",
         status: 1,
+        isSystem: 0,
     },
     rules: {
         name: [
             { required: true, message: "请输入用户角色", trigger: "blur" },
-            {
-                min: 2,
-                max: 20,
-                message: "长度在 2 到 20 个字符",
-                trigger: "blur",
-            },
+            { min: 2, max: 20, message: "长度在 2 到 20 个字符", trigger: "blur" },
+        ],
+        code: [
+            { required: true, message: "请输入角色编码", trigger: "blur" },
+            { min: 2, max: 50, message: "长度在 2 到 50 个字符", trigger: "blur" },
         ],
     },
 });
 
-// 获取用户角色列表
+const menuTreeRef = ref();
+const menuTree = ref([]);
+const menuDialog = reactive({
+    visible: false,
+    title: "",
+    loading: false,
+    roleId: null,
+});
+
+const permTreeRef = ref();
+const permTree = ref([]);
+const permDialog = reactive({
+    visible: false,
+    title: "",
+    loading: false,
+    roleId: null,
+});
+
 const getRoleList = async () => {
     loading.value = true;
     try {
@@ -241,7 +363,7 @@ const getRoleList = async () => {
             pageSize: pagination.pageSize,
         };
         Object.entries(searchForm).forEach(([key, value]) => {
-            if (value !== '') {
+            if (value !== "") {
                 params[key] = value;
             }
         });
@@ -249,7 +371,6 @@ const getRoleList = async () => {
         if (res.code === "200") {
             roleList.value = res.data.records;
             pagination.total = res.data.total;
-            console.log(res.data);
         } else {
             ElMessage.error(res.msg || "获取用户角色列表失败");
         }
@@ -258,15 +379,13 @@ const getRoleList = async () => {
     } finally {
         loading.value = false;
     }
-}
+};
 
-// 搜索
 const handleSearch = () => {
     pagination.pageNum = 1;
     getRoleList();
 };
 
-// 重置搜索
 const resetSearch = () => {
     Object.keys(searchForm).forEach((key) => {
         searchForm[key] = "";
@@ -274,7 +393,6 @@ const resetSearch = () => {
     handleSearch();
 };
 
-// 分页改变
 const handleSizeChange = (val) => {
     pagination.pageSize = val;
     getRoleList();
@@ -285,12 +403,10 @@ const handleCurrentChange = (val) => {
     getRoleList();
 };
 
-// 表格选择变化
 const handleSelectionChange = (val) => {
     selectedRows.value = val;
 };
 
-// 新增用户角色
 const handleAdd = () => {
     dialog.title = "新增用户角色";
     dialog.isAdd = true;
@@ -298,13 +414,15 @@ const handleAdd = () => {
     dialog.form = {
         id: null,
         name: "",
+        code: "",
+        sort: 0,
         status: 1,
         bio: "",
+        isSystem: 0,
     };
     dialog.visible = true;
 };
 
-// 编辑用户角色
 const handleEdit = (row) => {
     dialog.title = "编辑用户角色";
     dialog.isAdd = false;
@@ -312,13 +430,15 @@ const handleEdit = (row) => {
     dialog.form = {
         id: row.id || null,
         name: row.name || "",
+        code: row.code || "",
+        sort: row.sort ?? 0,
         status: row.status ?? 1,
         bio: row.bio || "",
+        isSystem: row.isSystem ?? 0,
     };
     dialog.visible = true;
 };
 
-// 提交用户
 const submitRole = async () => {
     if (!roleFormRef.value) return;
     await roleFormRef.value.validate(async (valid) => {
@@ -354,8 +474,11 @@ const submitRole = async () => {
     });
 };
 
-// 删除用户
 const handleDelete = (row) => {
+    if (row.isSystem === 1) {
+        ElMessage.warning("系统角色不可删除");
+        return;
+    }
     ElMessageBox.confirm(`确定要删除用户角色"${row.name}"吗？`, "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -390,8 +513,7 @@ const handleStatusChange = async (row) => {
     }
 };
 
-
-const handleImport = (res, file, filelist) => {
+const handleImport = (res) => {
     if (res.code === "200") {
         ElMessage.success("数据导入成功");
     } else {
@@ -400,7 +522,6 @@ const handleImport = (res, file, filelist) => {
     getRoleList();
 };
 
-// 关闭对话框
 const handleDialogClose = () => {
     roleFormRef.value?.clearValidate();
 };
@@ -422,7 +543,101 @@ const exportData = async () => {
     }
 };
 
-// 页面加载时获取数据
+/** 收集树节点 ID，用于回显时只勾叶子、父级由 el-tree 自动半选 */
+const collectLeafIds = (nodes, idSet, result) => {
+    (nodes || []).forEach((node) => {
+        if (node.children && node.children.length) {
+            collectLeafIds(node.children, idSet, result);
+        } else if (idSet.has(node.id)) {
+            result.push(node.id);
+        }
+    });
+};
+
+const openMenuDialog = async (row) => {
+    menuDialog.title = `分配菜单 - ${row.name}`;
+    menuDialog.roleId = row.id;
+    menuDialog.visible = true;
+    try {
+        const [treeRes, idsRes] = await Promise.all([getMenuList(), getRoleMenus(row.id)]);
+        if (treeRes.code === "200") {
+            menuTree.value = treeRes.data || [];
+        }
+        const ids = idsRes.code === "200" ? idsRes.data || [] : [];
+        const idSet = new Set(ids);
+        const leaves = [];
+        collectLeafIds(menuTree.value, idSet, leaves);
+        await nextTick();
+        menuTreeRef.value?.setCheckedKeys(leaves);
+    } catch (e) {
+        ElMessage.error("加载菜单失败");
+    }
+};
+
+const submitMenus = async () => {
+    menuDialog.loading = true;
+    try {
+        const checked = menuTreeRef.value?.getCheckedKeys(false) || [];
+        const half = menuTreeRef.value?.getHalfCheckedKeys() || [];
+        const res = await assignRoleMenus({
+            roleId: menuDialog.roleId,
+            menuIds: [...checked, ...half],
+        });
+        if (res.code === "200") {
+            ElMessage.success("菜单分配成功");
+            menuDialog.visible = false;
+        } else {
+            ElMessage.error(res.msg || "菜单分配失败");
+        }
+    } catch (e) {
+        ElMessage.error("菜单分配失败");
+    } finally {
+        menuDialog.loading = false;
+    }
+};
+
+const openPermDialog = async (row) => {
+    permDialog.title = `分配权限 - ${row.name}`;
+    permDialog.roleId = row.id;
+    permDialog.visible = true;
+    try {
+        const [treeRes, idsRes] = await Promise.all([getPermissionTree(), getRolePermissions(row.id)]);
+        if (treeRes.code === "200") {
+            permTree.value = treeRes.data || [];
+        }
+        const ids = idsRes.code === "200" ? idsRes.data || [] : [];
+        const idSet = new Set(ids);
+        const leaves = [];
+        collectLeafIds(permTree.value, idSet, leaves);
+        await nextTick();
+        permTreeRef.value?.setCheckedKeys(leaves);
+    } catch (e) {
+        ElMessage.error("加载权限失败");
+    }
+};
+
+const submitPerms = async () => {
+    permDialog.loading = true;
+    try {
+        const checked = permTreeRef.value?.getCheckedKeys(false) || [];
+        const half = permTreeRef.value?.getHalfCheckedKeys() || [];
+        const res = await assignRolePermissions({
+            roleId: permDialog.roleId,
+            permissionIds: [...checked, ...half],
+        });
+        if (res.code === "200") {
+            ElMessage.success("权限分配成功");
+            permDialog.visible = false;
+        } else {
+            ElMessage.error(res.msg || "权限分配失败");
+        }
+    } catch (e) {
+        ElMessage.error("权限分配失败");
+    } finally {
+        permDialog.loading = false;
+    }
+};
+
 onMounted(() => {
     getRoleList();
 });

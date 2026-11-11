@@ -5,6 +5,7 @@ import { ElNotification } from "element-plus";
 import AsideVue from "./components/menu/AsideVue.vue";
 import HeaderVue from "./components/menu/HeaderVue.vue";
 import { useNoticeWebSocket } from "./utils/useWebSocket.js";
+import { useMenuStore } from "./store/menu.ts";
 
 const route = useRoute();
 const router = useRouter();
@@ -30,10 +31,13 @@ const { connect, disconnect } = useNoticeWebSocket((data) => {
     }
 });
 
+const menuStore = useMenuStore();
+
 onMounted(() => {
     const token = localStorage.getItem("token");
     if (token) {
         connect();
+        menuStore.fetchAuth();
     }
 });
 
@@ -54,7 +58,7 @@ provide("noticeRefreshKey", noticeRefreshKey)
         <RouterView></RouterView>
     </div>
     <el-container v-else>
-        <el-aside width="200"><AsideVue /></el-aside>
+        <AsideVue />
         <el-container>
             <el-header><HeaderVue /></el-header>
             <el-main>

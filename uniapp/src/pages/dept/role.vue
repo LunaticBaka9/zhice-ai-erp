@@ -21,10 +21,13 @@
 					</view>
 				</view>
 				<text class="item-name">{{ item.name }}</text>
+				<text class="item-code" v-if="item.code">编码: {{ item.code }}</text>
 				<text class="item-desc" v-if="item.bio">{{ item.bio }}</text>
 				<view class="item-footer">
 					<text class="action-btn edit" @click="handleEdit(item)">编辑</text>
-					<text class="action-btn delete" @click="handleDelete(item)">删除</text>
+					<text class="action-btn" @click="openAssign(item, 'menu')">菜单</text>
+					<text class="action-btn" @click="openAssign(item, 'perm')">权限</text>
+					<text class="action-btn delete" v-if="item.isSystem !== 1" @click="handleDelete(item)">删除</text>
 				</view>
 			</view>
 			<view v-if="list.length === 0 && !loading" class="empty"><text>暂无角色数据</text></view>
@@ -39,6 +42,10 @@
 					<view class="modal-field">
 						<text class="field-label">角色名称 <text class="required">*</text></text>
 						<input class="field-input" v-model="form.name" placeholder="请输入角色名称" />
+					</view>
+					<view class="modal-field">
+						<text class="field-label">角色编码 <text class="required">*</text></text>
+						<input class="field-input" v-model="form.code" placeholder="请输入角色编码" :disabled="!!form.isSystem" />
 					</view>
 					<view class="modal-field">
 						<text class="field-label">状态</text>
@@ -59,12 +66,39 @@
 				</view>
 			</view>
 		</view>
+
+		<view v-if="showAssign" class="modal-mask" @click="showAssign = false">
+			<view class="modal-box" @click.stop>
+				<text class="modal-title">{{ assignTitle }}</text>
+				<scroll-view scroll-y class="modal-scroll">
+					<view
+						v-for="node in assignNodes"
+						:key="node.id"
+						class="check-row"
+						:style="{ paddingLeft: (12 + node.level * 16) + 'px' }"
+						@click="toggleAssign(node)"
+					>
+						<view class="checkbox" :class="{ checked: assignChecked.has(node.id) }" />
+						<text class="check-label">{{ node.name }}</text>
+					</view>
+				</scroll-view>
+				<view class="modal-btns">
+					<view class="modal-btn cancel" @click="showAssign = false"><text>取消</text></view>
+					<view class="modal-btn confirm" @click="submitAssign"><text>确认</text></view>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { getRoleList, addRole, updateRole, deleteRole } from '@/api/role'
+import {
+	getRoleList, addRole, updateRole, deleteRole,
+	getRoleMenus, assignRoleMenus, getRolePermissions, assignRolePermissions
+} from '@/api/role'
+import { getMenuList } from '@/api/menu'
+import { getPermissionTree } from '@/api/permission'
 import Pagination from '@/components/Pagination.vue'
 
 const keyword = ref('')
@@ -75,7 +109,13 @@ const pageSize = ref(10)
 const total = ref(0)
 const showModal = ref(false)
 
-const form = reactive({ id: null, name: '', bio: '', status: 1 })
+const form = reactive({ id: null, name: '', code: '', bio: '', status: 1, isSystem: 0 })
+const showAssign = ref(false)
+const assignType = ref('menu')
+const assignTitle = ref('')
+const assignRoleId = ref(null)
+const assignNodes = ref([])
+const assignChecked = ref(new Set())
 const statusOptions = [{ value: 1, label: '启用' }, { value: 0, label: '禁用' }]
 
 async function loadList() {
@@ -96,13 +136,68 @@ function handleSearch() { pageNum.value = 1; loadList() }
 function resetSearch() { keyword.value = ''; pageNum.value = 1; loadList() }
 
 function handleAdd() {
-	Object.assign(form, { id: null, name: '', bio: '', status: 1 })
+	Object.assign(form, { id: null, name: '', code: '', bio: '', status: 1, isSystem: 0 })
 	showModal.value = true
 }
 
 function handleEdit(item) {
-	Object.assign(form, { id: item.id, name: item.name || '', bio: item.bio || '', status: item.status ?? 1 })
+	Object.assign(form, {
+		id: item.id, name: item.name || '', code: item.code || '',
+		bio: item.bio || '', status: item.status ?? 1, isSystem: item.isSystem ?? 0
+	})
 	showModal.value = true
+}
+
+function flattenTree(nodes, level = 0, out = []) {
+	(nodes || []).forEach((n) => {
+		out.push({ id: n.id, name: n.name, level, children: n.children || [] })
+		if (n.children && n.children.length) flattenTree(n.children, level + 1, out)
+	})
+	return out
+}
+
+function collectDescendantIds(node, out = []) {
+	out.push(node.id)
+	;(node.children || []).forEach((c) => collectDescendantIds(c, out))
+	return out
+}
+
+async function openAssign(item, type) {
+	assignType.value = type
+	assignRoleId.value = item.id
+	assignTitle.value = (type === 'menu' ? '分配菜单 - ' : '分配权限 - ') + item.name
+	try {
+		const treeRes = type === 'menu' ? await getMenuList() : await getPermissionTree()
+		const idsRes = type === 'menu' ? await getRoleMenus(item.id) : await getRolePermissions(item.id)
+		assignNodes.value = flattenTree(treeRes.data || [])
+		assignChecked.value = new Set(idsRes.data || [])
+		showAssign.value = true
+	} catch (e) {
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	}
+}
+
+function toggleAssign(node) {
+	const next = new Set(assignChecked.value)
+	const ids = collectDescendantIds(node)
+	const allOn = ids.every((id) => next.has(id))
+	ids.forEach((id) => (allOn ? next.delete(id) : next.add(id)))
+	assignChecked.value = next
+}
+
+async function submitAssign() {
+	try {
+		const ids = Array.from(assignChecked.value)
+		const res = assignType.value === 'menu'
+			? await assignRoleMenus({ roleId: assignRoleId.value, menuIds: ids })
+			: await assignRolePermissions({ roleId: assignRoleId.value, permissionIds: ids })
+		if (res.code === '200') {
+			uni.showToast({ title: '保存成功', icon: 'success' })
+			showAssign.value = false
+		} else uni.showToast({ title: res.msg || '保存失败', icon: 'none' })
+	} catch (e) {
+		uni.showToast({ title: '保存失败', icon: 'none' })
+	}
 }
 
 function handleStatusChange(e) {
@@ -112,6 +207,7 @@ function handleStatusChange(e) {
 
 async function submitForm() {
 	if (!form.name) { uni.showToast({ title: '请输入角色名称', icon: 'none' }); return }
+	if (!form.code) { uni.showToast({ title: '请输入角色编码', icon: 'none' }); return }
 	try {
 		const fn = form.id ? updateRole : addRole
 		const res = await fn({ ...form })
@@ -123,6 +219,10 @@ async function submitForm() {
 }
 
 function handleDelete(item) {
+	if (item.isSystem === 1) {
+		uni.showToast({ title: '系统角色不可删除', icon: 'none' })
+		return
+	}
 	uni.showModal({
 		title: '提示', content: `确认删除角色「${item.name}」？`,
 		success: async (res) => {
@@ -164,7 +264,12 @@ onMounted(() => { loadList() })
 .status-tag.inactive .status-text { color: #F56C6C; }
 .status-text { font-size: 12px; }
 .item-name { font-size: 16px; font-weight: 500; color: #303133; display: block; margin-bottom: 4px; }
+.item-code { font-size: 12px; color: #909399; display: block; margin-bottom: 4px; }
 .item-desc { font-size: 13px; color: #909399; display: block; margin-bottom: 8px; }
+.check-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+.checkbox { width: 16px; height: 16px; border: 1px solid #DCDFE6; border-radius: 3px; }
+.checkbox.checked { background: #409EFF; border-color: #409EFF; }
+.check-label { font-size: 14px; color: #303133; }
 .item-footer { display: flex; gap: 20px; }
 .action-btn { font-size: 14px; }
 .action-btn.edit { color: #409EFF; }

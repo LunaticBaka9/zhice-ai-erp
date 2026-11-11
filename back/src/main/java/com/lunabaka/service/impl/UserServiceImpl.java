@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lunabaka.entity.Dept;
+import com.lunabaka.entity.Role;
 import com.lunabaka.entity.User;
 import com.lunabaka.exception.CustomerException;
 import com.lunabaka.mapper.UserMapper;
 import com.lunabaka.service.DeptService;
+import com.lunabaka.service.RoleService;
 import com.lunabaka.service.UserService;
 import com.lunabaka.utils.EmailUtils;
 import com.lunabaka.utils.PasswordUtil;
@@ -26,6 +28,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private DeptService deptService;
+    @Resource
+    private RoleService roleService;
     @Resource
     private UserMapper userMapper;
 
@@ -156,6 +160,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         user.setName(user.getUsername());
         user.setPassword(PasswordUtil.encode(user.getPassword()));
+        fillRole(user);
         baseMapper.insert(user);
     }
 
@@ -198,12 +203,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaUpdateWrapper<User> wrapper = Wrappers.<User>lambdaUpdate()
                 .eq(User::getUid, user.getUid())
                 .set(User::getName, user.getName())
-                .set(User::getRoleName, user.getRoleName())
                 .set(User::getPostName, user.getPostName())
                 .set(User::getBio, user.getBio())
                 .set(User::getJoinDate, user.getJoinDate())
                 .set(User::getAvatar, user.getAvatar())
                 .setSql("update_time = NOW()");
+        // 同时写入角色 ID 和名称，保证权限查询能命中 role_id
+        Role role = roleService.resolveRole(user.getRoleId(), user.getRoleName());
+        if (role != null) {
+            wrapper.set(User::getRoleId, role.getId())
+                    .set(User::getRoleName, role.getName());
+        } else if (user.getRoleName() != null) {
+            wrapper.set(User::getRoleName, user.getRoleName());
+        }
         if (user.getDeptId() != null) {
             Dept dept = deptService.getById(user.getDeptId());
             if (dept != null) {
@@ -261,6 +273,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void insertBatch(List<User> list) {
         for (User user : list) {
             insert(user);
+        }
+    }
+
+    /**
+     * 按角色 ID 或名称回填 user.role_id / role_name。
+     */
+    private void fillRole(User user) {
+        Role role = roleService.resolveRole(user.getRoleId(), user.getRoleName());
+        if (role != null) {
+            user.setRoleId(role.getId());
+            user.setRoleName(role.getName());
         }
     }
 }

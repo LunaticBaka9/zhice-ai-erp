@@ -193,7 +193,7 @@ const deptOptions = ref([])
 const statusOptions = [{ value: '启用', label: '启用' }, { value: '禁用', label: '禁用' }]
 
 const form = reactive({
-	uid: null, username: '', name: '', password: '', roleName: '', deptName: '',
+	uid: null, username: '', name: '', password: '', roleId: null, roleName: '', deptName: '',
 	phone: '', email: '', joinDate: '', status: '启用', bio: ''
 })
 const pwdForm = reactive({ newPassword: '', confirmPassword: '' })
@@ -239,19 +239,23 @@ async function loadList() {
 
 function handleSearch() { pageNum.value = 1; loadList() }
 function resetSearch() { Object.keys(searchForm).forEach(k => searchForm[k] = ''); pageNum.value = 1; loadList() }
-function handleRoleChange(e) { form.roleName = roleOptions.value[e.detail.value]?.name || '' }
+function handleRoleChange(e) {
+	const role = roleOptions.value[e.detail.value]
+	form.roleId = role?.id || null
+	form.roleName = role?.name || ''
+}
 function handleDeptChange(e) { form.deptName = deptOptions.value[e.detail.value]?.name || '' }
 function handleJoinDateChange(e) { form.joinDate = e.detail.value }
 function handleStatusChange(e) { form.status = statusOptions[e.detail.value]?.value || '启用' }
 
 function handleAdd() {
-	Object.assign(form, { uid: null, username: '', name: '', password: '', roleName: '', deptName: '', phone: '', email: '', joinDate: '', status: '启用', bio: '' })
+	Object.assign(form, { uid: null, username: '', name: '', password: '', roleId: null, roleName: '', deptName: '', phone: '', email: '', joinDate: '', status: '启用', bio: '' })
 	showModal.value = true
 }
 function handleEdit(item) {
 	Object.assign(form, {
 		uid: item.uid, username: item.username || '', name: item.name || '', password: '',
-		roleName: item.roleName || '', deptName: item.deptName || '', phone: item.phone || '',
+		roleId: item.roleId || null, roleName: item.roleName || '', deptName: item.deptName || '', phone: item.phone || '',
 		email: item.email || '', joinDate: item.joinDate || '', status: item.status || '启用', bio: item.bio || ''
 	})
 	showModal.value = true

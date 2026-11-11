@@ -28,7 +28,7 @@ public class User {
     private String email;
 
     @PropIgnore
-    private String roleId;
+    private Long roleId;
 
     @Alias("角色")
     private String roleName;
